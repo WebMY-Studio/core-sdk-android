@@ -18,9 +18,10 @@ dependencyResolutionManagement {
         mavenCentral()
 
         maven("https://jitpack.io")
+        maven("https://artifactory.appodeal.com/appodeal")
     }
 }
 
 rootProject.name = "WebMY Core SDK"
 include(":app")
- 
+include(":core-sdk")

@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,6 +18,21 @@ android {
         versionCode = computeVersionCode()
         versionName = computeVersionName()
 
+        val localProperties = gradleLocalProperties(rootDir, providers)
+
+        defaultConfig {
+            buildConfigField(
+                "String",
+                "APPODEAL_APP_KEY",
+                localProperties.getStringProperty("APPODEAL_APP_KEY")
+            )
+
+            buildConfigField(
+                "String",
+                "AMPLITUDE_API_KEY",
+                localProperties.getStringProperty("AMPLITUDE_API_KEY")
+            )
+        }
     }
     buildFeatures {
         buildConfig = true
@@ -37,4 +54,6 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    implementation(project(":core-sdk"))
 }
