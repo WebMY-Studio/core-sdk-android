@@ -3,6 +3,8 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -32,6 +34,9 @@ android {
                 "AMPLITUDE_API_KEY",
                 localProperties.getStringProperty("AMPLITUDE_API_KEY")
             )
+
+            manifestPlaceholders["ADMOB_APPLICATION_ID"] =
+                localProperties.readSecret("ADMOB_APPLICATION_ID")
         }
     }
     buildFeatures {

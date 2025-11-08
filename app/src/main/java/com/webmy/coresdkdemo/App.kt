@@ -11,6 +11,7 @@ class App : Application() {
 
         val config = Config.Builder(this)
             .setKoinMode(KoinMode.START)
+            .useFirebaseRemoteConfig()
             .addAppodealKey(BuildConfig.APPODEAL_APP_KEY)
             .addAmplitudeKey(BuildConfig.AMPLITUDE_API_KEY)
             .build()

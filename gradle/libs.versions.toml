@@ -7,6 +7,11 @@ koin-bom = "4.1.1"
 amplitude = "1.22.4"
 appodeal = "3.10.0.0"
 google-review = "2.0.2"
+google-play-services-ads = "24.7.0"
+firebase-bom = "34.5.0"
+firebase-crashlytics = "3.0.6"
+google-services = "4.4.4"
+coroutines = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -15,11 +20,22 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 amplitude = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
 appodeal = { module = "com.appodeal.ads:sdk", version.ref = "appodeal" }
+
 google-review = { module = "com.google.android.play:review", version.ref = "google-review" }
 google-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "google-review" }
+google-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "google-play-services-ads" }
+
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-config = { module = "com.google.firebase:firebase-config" }
+
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 

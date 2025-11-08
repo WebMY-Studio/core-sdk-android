@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.utils.createPublishingInfoForApp
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -18,8 +16,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-
-
 }
 
 dependencies {
@@ -33,5 +29,13 @@ dependencies {
 
     implementation(libs.google.review)
     implementation(libs.google.review.ktx)
+    implementation(libs.google.play.services.ads)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.config)
+
+    api(libs.coroutines)
 }
 

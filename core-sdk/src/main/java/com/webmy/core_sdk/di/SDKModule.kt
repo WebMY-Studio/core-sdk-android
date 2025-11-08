@@ -8,12 +8,13 @@ import com.webmy.core_sdk.tools.ads.AdsManager
 import com.webmy.core_sdk.tools.ads.RealAdsManager
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.tools.analytics.RealAnalyticsManager
+import com.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
+import com.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal fun sdkModule(config: Config) = module {
-    single<Config> { config }
-
+    configureRemoteConfig(config)
     configureAmplitude(config)
     configureAppodeal(config)
 }
@@ -48,6 +49,14 @@ internal fun Module.configureAppodeal(config: Config) {
                 application = config.application,
                 key = appodealKey
             )
+        }
+    }
+}
+
+internal fun Module.configureRemoteConfig(config: Config) {
+    if (config.useRemoteConfig) {
+        single<RemoteConfigManager> {
+            RealRemoteConfigManager()
         }
     }
 }
