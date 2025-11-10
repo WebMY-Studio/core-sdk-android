@@ -24,6 +24,7 @@ interface AdsPremiumManager {
     fun requestReward(
         activity: Activity,
         placement: String? = null,
+        autoGrant: Boolean = true,
         rewardCallback: (Boolean) -> Unit,
     )
 
@@ -68,9 +69,17 @@ class RealAdsPremiumManager(
     override fun requestReward(
         activity: Activity,
         placement: String?,
+        autoGrant: Boolean,
         rewardCallback: (Boolean) -> Unit,
     ) {
-        adsManager.showReward(activity, placement, rewardCallback)
+        launch {
+            if (isPremiumFlow.first()) {
+                if (autoGrant) rewardCallback(true)
+            } else {
+                withContext(Dispatchers.Main) {
+                    adsManager.showReward(activity, placement, rewardCallback)
+                }
+            }
+        }
     }
-
 }
