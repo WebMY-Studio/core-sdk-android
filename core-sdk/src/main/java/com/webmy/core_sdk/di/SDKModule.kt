@@ -25,6 +25,8 @@ internal fun sdkModule(config: Config) = module {
     configureAmplitude(config)
     configureAppodeal(config)
     configureBilling(config)
+
+    configureAdsPremium(config)
 }
 
 internal fun Module.configureAmplitude(config: Config) {
@@ -58,17 +60,6 @@ internal fun Module.configureAppodeal(config: Config) {
                 key = appodealKey
             )
         }
-
-        val premiumProductId = config.premiumProductId
-        if (!premiumProductId.isNullOrEmpty()) {
-            single<AdsPremiumManager> {
-                RealAdsPremiumManager(
-                    premiumProductId = premiumProductId,
-                    billingManager = get(),
-                    adsManager = get()
-                )
-            }
-        }
     }
 }
 
@@ -95,6 +86,19 @@ internal fun Module.configureBilling(config: Config) {
             RealBillingManager(
                 application = config.application,
                 oneTimeProducts = products
+            )
+        }
+    }
+}
+
+internal fun Module.configureAdsPremium(config: Config) {
+    val premiumProductId = config.premiumProductId
+    if (!premiumProductId.isNullOrEmpty()) {
+        single<AdsPremiumManager> {
+            RealAdsPremiumManager(
+                premiumProductId = premiumProductId,
+                billingManager = get(),
+                adsManager = get()
             )
         }
     }
