@@ -6,19 +6,19 @@ import com.webmy.core_sdk.tools.billing.BillingManager
 import com.webmy.core_sdk.tools.billing.containsPurchased
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 interface AdsPremiumManager {
-    val isPremiumFlow: StateFlow<Boolean>
+    val isPremiumFlow: Flow<Boolean>
 
     fun requestBanner(
         activity: Activity,
         container: FrameLayout,
-    ): Boolean
+    )
 
     fun requestReward(
         activity: Activity,
@@ -26,7 +26,7 @@ interface AdsPremiumManager {
         rewardCallback: (Boolean) -> Unit,
     )
 
-    fun requestInterstitial(activity: Activity): Boolean
+    fun requestInterstitial(activity: Activity)
 }
 
 class RealAdsPremiumManager(
@@ -37,28 +37,24 @@ class RealAdsPremiumManager(
 
     override val isPremiumFlow = billingManager.productsFlow
         .map { it.containsPurchased(premiumProductId) }
-        .stateIn(
-            scope = this,
-            started = SharingStarted.Eagerly,
-            initialValue = false
-        )
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
-    override fun requestBanner(activity: Activity, container: FrameLayout): Boolean {
-        return if (isPremiumFlow.value) {
-            adsManager.hideBanner(activity, container)
-            false
-        } else {
-            adsManager.showBanner(activity, container)
+    override fun requestBanner(activity: Activity, container: FrameLayout) {
+        launch {
+            if (isPremiumFlow.first()) {
+                adsManager.hideBanner(activity, container)
+            } else {
+                adsManager.showBanner(activity, container)
+            }
         }
     }
 
-    override fun requestInterstitial(activity: Activity): Boolean {
-        return if (isPremiumFlow.value) {
-            false
-        } else {
-            adsManager.showInter(activity)
+    override fun requestInterstitial(activity: Activity) {
+        launch {
+            if (!isPremiumFlow.first()) {
+                adsManager.showInter(activity)
+            }
         }
     }
 
