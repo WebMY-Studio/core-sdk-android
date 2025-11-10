@@ -14,24 +14,32 @@ import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.util.dpToPx
 
+/**
+ * Use this entity if you want to handle ads by yourself
+ *
+ * Otherwise, use [AdsPremiumManager]
+ */
 interface AdsManager {
-
-    companion object {
-        private const val DEFAULT_PLACEMENT = "default"
-    }
 
     fun showBanner(
         activity: Activity,
         container: FrameLayout,
     ): Boolean
 
+    fun hideBanner(
+        activity: Activity,
+        container: FrameLayout,
+    )
+
     fun showReward(
         activity: Activity,
-        placement: String = DEFAULT_PLACEMENT,
+        placement: String? = null,
         rewardCallback: (Boolean) -> Unit,
     )
 
     fun showInter(activity: Activity): Boolean
+
+    fun destroy()
 }
 
 internal class RealAdsManager(
@@ -42,16 +50,19 @@ internal class RealAdsManager(
 
     companion object {
         private const val ANALYTICS_ERROR_EVENT = "appodeal_initialization_error"
+        private const val DEFAULT_PLACEMENT = "default"
     }
 
     private var rewardCallback: ((Boolean) -> Unit)? = null
+
+    private val adTypes = Appodeal.INTERSTITIAL or Appodeal.REWARDED_VIDEO or Appodeal.BANNER_VIEW
 
     init {
         Appodeal.setTesting(testMode = BuildConfig.DEBUG)
         Appodeal.initialize(
             context = application,
             appKey = key,
-            adTypes = Appodeal.INTERSTITIAL or Appodeal.REWARDED_VIDEO or Appodeal.BANNER_VIEW,
+            adTypes = adTypes,
             callback = object : ApdInitializationCallback {
                 override fun onInitializationFinished(
                     errors: List<ApdInitializationError>?,
@@ -85,22 +96,31 @@ internal class RealAdsManager(
         return isShown
     }
 
+    override fun hideBanner(activity: Activity, container: FrameLayout) {
+        container.isVisible = false
+        Appodeal.hide(activity, Appodeal.BANNER_VIEW)
+    }
+
     override fun showReward(
         activity: Activity,
-        placement: String,
+        placement: String?,
         rewardCallback: (Boolean) -> Unit,
     ) {
-        if (!Appodeal.canShow(Appodeal.REWARDED_VIDEO, placement)) return
-
-        val isShown = Appodeal.show(activity, Appodeal.REWARDED_VIDEO, placement)
-
-        if (!isShown) return
-        this.rewardCallback = rewardCallback
+        val placementName = placement ?: DEFAULT_PLACEMENT
+        if (!Appodeal.canShow(Appodeal.REWARDED_VIDEO, placementName)) return
+        val isShown = Appodeal.show(activity, Appodeal.REWARDED_VIDEO, placementName)
+        if (isShown) {
+            this.rewardCallback = rewardCallback
+        }
     }
 
     override fun showInter(activity: Activity): Boolean {
         if (!Appodeal.isLoaded(Appodeal.INTERSTITIAL)) return false
         return Appodeal.show(activity, Appodeal.INTERSTITIAL)
+    }
+
+    override fun destroy() {
+        Appodeal.destroy(adTypes)
     }
 
     private fun setInterstitialCallbacks() {

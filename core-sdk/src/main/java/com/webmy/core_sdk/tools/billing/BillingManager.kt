@@ -18,6 +18,7 @@ import com.android.billingclient.api.queryPurchasesAsync
 import com.webmy.core_sdk.util.awaitTrue
 import com.webmy.core_sdk.util.coerceToUnit
 import com.webmy.core_sdk.util.flatMap
+import com.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,22 +29,31 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.CoroutineContext
 
 interface BillingManager {
 
-    val products: Flow<List<OneTimeProduct>>
+    val productsFlow: Flow<List<OneTimeProduct>>
 
     suspend fun fetchProducts(): Result<Unit>
 
     suspend fun purchase(activity: Activity, productId: String): Result<Unit>
 
     suspend fun canBePurchased(productId: String): Boolean
+
+    suspend fun awaitInitialized()
 }
+
+fun List<OneTimeProduct>.containsPurchased(productId: String) =
+    find { it.id == productId }?.isPurchased ?: false
+
 
 class RealBillingManager(
     application: Application,
-    oneTimeProducts: List<String>,
-) : BillingManager, PurchasesUpdatedListener {
+    oneTimeProducts: Set<String>,
+) : BillingManager, PurchasesUpdatedListener, CoroutineScope {
+
+    override val coroutineContext: CoroutineContext = Dispatchers.IO
 
     private val pendingPurchaseParams = PendingPurchasesParams.newBuilder()
         .enableOneTimeProducts()
@@ -81,10 +91,10 @@ class RealBillingManager(
             }
     }
 
-    private val purchases = MutableStateFlow<Set<String>>(setOf())
-    private val details = MutableStateFlow<Map<String, ProductDetails>>(mapOf())
+    private val purchasesFlow = singleReplaySharedFlow<Set<String>>()
+    private val detailsFlow = singleReplaySharedFlow<Map<String, ProductDetails>>()
 
-    override val products = combine(purchases, details) { purchases, details ->
+    override val productsFlow = combine(purchasesFlow, detailsFlow) { purchases, details ->
         details.values.map {
             val productId = it.productId
             val formattedPrice = it.oneTimePurchaseOfferDetails?.formattedPrice
@@ -133,8 +143,9 @@ class RealBillingManager(
                     detailsMap[detail.productId] = detail
                 }
 
-                purchases.value = purchasesSet
-                details.value = detailsMap
+
+                purchasesFlow.emit(purchasesSet)
+                detailsFlow.emit(detailsMap)
             }
             .coerceToUnit()
     }
@@ -216,9 +227,11 @@ class RealBillingManager(
 
                 billingClient.acknowledgePurchase(params) { result ->
                     if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                        val set = purchases.value.toMutableSet()
-                        set.addAll(purchase.products)
-                        purchases.value = set
+                        launch {
+                            val set = purchasesFlow.first().toMutableSet()
+                            set.addAll(purchase.products)
+                            purchasesFlow.emit(set)
+                        }
                     }
                 }
             }
@@ -226,7 +239,7 @@ class RealBillingManager(
     }
 
     override suspend fun canBePurchased(productId: String): Boolean {
-        val premiumProductAvailableToPurchase = products
+        val premiumProductAvailableToPurchase = productsFlow
             .map { products ->
                 products.filter { !it.isPurchased }
                     .find { it.id == productId }
@@ -234,5 +247,9 @@ class RealBillingManager(
             .first()
 
         return premiumProductAvailableToPurchase != null
+    }
+
+    override suspend fun awaitInitialized() {
+        productsFlow.first()
     }
 }

@@ -5,7 +5,9 @@ import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
 import com.webmy.core_sdk.Config
 import com.webmy.core_sdk.tools.ads.AdsManager
+import com.webmy.core_sdk.tools.ads.AdsPremiumManager
 import com.webmy.core_sdk.tools.ads.RealAdsManager
+import com.webmy.core_sdk.tools.ads.RealAdsPremiumManager
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.tools.analytics.RealAnalyticsManager
 import com.webmy.core_sdk.tools.billing.BillingManager
@@ -56,6 +58,17 @@ internal fun Module.configureAppodeal(config: Config) {
                 key = appodealKey
             )
         }
+
+        val premiumProductId = config.premiumProductId
+        if (!premiumProductId.isNullOrEmpty()) {
+            single<AdsPremiumManager> {
+                RealAdsPremiumManager(
+                    premiumProductId = premiumProductId,
+                    billingManager = get(),
+                    adsManager = get()
+                )
+            }
+        }
     }
 }
 
@@ -70,12 +83,18 @@ internal fun Module.configurePreferences(config: Config) {
 }
 
 internal fun Module.configureBilling(config: Config) {
-    val oneTimeProducts = config.oneTimeProducts
-    if (oneTimeProducts.isNotEmpty()) {
+    val products = buildList {
+        addAll(config.oneTimeProducts)
+        add(config.premiumProductId)
+    }
+        .filterNotNull()
+        .toSet()
+
+    if (products.isNotEmpty()) {
         single<BillingManager> {
             RealBillingManager(
                 application = config.application,
-                oneTimeProducts = oneTimeProducts
+                oneTimeProducts = products
             )
         }
     }

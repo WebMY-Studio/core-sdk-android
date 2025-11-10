@@ -7,6 +7,7 @@ class Config private constructor(
     val application: Application,
     val koinMode: KoinMode,
     val appodealKey: String?,
+    val premiumProductId: String?,
     val amplitudeKey: String?,
     val remoteConfigEnabled: Boolean,
     val remoteConfigUpdateInterval: Long,
@@ -16,6 +17,7 @@ class Config private constructor(
 
         private var koinMode: KoinMode = KoinMode.START
         private var appodealKey: String? = null
+        private var premiumProductId: String? = null
         private var amplitudeKey: String? = null
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
@@ -49,8 +51,9 @@ class Config private constructor(
          * ADMOB_APPLICATION_ID=ca-app-pub-XXXXXXXX~YYYYYYYY
          * ```
          */
-        fun enableAds(appodealKey: String) = apply {
+        fun enableAds(appodealKey: String, premiumProductId: String? = null) = apply {
             this.appodealKey = appodealKey
+            this.premiumProductId = premiumProductId
         }
 
         /**
@@ -93,6 +96,7 @@ class Config private constructor(
                 application = application,
                 koinMode = koinMode,
                 appodealKey = appodealKey,
+                premiumProductId = premiumProductId,
                 amplitudeKey = amplitudeKey,
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
