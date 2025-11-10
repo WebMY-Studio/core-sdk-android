@@ -69,26 +69,25 @@ class RealBillingManager(
     private val connectMutex = Mutex()
 
     init {
-        CoroutineScope(Dispatchers.IO)
-            .launch {
-                connectMutex.withLock {
-                    isConnected.value = false
+        launch {
+            connectMutex.withLock {
+                isConnected.value = false
 
-                    billingClient.startConnection(object : BillingClientStateListener {
-                        override fun onBillingServiceDisconnected() {
+                billingClient.startConnection(object : BillingClientStateListener {
+                    override fun onBillingServiceDisconnected() {
+                    }
+
+                    override fun onBillingSetupFinished(billingResult: BillingResult) {
+                        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                            isConnected.value = true
                         }
-
-                        override fun onBillingSetupFinished(billingResult: BillingResult) {
-                            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                                isConnected.value = true
-                            }
-                        }
-                    })
-                }
-
-                isConnected.awaitTrue()
-                fetchProducts()
+                    }
+                })
             }
+
+            isConnected.awaitTrue()
+            fetchProducts()
+        }
     }
 
     private val purchasesFlow = singleReplaySharedFlow<Set<String>>()
