@@ -81,7 +81,7 @@ class RealBillingManager(
             }
     }
 
-    private val purchases = MutableStateFlow<Map<String, Purchase>>(mapOf())
+    private val purchases = MutableStateFlow<Set<String>>(setOf())
     private val details = MutableStateFlow<Map<String, ProductDetails>>(mapOf())
 
     override val products = combine(purchases, details) { purchases, details ->
@@ -92,7 +92,7 @@ class RealBillingManager(
             OneTimeProduct(
                 id = productId,
                 formattedPrice = formattedPrice,
-                isPurchased = purchases[productId]?.isAcknowledged ?: false
+                isPurchased = purchases.contains(productId)
             )
         }
     }
@@ -119,19 +119,21 @@ class RealBillingManager(
                     .map { details -> details to purchases }
             }
             .map { (detailsList, purchasesList) ->
-                val purchasesMap = mutableMapOf<String, Purchase>()
-                purchasesList.forEach { purchase ->
-                    purchase.products.forEach { productId ->
-                        purchasesMap[productId] = purchase
+                val purchasesSet = buildSet {
+                    purchasesList.forEach { purchase ->
+                        purchase.products.forEach { productId ->
+                            if (purchase.isAcknowledged) add(productId)
+                        }
                     }
                 }
+
 
                 val detailsMap = mutableMapOf<String, ProductDetails>()
                 detailsList.forEach { detail ->
                     detailsMap[detail.productId] = detail
                 }
 
-                purchases.value = purchasesMap
+                purchases.value = purchasesSet
                 details.value = detailsMap
             }
             .coerceToUnit()
@@ -214,11 +216,9 @@ class RealBillingManager(
 
                 billingClient.acknowledgePurchase(params) { result ->
                     if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                        val map = purchases.value.toMutableMap()
-                        purchase.products.forEach {
-                            map[it] = purchase
-                        }
-                        purchases.value = map
+                        val set = purchases.value.toMutableSet()
+                        set.addAll(purchase.products)
+                        purchases.value = set
                     }
                 }
             }
