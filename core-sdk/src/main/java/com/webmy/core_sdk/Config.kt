@@ -12,6 +12,8 @@ class Config private constructor(
     val remoteConfigEnabled: Boolean,
     val remoteConfigUpdateInterval: Long,
     val oneTimeProducts: List<String>,
+    val firstSkipAdsAmountRemoteConfigKey: String?,
+    val skipAdsAmountRemoteConfigKey: String?,
 ) {
     class Builder(private val application: Application) {
 
@@ -22,6 +24,8 @@ class Config private constructor(
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
         private var oneTimeProducts: List<String> = emptyList()
+        private var firstSkipAdsAmountRemoteConfigKey: String? = null
+        private var skipAdsAmountRemoteConfigKey: String? = null
 
         /**
          * @param mode See [KoinMode] to use proper value
@@ -82,9 +86,15 @@ class Config private constructor(
          *    alias(libs.plugins.firebase.crashlytics) apply false
          *    ```
          */
-        fun enableRemoteConfig(updateInterval: Duration = Duration.ZERO) = apply {
+        fun enableRemoteConfig(
+            updateInterval: Duration = Duration.ZERO,
+            firstSkipAdsAmountKey: String? = null,
+            skipAdsAmountKey: String? = null,
+        ) = apply {
             this.remoteConfigEnabled = true
             this.remoteConfigUpdateInterval = updateInterval.inWholeMilliseconds
+            this.firstSkipAdsAmountRemoteConfigKey = firstSkipAdsAmountKey
+            this.skipAdsAmountRemoteConfigKey = skipAdsAmountKey
         }
 
         fun enableBilling(oneTimeProducts: List<String>) = apply {
@@ -100,7 +110,9 @@ class Config private constructor(
                 amplitudeKey = amplitudeKey,
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
-                oneTimeProducts = oneTimeProducts
+                oneTimeProducts = oneTimeProducts,
+                firstSkipAdsAmountRemoteConfigKey = firstSkipAdsAmountRemoteConfigKey,
+                skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
             )
         }
     }

@@ -97,8 +97,11 @@ internal fun Module.configureAdsPremium(config: Config) {
         single<AdsPremiumManager> {
             RealAdsPremiumManager(
                 premiumProductId = premiumProductId,
+                firstSkipAdsAmountRemoteConfigKey = config.firstSkipAdsAmountRemoteConfigKey,
+                skipAdsAmountRemoteConfigKey = config.skipAdsAmountRemoteConfigKey,
                 billingManager = get(),
-                adsManager = get()
+                adsManager = get(),
+                remoteConfigManager = get()
             )
         }
     }

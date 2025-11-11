@@ -4,6 +4,7 @@ import android.app.Activity
 import android.widget.FrameLayout
 import com.webmy.core_sdk.tools.billing.BillingManager
 import com.webmy.core_sdk.tools.billing.containsPurchased
+import com.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,9 +34,19 @@ interface AdsPremiumManager {
 
 class RealAdsPremiumManager(
     premiumProductId: String,
+    private val firstSkipAdsAmountRemoteConfigKey: String?,
+    private val skipAdsAmountRemoteConfigKey: String?,
     billingManager: BillingManager,
     private val adsManager: AdsManager,
+    private val remoteConfigManager: RemoteConfigManager,
 ) : AdsPremiumManager, CoroutineScope {
+
+    companion object {
+        private const val DEFAULT_FIRST_SKIP_AMOUNT = 2L
+        private const val DEFAULT_SKIP_AMOUNT = 3L
+    }
+
+    private var currentTriggerInterCount = 0L
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
@@ -58,9 +69,27 @@ class RealAdsPremiumManager(
     override fun requestInterstitial(activity: Activity) {
         launch {
             val isPremium = isPremiumFlow.first()
-            withContext(Dispatchers.Main) {
-                if (!isPremium) {
-                    adsManager.showInter(activity)
+
+            if (!isPremium) {
+                val firstSkipAdsAmount = firstSkipAdsAmountRemoteConfigKey?.let {
+                    remoteConfigManager.getSyncedLong(it)
+                        .getOrDefault(DEFAULT_FIRST_SKIP_AMOUNT)
+                } ?: DEFAULT_FIRST_SKIP_AMOUNT
+
+                val skipAdsAmount = skipAdsAmountRemoteConfigKey?.let {
+                    remoteConfigManager.getSyncedLong(it)
+                        .getOrDefault(DEFAULT_SKIP_AMOUNT)
+                } ?: DEFAULT_SKIP_AMOUNT
+
+                currentTriggerInterCount++
+                if (currentTriggerInterCount < firstSkipAdsAmount) return@launch
+
+                val countSinceInitial = currentTriggerInterCount - firstSkipAdsAmount
+
+                if (countSinceInitial % skipAdsAmount == 0L) {
+                    withContext(Dispatchers.Main) {
+                        adsManager.showInter(activity)
+                    }
                 }
             }
         }
