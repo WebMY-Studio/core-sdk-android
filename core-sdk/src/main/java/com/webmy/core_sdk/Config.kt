@@ -14,6 +14,7 @@ class Config private constructor(
     val oneTimeProducts: List<String>,
     val firstSkipAdsAmountRemoteConfigKey: String?,
     val skipAdsAmountRemoteConfigKey: String?,
+    val showDebugAds: Boolean,
 ) {
     class Builder(private val application: Application) {
 
@@ -26,6 +27,7 @@ class Config private constructor(
         private var oneTimeProducts: List<String> = emptyList()
         private var firstSkipAdsAmountRemoteConfigKey: String? = null
         private var skipAdsAmountRemoteConfigKey: String? = null
+        private var showDebugAds: Boolean = false
 
         /**
          * @param mode See [KoinMode] to use proper value
@@ -101,6 +103,10 @@ class Config private constructor(
             this.oneTimeProducts = oneTimeProducts
         }
 
+        fun enableDebugAds() = apply {
+            this.showDebugAds = true
+        }
+
         fun build(): Config {
             return Config(
                 application = application,
@@ -113,6 +119,7 @@ class Config private constructor(
                 oneTimeProducts = oneTimeProducts,
                 firstSkipAdsAmountRemoteConfigKey = firstSkipAdsAmountRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
+                showDebugAds = showDebugAds
             )
         }
     }

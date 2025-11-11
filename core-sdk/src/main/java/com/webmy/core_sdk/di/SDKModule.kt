@@ -57,7 +57,8 @@ internal fun Module.configureAppodeal(config: Config) {
             RealAdsManager(
                 analyticsManager = get(),
                 application = config.application,
-                key = appodealKey
+                key = appodealKey,
+                config.showDebugAds
             )
         }
     }

@@ -10,7 +10,6 @@ import com.appodeal.ads.InterstitialCallbacks
 import com.appodeal.ads.RewardedVideoCallbacks
 import com.appodeal.ads.initializing.ApdInitializationCallback
 import com.appodeal.ads.initializing.ApdInitializationError
-import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.util.dpToPx
 
@@ -46,6 +45,7 @@ internal class RealAdsManager(
     private val analyticsManager: AnalyticsManager,
     application: Application,
     key: String,
+    private val showDebugAds: Boolean,
 ) : AdsManager {
 
     companion object {
@@ -58,7 +58,7 @@ internal class RealAdsManager(
     private val adTypes = Appodeal.INTERSTITIAL or Appodeal.REWARDED_VIDEO or Appodeal.BANNER_VIEW
 
     init {
-        Appodeal.setTesting(testMode = BuildConfig.DEBUG)
+        Appodeal.setTesting(testMode = showDebugAds)
         Appodeal.initialize(
             context = application,
             appKey = key,
