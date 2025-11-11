@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 fun <T> singleReplaySharedFlow() =
     MutableSharedFlow<T>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -19,3 +20,8 @@ fun <V> Flow<V>.observe(owner: LifecycleOwner, collector: suspend (V) -> Unit) {
         collect(collector)
     }
 }
+
+inline fun <T, R> Flow<List<T>>.mapList(crossinline mapper: suspend (T) -> R) =
+    map { list ->
+        list.map { item -> mapper(item) }
+    }
