@@ -12,15 +12,6 @@ An open-source **Android SDK** to **bootstrap app development** with a lot of pr
 ✅ One-Time In-App Purchases (Billing)  
 ✅ Shared Preferences Helper
 
-🧩 **Coming Soon**
-- Firebase Push Notifications
-- Firebase Analytics
-- Billing for Subscriptions
-- Display banners on Jetpack Compose
-- Facebook SDK Integration
-- Demo project
-- Ability to disable ADS (now app crashes without properly configured ads)
-
 ---
 
 ## Installation
