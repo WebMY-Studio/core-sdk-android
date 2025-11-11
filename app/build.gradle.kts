@@ -19,6 +19,8 @@ android {
         versionName = computeVersionName()
 
         manifestPlaceholders["ADMOB_APPLICATION_ID"] = ""
+        manifestPlaceholders["FACEBOOK_APP_ID"] = ""
+        manifestPlaceholders["FACEBOOK_CLIENT_TOKEN"] = ""
     }
     buildFeatures {
         buildConfig = true
