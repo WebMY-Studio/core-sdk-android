@@ -20,6 +20,8 @@ import com.webmy.core_sdk.util.dpToPx
  */
 interface AdsManager {
 
+    fun init()
+
     fun showBanner(
         activity: Activity,
         container: FrameLayout,
@@ -43,8 +45,8 @@ interface AdsManager {
 
 internal class RealAdsManager(
     private val analyticsManager: AnalyticsManager,
-    application: Application,
-    key: String,
+    private val application: Application,
+    private val key: String,
     private val showDebugAds: Boolean,
 ) : AdsManager {
 
@@ -57,7 +59,7 @@ internal class RealAdsManager(
 
     private val adTypes = Appodeal.INTERSTITIAL or Appodeal.REWARDED_VIDEO or Appodeal.BANNER_VIEW
 
-    init {
+    override fun init() {
         Appodeal.setTesting(testMode = showDebugAds)
         Appodeal.initialize(
             context = application,
