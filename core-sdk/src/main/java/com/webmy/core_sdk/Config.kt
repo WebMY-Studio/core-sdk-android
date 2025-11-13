@@ -7,14 +7,15 @@ class Config private constructor(
     val application: Application,
     val koinMode: KoinMode,
     val appodealKey: String?,
-    val premiumProductId: String?,
-    val amplitudeKey: String?,
-    val remoteConfigEnabled: Boolean,
-    val remoteConfigUpdateInterval: Long,
-    val oneTimeProducts: List<String>,
-    val firstSkipAdsAmountRemoteConfigKey: String?,
-    val skipAdsAmountRemoteConfigKey: String?,
     val showDebugAds: Boolean,
+    val amplitudeKey: String?,
+    val premiumProductId: String?,
+    val remoteConfigEnabled: Boolean,
+    val oneTimeProducts: List<String>,
+    val useFirebaseAnalytics: Boolean,
+    val remoteConfigUpdateInterval: Long,
+    val fistShowAtRemoteConfigKey: String?,
+    val skipAdsAmountRemoteConfigKey: String?,
 ) {
     class Builder(private val application: Application) {
 
@@ -25,9 +26,10 @@ class Config private constructor(
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
         private var oneTimeProducts: List<String> = emptyList()
-        private var firstSkipAdsAmountRemoteConfigKey: String? = null
+        private var fistShowAtRemoteConfigKey: String? = null
         private var skipAdsAmountRemoteConfigKey: String? = null
         private var showDebugAds: Boolean = false
+        private var useFirebaseAnalytics: Boolean = false
 
         /**
          * @param mode See [KoinMode] to use proper value
@@ -65,8 +67,9 @@ class Config private constructor(
         /**
          * @param amplitudeKey Amplitude API key. By default SDK uses ServerZone.EU
          */
-        fun enableAnalytics(amplitudeKey: String) = apply {
+        fun enableAnalytics(amplitudeKey: String, useFirebase: Boolean = false) = apply {
             this.amplitudeKey = amplitudeKey
+            this.useFirebaseAnalytics = useFirebase
         }
 
         /**
@@ -90,12 +93,12 @@ class Config private constructor(
          */
         fun enableRemoteConfig(
             updateInterval: Duration = Duration.ZERO,
-            firstSkipAdsAmountKey: String? = null,
+            fistShowAtKey: String? = null,
             skipAdsAmountKey: String? = null,
         ) = apply {
             this.remoteConfigEnabled = true
             this.remoteConfigUpdateInterval = updateInterval.inWholeMilliseconds
-            this.firstSkipAdsAmountRemoteConfigKey = firstSkipAdsAmountKey
+            this.fistShowAtRemoteConfigKey = fistShowAtKey
             this.skipAdsAmountRemoteConfigKey = skipAdsAmountKey
         }
 
@@ -117,9 +120,10 @@ class Config private constructor(
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
                 oneTimeProducts = oneTimeProducts,
-                firstSkipAdsAmountRemoteConfigKey = firstSkipAdsAmountRemoteConfigKey,
+                fistShowAtRemoteConfigKey = fistShowAtRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
-                showDebugAds = showDebugAds
+                showDebugAds = showDebugAds,
+                useFirebaseAnalytics = useFirebaseAnalytics
             )
         }
     }

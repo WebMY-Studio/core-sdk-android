@@ -25,7 +25,7 @@ interface AdsPremiumManager {
     fun requestReward(
         activity: Activity,
         placement: String? = null,
-        autoGrant: Boolean = true,
+        grantWhenPremium: Boolean = true,
         rewardCallback: (Boolean) -> Unit,
     )
 
@@ -34,7 +34,7 @@ interface AdsPremiumManager {
 
 class RealAdsPremiumManager(
     premiumProductId: String,
-    private val firstSkipAdsAmountRemoteConfigKey: String?,
+    private val fistShowAtRemoteConfigKey: String?,
     private val skipAdsAmountRemoteConfigKey: String?,
     billingManager: BillingManager,
     private val adsManager: AdsManager,
@@ -42,7 +42,7 @@ class RealAdsPremiumManager(
 ) : AdsPremiumManager, CoroutineScope {
 
     companion object {
-        private const val DEFAULT_FIRST_SKIP_AMOUNT = 2L
+        private const val DEFAULT_FIRST_SHOW_AT = 2L
         private const val DEFAULT_SKIP_AMOUNT = 3L
     }
 
@@ -71,10 +71,10 @@ class RealAdsPremiumManager(
             val isPremium = isPremiumFlow.first()
 
             if (!isPremium) {
-                val firstSkipAdsAmount = firstSkipAdsAmountRemoteConfigKey?.let {
+                val firstSkipAdsAmount = fistShowAtRemoteConfigKey?.let {
                     remoteConfigManager.getSyncedLong(it)
-                        .getOrDefault(DEFAULT_FIRST_SKIP_AMOUNT)
-                } ?: DEFAULT_FIRST_SKIP_AMOUNT
+                        .getOrDefault(DEFAULT_FIRST_SHOW_AT)
+                } ?: DEFAULT_FIRST_SHOW_AT
 
                 val skipAdsAmount = skipAdsAmountRemoteConfigKey?.let {
                     remoteConfigManager.getSyncedLong(it)
@@ -98,12 +98,12 @@ class RealAdsPremiumManager(
     override fun requestReward(
         activity: Activity,
         placement: String?,
-        autoGrant: Boolean,
+        grantWhenPremium: Boolean,
         rewardCallback: (Boolean) -> Unit,
     ) {
         launch {
             if (isPremiumFlow.first()) {
-                if (autoGrant) rewardCallback(true)
+                if (grantWhenPremium) rewardCallback(true)
             } else {
                 withContext(Dispatchers.Main) {
                     adsManager.showReward(activity, placement, rewardCallback)

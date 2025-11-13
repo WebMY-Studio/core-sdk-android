@@ -3,6 +3,7 @@ package com.webmy.core_sdk.di
 import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.webmy.core_sdk.Config
 import com.webmy.core_sdk.tools.ads.AdsManager
 import com.webmy.core_sdk.tools.ads.AdsPremiumManager
@@ -22,14 +23,14 @@ import org.koin.dsl.module
 internal fun sdkModule(config: Config) = module {
     configureRemoteConfig(config)
     configurePreferences(config)
-    configureAmplitude(config)
+    configureAnalytics(config)
     configureAppodeal(config)
     configureBilling(config)
 
     configureAdsPremium(config)
 }
 
-internal fun Module.configureAmplitude(config: Config) {
+internal fun Module.configureAnalytics(config: Config) {
     val amplitudeKey = config.amplitudeKey
     if (!amplitudeKey.isNullOrEmpty()) {
         single<Amplitude> {
@@ -41,13 +42,28 @@ internal fun Module.configureAmplitude(config: Config) {
                 )
             )
         }
-
-        single<AnalyticsManager> {
-            RealAnalyticsManager(
-                amplitude = get()
-            )
-        }
     }
+    single<FirebaseAnalytics> { FirebaseAnalytics.getInstance(config.application) }
+
+    single<AnalyticsManager> {
+        val amplitude = if (!amplitudeKey.isNullOrEmpty()) {
+            get<Amplitude>()
+        } else {
+            null
+        }
+
+        val firebase = if (config.useFirebaseAnalytics) {
+            get<FirebaseAnalytics>()
+        } else {
+            null
+        }
+
+        RealAnalyticsManager(
+            amplitude = amplitude,
+            firebase = firebase
+        )
+    }
+
 }
 
 internal fun Module.configureAppodeal(config: Config) {
@@ -58,7 +74,8 @@ internal fun Module.configureAppodeal(config: Config) {
                 analyticsManager = get(),
                 application = config.application,
                 key = appodealKey,
-                config.showDebugAds
+                showDebugAds = config.showDebugAds,
+                firebaseAnalytics = get()
             )
         }
     }
@@ -98,7 +115,7 @@ internal fun Module.configureAdsPremium(config: Config) {
         single<AdsPremiumManager> {
             RealAdsPremiumManager(
                 premiumProductId = premiumProductId,
-                firstSkipAdsAmountRemoteConfigKey = config.firstSkipAdsAmountRemoteConfigKey,
+                fistShowAtRemoteConfigKey = config.fistShowAtRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = config.skipAdsAmountRemoteConfigKey,
                 billingManager = get(),
                 adsManager = get(),

@@ -10,6 +10,10 @@ import com.appodeal.ads.InterstitialCallbacks
 import com.appodeal.ads.RewardedVideoCallbacks
 import com.appodeal.ads.initializing.ApdInitializationCallback
 import com.appodeal.ads.initializing.ApdInitializationError
+import com.appodeal.ads.revenue.AdRevenueCallbacks
+import com.appodeal.ads.revenue.RevenueInfo
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.logEvent
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.util.dpToPx
 
@@ -44,11 +48,12 @@ interface AdsManager {
 }
 
 internal class RealAdsManager(
-    private val analyticsManager: AnalyticsManager,
-    private val application: Application,
     private val key: String,
     private val showDebugAds: Boolean,
-) : AdsManager {
+    private val application: Application,
+    private val analyticsManager: AnalyticsManager,
+    private val firebaseAnalytics: FirebaseAnalytics
+) : AdsManager, AdRevenueCallbacks, ApdInitializationCallback {
 
     companion object {
         private const val ANALYTICS_ERROR_EVENT = "appodeal_initialization_error"
@@ -65,24 +70,34 @@ internal class RealAdsManager(
             context = application,
             appKey = key,
             adTypes = adTypes,
-            callback = object : ApdInitializationCallback {
-                override fun onInitializationFinished(
-                    errors: List<ApdInitializationError>?,
-                ) {
-                    if (!errors.isNullOrEmpty()) {
-                        val map = mutableMapOf<String, Any?>()
-                        errors.mapIndexed { index, error ->
-                            map["Error$index"] = error.message
-                        }
-                        analyticsManager.logEvent(ANALYTICS_ERROR_EVENT, map)
-                    }
-                }
-            }
+            callback = this
         )
+        Appodeal.setAdRevenueCallbacks(this)
 
         setBannerCallbacks()
         setInterstitialCallbacks()
         setRewardedVideoCallbacks()
+    }
+
+    override fun onAdRevenueReceive(revenueInfo: RevenueInfo) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.AD_IMPRESSION) {
+            param(FirebaseAnalytics.Param.AD_PLATFORM, revenueInfo.platform)
+            param(FirebaseAnalytics.Param.SOURCE, revenueInfo.networkName)
+            param(FirebaseAnalytics.Param.AD_FORMAT, revenueInfo.adTypeString)
+            param(FirebaseAnalytics.Param.AD_UNIT_NAME, revenueInfo.adUnitName)
+            param(FirebaseAnalytics.Param.CURRENCY, revenueInfo.currency)
+            param(FirebaseAnalytics.Param.VALUE, revenueInfo.revenue)
+        }
+    }
+
+    override fun onInitializationFinished(errors: List<ApdInitializationError>?) {
+        if (!errors.isNullOrEmpty()) {
+            val map = mutableMapOf<String, Any?>()
+            errors.mapIndexed { index, error ->
+                map["Error$index"] = error.message
+            }
+            analyticsManager.logEvent(ANALYTICS_ERROR_EVENT, map)
+        }
     }
 
     override fun showBanner(
