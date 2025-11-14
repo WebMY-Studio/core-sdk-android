@@ -17,6 +17,7 @@ import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.webmy.core_sdk.util.awaitTrue
 import com.webmy.core_sdk.util.coerceToUnit
+import com.webmy.core_sdk.util.failure
 import com.webmy.core_sdk.util.flatMap
 import com.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlinx.coroutines.CoroutineScope
@@ -24,8 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -33,7 +36,7 @@ import kotlin.coroutines.CoroutineContext
 
 interface BillingManager {
 
-    val productsFlow: Flow<List<OneTimeProduct>>
+    val productsFlow: Flow<List<Product>>
 
     suspend fun fetchProducts(): Result<Unit>
 
@@ -44,13 +47,11 @@ interface BillingManager {
     suspend fun awaitInitialized()
 }
 
-fun List<OneTimeProduct>.containsPurchased(productId: String) =
-    find { it.id == productId }?.isPurchased ?: false
-
 
 class RealBillingManager(
     application: Application,
-    oneTimeProducts: Set<String>,
+    private val oneTimeProducts: Set<String>,
+    private val subscriptionProducts: Set<String>,
 ) : BillingManager, PurchasesUpdatedListener, CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
@@ -91,27 +92,51 @@ class RealBillingManager(
     }
 
     private val purchasesFlow = singleReplaySharedFlow<Set<String>>()
-    private val detailsFlow = singleReplaySharedFlow<Map<String, ProductDetails>>()
+    private val oneTimeDetailsFlow = singleReplaySharedFlow<Map<String, ProductDetails>>()
+    private val subscriptionDetailsFlow = singleReplaySharedFlow<Map<String, ProductDetails>>()
 
-    override val productsFlow = combine(purchasesFlow, detailsFlow) { purchases, details ->
-        details.values.map {
-            val productId = it.productId
-            val formattedPrice = it.oneTimePurchaseOfferDetails?.formattedPrice
-
-            OneTimeProduct(
-                id = productId,
-                formattedPrice = formattedPrice,
-                isPurchased = purchases.contains(productId)
-            )
+    override val productsFlow = combine(
+        purchasesFlow,
+        oneTimeDetailsFlow,
+        subscriptionDetailsFlow
+    ) { purchases, oneTimeDetails, subscriptionDetails ->
+        buildList {
+            oneTimeDetails.values.forEach { detail ->
+                val productId = detail.productId
+                add(
+                    Product.OneTime(
+                        id = productId,
+                        formattedPrice = detail.oneTimePurchaseOfferDetails?.formattedPrice,
+                        isPurchased = purchases.contains(productId),
+                        offerToken = detail.oneTimePurchaseOfferDetails?.offerToken
+                    )
+                )
+            }
+            subscriptionDetails.values.forEach { detail ->
+                val productId = detail.productId
+                val subscriptionOfferDetails = detail.subscriptionOfferDetails?.firstOrNull()
+                add(
+                    Product.Subscription(
+                        id = productId,
+                        formattedPrice = subscriptionOfferDetails?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice,
+                        isPurchased = purchases.contains(productId),
+                        offerToken = subscriptionOfferDetails?.offerToken
+                    )
+                )
+            }
         }
     }
 
 
-    val queryPurchasesParams = QueryPurchasesParams.newBuilder()
+    private val queryOneTimePurchasesParams = QueryPurchasesParams.newBuilder()
         .setProductType(BillingClient.ProductType.INAPP)
         .build()
 
-    val queryDetailsParams = QueryProductDetailsParams.newBuilder()
+    private val querySubscriptionPurchasesParams = QueryPurchasesParams.newBuilder()
+        .setProductType(BillingClient.ProductType.SUBS)
+        .build()
+
+    private val queryOneTimeDetailsParams = QueryProductDetailsParams.newBuilder()
         .setProductList(
             oneTimeProducts.map {
                 QueryProductDetailsParams.Product.newBuilder()
@@ -121,89 +146,156 @@ class RealBillingManager(
             }
         ).build()
 
-    override suspend fun fetchProducts(): Result<Unit> {
-        return queryPurchases()
-            .flatMap { purchases ->
-                queryProductsDetails()
-                    .map { details -> details to purchases }
+    private val querySubscriptionDetailsParams = QueryProductDetailsParams.newBuilder()
+        .setProductList(
+            subscriptionProducts.map {
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(it)
+                    .setProductType(BillingClient.ProductType.SUBS)
+                    .build()
             }
-            .map { (detailsList, purchasesList) ->
+        ).build()
+
+    override suspend fun fetchProducts(): Result<Unit> {
+        return queryOneTimePurchases()
+            .flatMap { oneTimePurchases ->
+                querySubscriptionPurchases()
+                    .map { subscriptionPurchases -> oneTimePurchases to subscriptionPurchases }
+            }
+            .flatMap { (oneTimePurchases, subscriptionPurchases) ->
+                queryOneTimeProductsDetails()
+                    .flatMap { oneTimeDetails ->
+                        querySubscriptionProductsDetails()
+                            .map { subscriptionDetails ->
+                                FetchProductsData(
+                                    oneTimePurchases = oneTimePurchases,
+                                    subscriptionPurchases = subscriptionPurchases,
+                                    oneTimeDetails = oneTimeDetails,
+                                    subscriptionDetails = subscriptionDetails
+                                )
+                            }
+                    }
+            }
+            .map { data ->
                 val purchasesSet = buildSet {
-                    purchasesList.forEach { purchase ->
+                    data.oneTimePurchases.forEach { purchase ->
+                        purchase.products.forEach { productId ->
+                            if (purchase.isAcknowledged) add(productId)
+                        }
+                    }
+                    data.subscriptionPurchases.forEach { purchase ->
                         purchase.products.forEach { productId ->
                             if (purchase.isAcknowledged) add(productId)
                         }
                     }
                 }
 
-
-                val detailsMap = mutableMapOf<String, ProductDetails>()
-                detailsList.forEach { detail ->
-                    detailsMap[detail.productId] = detail
+                val oneTimeDetailsMap = mutableMapOf<String, ProductDetails>()
+                data.oneTimeDetails.forEach { detail ->
+                    oneTimeDetailsMap[detail.productId] = detail
                 }
 
+                val subscriptionDetailsMap = mutableMapOf<String, ProductDetails>()
+                data.subscriptionDetails.forEach { detail ->
+                    subscriptionDetailsMap[detail.productId] = detail
+                }
 
                 purchasesFlow.emit(purchasesSet)
-                detailsFlow.emit(detailsMap)
+                oneTimeDetailsFlow.emit(oneTimeDetailsMap)
+                subscriptionDetailsFlow.emit(subscriptionDetailsMap)
             }
             .coerceToUnit()
     }
 
     override suspend fun purchase(activity: Activity, productId: String): Result<Unit> {
-        return queryProductsDetails()
-            .map { details -> details.find { it.productId == productId } }
-            .flatMap {
-                if (it == null) {
-                    Result.failure(Throwable("Cannot find product with :productId = $productId"))
-                } else {
-                    Result.success(it)
-                }
-            }
-            .flatMap {
-                val offerToken = it.oneTimePurchaseOfferDetails?.offerToken
+        val tokenFlow = productsFlow
+            .mapNotNull { it.find { it.id == productId }?.offerToken }
 
-                if (offerToken == null) {
-                    Result.failure(Throwable("Cannot find offer token for :productId = $productId"))
-                } else {
-                    runCatching {
-                        val flowParams = BillingFlowParams.newBuilder()
-                            .setProductDetailsParamsList(
-                                listOf(
-                                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                                        .setProductDetails(it)
-                                        .build()
-                                )
-                            ).build()
+        val offerDetails = combine(
+            oneTimeDetailsFlow,
+            subscriptionDetailsFlow
+        ) { oneTimeDetails, subscriptionDetails ->
+            val details = oneTimeDetails[productId] ?: subscriptionDetails[productId]
+            details
+        }
+            .filterNotNull()
+            .map { tokenFlow.first() to it }
+            .first()
 
-                        billingClient.launchBillingFlow(activity, flowParams)
-                    }
-                }
-            }
-            .coerceToUnit()
+        return runCatching {
+            val params = BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(offerDetails.second)
+                .setOfferToken(offerDetails.first)
+                .build()
+
+            val flowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(listOf(params))
+                .build()
+
+            billingClient.launchBillingFlow(activity, flowParams)
+        }.coerceToUnit()
     }
 
-    private suspend fun queryPurchases(): Result<List<Purchase>> {
+    private suspend fun queryOneTimePurchases(): Result<List<Purchase>> {
+        if (oneTimeProducts.isEmpty()) {
+            return Result.success(emptyList())
+        }
         return runCatching {
-            billingClient.queryPurchasesAsync(queryPurchasesParams)
+            billingClient.queryPurchasesAsync(queryOneTimePurchasesParams)
         }
             .flatMap {
                 if (it.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     Result.success(it.purchasesList)
                 } else {
-                    Result.failure(Throwable("Unable to fetch purchased products"))
+                    failure("Unable to fetch purchased one-time products")
                 }
             }
     }
 
-    private suspend fun queryProductsDetails(): Result<List<ProductDetails>> {
+    private suspend fun querySubscriptionPurchases(): Result<List<Purchase>> {
+        if (subscriptionProducts.isEmpty()) {
+            return Result.success(emptyList())
+        }
         return runCatching {
-            billingClient.queryProductDetails(queryDetailsParams)
+            billingClient.queryPurchasesAsync(querySubscriptionPurchasesParams)
+        }
+            .flatMap {
+                if (it.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    Result.success(it.purchasesList)
+                } else {
+                    failure("Unable to fetch purchased subscription products")
+                }
+            }
+    }
+
+    private suspend fun queryOneTimeProductsDetails(): Result<List<ProductDetails>> {
+        if (oneTimeProducts.isEmpty()) {
+            return Result.success(emptyList())
+        }
+        return runCatching {
+            billingClient.queryProductDetails(queryOneTimeDetailsParams)
         }
             .flatMap {
                 if (it.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     Result.success(it.productDetailsList.orEmpty())
                 } else {
-                    Result.failure(Throwable("Unable to fetch products"))
+                    failure("Unable to fetch one-time products")
+                }
+            }
+    }
+
+    private suspend fun querySubscriptionProductsDetails(): Result<List<ProductDetails>> {
+        if (subscriptionProducts.isEmpty()) {
+            return Result.success(emptyList())
+        }
+        return runCatching {
+            billingClient.queryProductDetails(querySubscriptionDetailsParams)
+        }
+            .flatMap {
+                if (it.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    Result.success(it.productDetailsList.orEmpty())
+                } else {
+                    failure("Unable to fetch subscription products")
                 }
             }
     }

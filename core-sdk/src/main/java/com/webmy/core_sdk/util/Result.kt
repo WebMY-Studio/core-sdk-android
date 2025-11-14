@@ -14,3 +14,5 @@ inline fun <T, R> Result<T>.flatMap(transform: (T) -> Result<R>): Result<R> {
         onFailure = { this as Result<R> }
     )
 }
+
+fun <T> failure(message: String) = Result.failure<T>(Throwable(message))

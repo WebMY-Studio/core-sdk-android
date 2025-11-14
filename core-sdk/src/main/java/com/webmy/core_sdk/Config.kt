@@ -16,6 +16,7 @@ class Config private constructor(
     val remoteConfigUpdateInterval: Long,
     val fistShowAtRemoteConfigKey: String?,
     val skipAdsAmountRemoteConfigKey: String?,
+    val subscriptionProducts: List<String>,
 ) {
     class Builder(private val application: Application) {
 
@@ -26,6 +27,7 @@ class Config private constructor(
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
         private var oneTimeProducts: List<String> = emptyList()
+        private var subscriptionProducts: List<String> = emptyList()
         private var fistShowAtRemoteConfigKey: String? = null
         private var skipAdsAmountRemoteConfigKey: String? = null
         private var showDebugAds: Boolean = false
@@ -102,8 +104,9 @@ class Config private constructor(
             this.skipAdsAmountRemoteConfigKey = skipAdsAmountKey
         }
 
-        fun enableBilling(oneTimeProducts: List<String>) = apply {
+        fun enableBilling(oneTimeProducts: List<String>, subscriptionProducts: List<String>) = apply {
             this.oneTimeProducts = oneTimeProducts
+            this.subscriptionProducts = subscriptionProducts
         }
 
         fun enableDebugAds() = apply {
@@ -120,6 +123,7 @@ class Config private constructor(
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
                 oneTimeProducts = oneTimeProducts,
+                subscriptionProducts = subscriptionProducts,
                 fistShowAtRemoteConfigKey = fistShowAtRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
                 showDebugAds = showDebugAds,

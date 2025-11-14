@@ -92,18 +92,16 @@ internal fun Module.configurePreferences(config: Config) {
 }
 
 internal fun Module.configureBilling(config: Config) {
-    val products = buildList {
-        addAll(config.oneTimeProducts)
-        add(config.premiumProductId)
-    }
-        .filterNotNull()
-        .toSet()
+    val oneTimeProducts = config.oneTimeProducts.toSet()
 
-    if (products.isNotEmpty()) {
+    val subscriptionProducts = config.subscriptionProducts.toSet()
+
+    if (oneTimeProducts.isNotEmpty() || subscriptionProducts.isNotEmpty()) {
         single<BillingManager> {
             RealBillingManager(
                 application = config.application,
-                oneTimeProducts = products
+                oneTimeProducts = oneTimeProducts,
+                subscriptionProducts = subscriptionProducts
             )
         }
     }
