@@ -136,25 +136,29 @@ class RealBillingManager(
         .setProductType(BillingClient.ProductType.SUBS)
         .build()
 
-    private val queryOneTimeDetailsParams = QueryProductDetailsParams.newBuilder()
-        .setProductList(
-            oneTimeProducts.map {
-                QueryProductDetailsParams.Product.newBuilder()
-                    .setProductId(it)
-                    .setProductType(BillingClient.ProductType.INAPP)
-                    .build()
-            }
-        ).build()
+    private val queryOneTimeDetailsParams by lazy {
+        QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                oneTimeProducts.map {
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(it)
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+                }
+            ).build()
+    }
 
-    private val querySubscriptionDetailsParams = QueryProductDetailsParams.newBuilder()
-        .setProductList(
-            subscriptionProducts.map {
-                QueryProductDetailsParams.Product.newBuilder()
-                    .setProductId(it)
-                    .setProductType(BillingClient.ProductType.SUBS)
-                    .build()
-            }
-        ).build()
+    private val querySubscriptionDetailsParams by lazy {
+        QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                subscriptionProducts.map {
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(it)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                }
+            ).build()
+    }
 
     override suspend fun fetchProducts(): Result<Unit> {
         return queryOneTimePurchases()
