@@ -4,7 +4,11 @@ import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.gson.Gson
+import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.Config
+import com.webmy.core_sdk.data.NetworkApiCreator
+import com.webmy.core_sdk.data.RealNetworkApiCreator
 import com.webmy.core_sdk.tools.ads.AdsManager
 import com.webmy.core_sdk.tools.ads.AdsPremiumManager
 import com.webmy.core_sdk.tools.ads.RealAdsManager
@@ -17,8 +21,14 @@ import com.webmy.core_sdk.tools.preferences.Preferences
 import com.webmy.core_sdk.tools.preferences.RealPreferences
 import com.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
 import com.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
+import okhttp3.Cache
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 internal fun sdkModule(config: Config) = module {
     configureRemoteConfig(config)
@@ -28,6 +38,8 @@ internal fun sdkModule(config: Config) = module {
     configureBilling(config)
 
     configureAdsPremium(config)
+
+    configureNetwork()
 }
 
 internal fun Module.configureAnalytics(config: Config) {
@@ -121,4 +133,33 @@ internal fun Module.configureAdsPremium(config: Config) {
             )
         }
     }
+}
+
+private const val HTTP_CACHE = "http_cache"
+private const val CACHE_SIZE = 50L * 1024L * 1024L // 50 MiB
+private const val TIMEOUT_SECONDS = 20L
+
+internal fun Module.configureNetwork() {
+    single<OkHttpClient.Builder> {
+        val builder =
+            OkHttpClient.Builder()
+                .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .cache(Cache(File(androidContext().cacheDir, HTTP_CACHE), CACHE_SIZE))
+                .retryOnConnectionFailure(true)
+
+        if (BuildConfig.DEBUG) {
+            builder.addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+        }
+
+        builder
+    }
+
+    single<OkHttpClient> { get<OkHttpClient.Builder>().build() }
+
+    single<NetworkApiCreator> { RealNetworkApiCreator(get()) }
+
+    single<Gson> { Gson() }
+
 }

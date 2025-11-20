@@ -68,6 +68,11 @@ dependencies {
     implementation(libs.firebase.config)
 
     implementation(libs.billingclient)
+    implementation(libs.squareup.okhttp3.core)
+    implementation(libs.squareup.okhttp3.logging)
+    implementation(libs.squareup.retrofit2.core)
+    implementation(libs.squareup.retrofit2.converters.gson)
+
 }
 
 afterEvaluate {

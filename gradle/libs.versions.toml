@@ -10,6 +10,8 @@ google-play-services-ads = "24.7.0"
 firebase-bom = "34.5.0"
 coroutines = "1.10.2"
 billing-ktx = "8.1.0"
+okhttp3 = "5.2.1"
+retrofit2 = "3.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +31,11 @@ firebase-config = { module = "com.google.firebase:firebase-config" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 billingclient = { module = "com.android.billingclient:billing-ktx", version.ref = "billing-ktx" }
+
+squareup-okhttp3-core = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3" }
+squareup-okhttp3-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3" }
+squareup-retrofit2-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit2" }
+squareup-retrofit2-converters-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
