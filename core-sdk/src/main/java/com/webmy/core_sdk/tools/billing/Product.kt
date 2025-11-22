@@ -2,24 +2,32 @@ package com.webmy.core_sdk.tools.billing
 
 sealed class Product(
     open val id: String,
-    open val formattedPrice: String?,
     open val isPurchased: Boolean,
-
+    open val title: String,
     open val offerToken: String?,
 ) {
     data class OneTime(
         override val id: String,
-        override val formattedPrice: String?,
         override val isPurchased: Boolean,
         override val offerToken: String?,
-    ) : Product(id, formattedPrice, isPurchased, offerToken)
+        override val title: String,
+        val formattedPrice: String?,
+    ) : Product(id, isPurchased, title, offerToken)
 
     data class Subscription(
         override val id: String,
-        override val formattedPrice: String?,
         override val isPurchased: Boolean,
         override val offerToken: String?,
-    ) : Product(id, formattedPrice, isPurchased, offerToken)
+        override val title: String,
+        val phases: List<Phase>
+    ) : Product(id, isPurchased, title, offerToken) {
+        data class Phase(
+            val formattedPrice: String,
+            val billingPeriod: String,
+            val priceMicros: Long,
+            val currency: String
+        )
+    }
 }
 
 fun List<Product>.containsPurchased(productId: String) =

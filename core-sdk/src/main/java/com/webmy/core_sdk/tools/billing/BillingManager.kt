@@ -103,26 +103,42 @@ class RealBillingManager(
         buildList {
             oneTimeDetails.values.forEach { detail ->
                 val productId = detail.productId
-                add(
-                    Product.OneTime(
-                        id = productId,
-                        formattedPrice = detail.oneTimePurchaseOfferDetails?.formattedPrice,
-                        isPurchased = purchases.contains(productId),
-                        offerToken = detail.oneTimePurchaseOfferDetails?.offerToken
+                val offerDetails = detail.oneTimePurchaseOfferDetails
+                if (offerDetails != null) {
+                    add(
+                        Product.OneTime(
+                            id = productId,
+                            title = detail.title,
+                            offerToken = offerDetails.offerToken,
+                            formattedPrice = offerDetails.formattedPrice,
+                            isPurchased = purchases.contains(productId)
+                        )
                     )
-                )
+                }
+
             }
             subscriptionDetails.values.forEach { detail ->
                 val productId = detail.productId
-                val subscriptionOfferDetails = detail.subscriptionOfferDetails?.firstOrNull()
-                add(
-                    Product.Subscription(
-                        id = productId,
-                        formattedPrice = subscriptionOfferDetails?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice,
-                        isPurchased = purchases.contains(productId),
-                        offerToken = subscriptionOfferDetails?.offerToken
+                val offerDetails = detail.subscriptionOfferDetails?.firstOrNull()
+                if (offerDetails != null) {
+                    val phases = offerDetails.pricingPhases.pricingPhaseList.map {
+                        Product.Subscription.Phase(
+                            formattedPrice = it.formattedPrice,
+                            priceMicros = it.priceAmountMicros,
+                            currency = it.priceCurrencyCode,
+                            billingPeriod = it.billingPeriod
+                        )
+                    }
+                    add(
+                        Product.Subscription(
+                            id = productId,
+                            title = detail.title,
+                            isPurchased = purchases.contains(productId),
+                            offerToken = offerDetails.offerToken,
+                            phases = phases
+                        )
                     )
-                )
+                }
             }
         }
     }
