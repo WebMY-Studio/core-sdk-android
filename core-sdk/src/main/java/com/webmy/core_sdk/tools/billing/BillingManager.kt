@@ -122,7 +122,6 @@ class RealBillingManager(
                 val offerDetails = detail.subscriptionOfferDetails?.firstOrNull()
                 if (offerDetails != null) {
                     val phases = offerDetails.pricingPhases.pricingPhaseList.map {
-                        it.billingCycleCount
                         Product.Subscription.Phase(
                             formattedPrice = it.formattedPrice,
                             priceMicros = it.priceAmountMicros,

@@ -21,6 +21,8 @@ import com.webmy.core_sdk.tools.preferences.Preferences
 import com.webmy.core_sdk.tools.preferences.RealPreferences
 import com.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
 import com.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
+import com.webmy.core_sdk.tools.sharing.RealSharingManager
+import com.webmy.core_sdk.tools.sharing.SharingManager
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -40,6 +42,7 @@ internal fun sdkModule(config: Config) = module {
     configureAdsPremium(config)
 
     configureNetwork()
+    configureSharingManager()
 }
 
 internal fun Module.configureAnalytics(config: Config) {
@@ -162,4 +165,8 @@ internal fun Module.configureNetwork() {
 
     single<Gson> { Gson() }
 
+}
+
+internal fun Module.configureSharingManager() {
+    single<SharingManager> { RealSharingManager() }
 }
