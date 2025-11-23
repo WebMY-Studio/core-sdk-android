@@ -25,7 +25,8 @@ sealed class Product(
             val formattedPrice: String,
             val billingPeriod: String,
             val priceMicros: Long,
-            val currency: String
+            val currency: String,
+            val cycles: Int
         )
     }
 }
