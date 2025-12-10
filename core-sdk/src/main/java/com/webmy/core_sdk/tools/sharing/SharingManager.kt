@@ -6,14 +6,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 
 interface SharingManager {
-    fun shareContent(activity: AppCompatActivity, sharing: ContentSharing)
-    fun shareText(activity: AppCompatActivity, text: String)
-    fun shareEvent(activity: AppCompatActivity, sharing: EventSharing)
+    fun shareContent(sharing: ContentSharing)
+    fun shareText(text: String)
+    fun shareEvent(sharing: EventSharing)
 }
 
-class RealSharingManager() : SharingManager {
+class RealSharingManager(
+    private val activity: AppCompatActivity
+) : SharingManager {
 
-    override fun shareContent(activity: AppCompatActivity, sharing: ContentSharing) {
+    override fun shareContent(sharing: ContentSharing) {
         val intent = ShareCompat.IntentBuilder(activity)
             .setStream(sharing.file.uri)
             .setType(sharing.file.mimeType)
@@ -27,7 +29,7 @@ class RealSharingManager() : SharingManager {
         activity.startActivity(intent)
     }
 
-    override fun shareText(activity: AppCompatActivity, text: String) {
+    override fun shareText(text: String) {
         val intent = ShareCompat.IntentBuilder(activity)
             .setType("text/plain")
             .setText(text)
@@ -36,7 +38,7 @@ class RealSharingManager() : SharingManager {
         activity.startActivity(intent)
     }
 
-    override fun shareEvent(activity: AppCompatActivity, sharing: EventSharing) {
+    override fun shareEvent(sharing: EventSharing) {
         val intent = Intent(Intent.ACTION_INSERT).apply {
             data = CalendarContract.Events.CONTENT_URI
 

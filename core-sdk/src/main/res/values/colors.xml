@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="transparent">#00FFFFFF</color>
+
+    <color name="white_20">#33FFFFFF</color>
+
+    <color name="black">#000000</color>
+    <color name="error">#D32F2F</color>
+
+    <color name="borderPrimary">#0F0E0E0F</color>
+
+    <color name="backgroundPrimary">#FFFFFF</color>
+    <color name="backgroundSecondary">#080E0E0F</color>
+
+    <color name="textAndIconsPrimary">#0E0E0F</color>
+    <color name="textAndIconsSecondary">#660E0E0F</color>
+    <color name="textAndIconsPrimaryInverse">#FFFFFF</color>
+</resources>

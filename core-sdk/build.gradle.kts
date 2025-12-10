@@ -24,6 +24,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
 
     publishing {
@@ -52,6 +53,9 @@ java {
 dependencies {
     api(libs.coroutines)
     api(libs.androidx.core.ktx)
+
+    api(libs.appcompat)
+    api(libs.material)
 
     api(platform(libs.koin.bom))
     api(libs.koin.android)

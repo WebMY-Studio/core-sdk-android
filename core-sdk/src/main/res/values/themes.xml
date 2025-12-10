@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="BaseTextTheme" />
+
+    <style name="SpeechToText.Text" parent="BaseTextTheme" />
+
+    <style name="SpeechToText.Text.H1" parent="SpeechToText.Text">
+        <item name="android:textSize">36sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="SpeechToText.Text.H2" parent="SpeechToText.Text">
+        <item name="android:textSize">32sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="SpeechToText.Text.H3" parent="SpeechToText.Text">
+        <item name="android:textSize">24sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="SpeechToText.Text.H5" parent="SpeechToText.Text">
+        <item name="android:textSize">18sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="SpeechToText.Text.Body1" parent="SpeechToText.Text">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="SpeechToText.Text.Body1.Medium" parent="SpeechToText.Text.Body1">
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="SpeechToText.Text.Body1.Bold" parent="SpeechToText.Text.Body1">
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="SpeechToText.Text.Body2" parent="SpeechToText.Text">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="SpeechToText.Text.Body2.Medium" parent="SpeechToText.Text.Body2">
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+</resources>

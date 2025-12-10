@@ -134,12 +134,28 @@ To integrate Firebase features like **Remote Config** and **Crashlytics**, follo
 Place your `google-services.json` file in the **app module** directory.
 
 ### 2️⃣ Apply Firebase plugins
+
+In **libs.versions.toml**:
+
+```kotlin
+[versions]
+...
+firebase-crashlytics = "$versionNumber"
+google-services = "$versionNumber"
+
+[plugins]
+...
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+
+```
+
 In your **app module’s** `build.gradle.kts`:
 
 ```kotlin
 plugins {
-alias(libs.plugins.google.services)
-alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 ```
 
@@ -147,8 +163,8 @@ In your **root** `build.gradle.kts`:
 
 ```kotlin
 plugins {
-alias(libs.plugins.google.services) apply false
-alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 ```
 
