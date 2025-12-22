@@ -17,6 +17,7 @@ class Config private constructor(
     val fistShowAtRemoteConfigKey: String?,
     val skipAdsAmountRemoteConfigKey: String?,
     val subscriptionProducts: List<String>,
+    val adaptyKey: String?
 ) {
     class Builder(private val application: Application) {
 
@@ -32,6 +33,7 @@ class Config private constructor(
         private var skipAdsAmountRemoteConfigKey: String? = null
         private var showDebugAds: Boolean = false
         private var useFirebaseAnalytics: Boolean = false
+        private var adaptyKey: String? = null
 
         /**
          * @param mode See [KoinMode] to use proper value
@@ -113,6 +115,10 @@ class Config private constructor(
             this.showDebugAds = true
         }
 
+        fun enableAdapty(key: String) {
+            adaptyKey = key
+        }
+
         fun build(): Config {
             return Config(
                 application = application,
@@ -127,7 +133,8 @@ class Config private constructor(
                 fistShowAtRemoteConfigKey = fistShowAtRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
                 showDebugAds = showDebugAds,
-                useFirebaseAnalytics = useFirebaseAnalytics
+                useFirebaseAnalytics = useFirebaseAnalytics,
+                adaptyKey = adaptyKey
             )
         }
     }

@@ -14,6 +14,7 @@ okhttp3 = "5.3.2"
 retrofit2 = "3.0.0"
 appcompat = "1.7.1"
 material = "1.13.0"
+adaptyBom = "3.15.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -21,6 +22,8 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 amplitude = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
 appodeal = { module = "com.appodeal.ads:sdk", version.ref = "appodeal" }
+adapty-bom = { module = "io.adapty:adapty-bom", version.ref = "adaptyBom" }
+adapty = { module = "io.adapty:android-sdk" }
 
 google-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "google-review" }
 google-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "google-play-services-ads" }

@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
 
+    implementation(platform(libs.adapty.bom))
+    implementation(libs.adapty)
+
     implementation(libs.billingclient)
     api(libs.squareup.okhttp3.core)
     api(libs.squareup.okhttp3.logging)

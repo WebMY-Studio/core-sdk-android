@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:name=".App"
         android:allowBackup="true"
+        android:dataExtractionRules="@null"
+        android:fullBackupContent="@null"
         android:icon="@drawable/ic_logo"
         android:label="Demo WebMY"
         android:logo="@drawable/ic_logo"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        tools:replace="android:allowBackup,android:dataExtractionRules,android:fullBackupContent">
 
         <activity
             android:name=".MainActivity"

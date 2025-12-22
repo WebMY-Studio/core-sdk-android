@@ -1,5 +1,7 @@
 package com.webmy.core_sdk
 
+import com.adapty.Adapty
+import com.adapty.models.AdaptyConfig
 import com.google.android.gms.ads.MobileAds
 import com.webmy.core_sdk.di.sdkModule
 import org.koin.core.context.loadKoinModules
@@ -17,6 +19,14 @@ class WebMY private constructor() {
 
         if (!config.appodealKey.isNullOrEmpty()) {
             MobileAds.initialize(config.application)
+        }
+
+        val adaptyKey = config.adaptyKey
+        if (!adaptyKey.isNullOrEmpty()) {
+            Adapty.activate(
+                config.application,
+                AdaptyConfig.Builder(adaptyKey).build()
+            )
         }
     }
 
