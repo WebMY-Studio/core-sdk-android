@@ -33,7 +33,7 @@ interface AdsPremiumManager {
 }
 
 class RealAdsPremiumManager(
-    premiumProductId: String,
+    premiumProductIds: List<String>,
     private val fistShowAtRemoteConfigKey: String?,
     private val skipAdsAmountRemoteConfigKey: String?,
     billingManager: BillingManager,
@@ -51,7 +51,11 @@ class RealAdsPremiumManager(
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
     override val isPremiumFlow = billingManager.productsFlow
-        .map { it.containsPurchased(premiumProductId) }
+        .map { products ->
+            premiumProductIds.any { premiumProductIds ->
+                products.containsPurchased(premiumProductIds)
+            }
+        }
 
     override fun requestBanner(activity: Activity, container: FrameLayout) {
         launch {

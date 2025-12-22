@@ -1,6 +1,7 @@
 package com.webmy.core_sdk
 
 import android.app.Application
+import com.appodeal.ads.S
 import kotlin.time.Duration
 
 class Config private constructor(
@@ -9,7 +10,7 @@ class Config private constructor(
     val appodealKey: String?,
     val showDebugAds: Boolean,
     val amplitudeKey: String?,
-    val premiumProductId: String?,
+    val premiumProductIds: List<String>,
     val remoteConfigEnabled: Boolean,
     val oneTimeProducts: List<String>,
     val useFirebaseAnalytics: Boolean,
@@ -23,7 +24,7 @@ class Config private constructor(
 
         private var koinMode: KoinMode = KoinMode.START
         private var appodealKey: String? = null
-        private var premiumProductId: String? = null
+        private var premiumProductIds: List<String> = emptyList()
         private var amplitudeKey: String? = null
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
@@ -63,9 +64,9 @@ class Config private constructor(
          * ADMOB_APPLICATION_ID=ca-app-pub-XXXXXXXX~YYYYYYYY
          * ```
          */
-        fun enableAds(appodealKey: String, premiumProductId: String? = null) = apply {
+        fun enableAds(appodealKey: String, premiumProductIds: List<String> = emptyList()) = apply {
             this.appodealKey = appodealKey
-            this.premiumProductId = premiumProductId
+            this.premiumProductIds = premiumProductIds
         }
 
         /**
@@ -124,7 +125,7 @@ class Config private constructor(
                 application = application,
                 koinMode = koinMode,
                 appodealKey = appodealKey,
-                premiumProductId = premiumProductId,
+                premiumProductIds = premiumProductIds,
                 amplitudeKey = amplitudeKey,
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,

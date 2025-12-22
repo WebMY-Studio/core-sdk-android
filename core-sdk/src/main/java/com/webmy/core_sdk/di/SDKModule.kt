@@ -120,11 +120,11 @@ internal fun Module.configureBilling(config: Config) {
 }
 
 internal fun Module.configureAdsPremium(config: Config) {
-    val premiumProductId = config.premiumProductId
-    if (!premiumProductId.isNullOrEmpty()) {
+    val premiumProductIds = config.premiumProductIds
+    if (premiumProductIds.isNotEmpty()) {
         single<AdsPremiumManager> {
             RealAdsPremiumManager(
-                premiumProductId = premiumProductId,
+                premiumProductIds = premiumProductIds,
                 fistShowAtRemoteConfigKey = config.fistShowAtRemoteConfigKey,
                 skipAdsAmountRemoteConfigKey = config.skipAdsAmountRemoteConfigKey,
                 billingManager = get(),
