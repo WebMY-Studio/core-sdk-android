@@ -116,8 +116,8 @@ class Config private constructor(
             this.showDebugAds = true
         }
 
-        fun enableAdapty(key: String) {
-            adaptyKey = key
+        fun enableAdapty(key: String) = apply {
+            this.adaptyKey = key
         }
 
         fun build(): Config {

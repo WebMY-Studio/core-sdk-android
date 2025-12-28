@@ -30,10 +30,6 @@ android {
     publishing {
         singleVariant("release")
     }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
-    }
 }
 
 kotlin {
@@ -79,6 +75,7 @@ dependencies {
     api(libs.squareup.okhttp3.logging)
     api(libs.squareup.retrofit2.core)
     api(libs.squareup.retrofit2.converters.gson)
+    api(libs.facebook)
 
 }
 
