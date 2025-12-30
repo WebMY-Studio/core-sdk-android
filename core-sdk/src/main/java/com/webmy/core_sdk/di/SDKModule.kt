@@ -9,6 +9,8 @@ import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.Config
 import com.webmy.core_sdk.data.NetworkApiCreator
 import com.webmy.core_sdk.data.RealNetworkApiCreator
+import com.webmy.core_sdk.domain.interactor.PremiumInteractor
+import com.webmy.core_sdk.domain.interactor.RealPremiumInteractor
 import com.webmy.core_sdk.tools.ads.AdsManager
 import com.webmy.core_sdk.tools.ads.AdsPremiumManager
 import com.webmy.core_sdk.tools.ads.RealAdsManager
@@ -105,7 +107,6 @@ internal fun Module.configurePreferences(config: Config) {
 
 internal fun Module.configureBilling(config: Config) {
     val oneTimeProducts = config.oneTimeProducts.toSet()
-
     val subscriptionProducts = config.subscriptionProducts.toSet()
 
     if (oneTimeProducts.isNotEmpty() || subscriptionProducts.isNotEmpty()) {
@@ -116,6 +117,8 @@ internal fun Module.configureBilling(config: Config) {
                 subscriptionProducts = subscriptionProducts
             )
         }
+
+        single<PremiumInteractor> { RealPremiumInteractor(get()) }
     }
 }
 
@@ -161,5 +164,4 @@ internal fun Module.configureNetwork() {
     single<NetworkApiCreator> { RealNetworkApiCreator(get()) }
 
     single<Gson> { Gson() }
-
 }

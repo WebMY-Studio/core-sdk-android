@@ -108,7 +108,7 @@ class RealBillingManager(
                     add(
                         Product.OneTime(
                             id = productId,
-                            title = detail.title,
+                            title = detail.name,
                             offerToken = offerDetails.offerToken,
                             formattedPrice = offerDetails.formattedPrice,
                             isPurchased = purchases.contains(productId)
@@ -133,7 +133,7 @@ class RealBillingManager(
                     add(
                         Product.Subscription(
                             id = productId,
-                            title = detail.title,
+                            title = detail.name,
                             isPurchased = purchases.contains(productId),
                             offerToken = offerDetails.offerToken,
                             phases = phases

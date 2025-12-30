@@ -1,0 +1,41 @@
+package com.webmy.core_sdk.presentation.paywall.base
+
+import androidx.lifecycle.viewModelScope
+import com.webmy.core_sdk.domain.interactor.PremiumInteractor
+import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
+import com.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import com.webmy.core_sdk.tools.analytics.AnalyticsManager
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+
+abstract class BasePaywallViewModel(
+    private val navigator: BaseNavigator,
+    private val premiumInteractor: PremiumInteractor,
+    private val analyticsManager: AnalyticsManager
+) : BaseViewModel() {
+
+    init {
+        startPurchaseObservation()
+        analyticsManager.logEvent("paywall_shown")
+    }
+
+    protected val subscriptionsFlow = premiumInteractor.subscriptionsFlow
+
+    suspend fun purchase(productId: String) {
+        premiumInteractor.purchase(productId, navigator.activity)
+    }
+
+    fun onCloseClick() {
+        navigator.finish()
+    }
+
+    private fun startPurchaseObservation() {
+        viewModelScope.launch {
+            analyticsManager.logEvent("purchase_success")
+            premiumInteractor.isPremiumFlow.filter { it }.first()
+            navigator.finish()
+        }
+    }
+
+}

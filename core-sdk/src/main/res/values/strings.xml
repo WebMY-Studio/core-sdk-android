@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="day">day</string>
+    <string name="week">week</string>
+    <string name="month">month</string>
+    <string name="year">year</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Powered by AI</string>
+    <string name="paywall_header">Go Pro &amp; Unlock Your Full Potential</string>
+    <string name="paywall_description">Take your productivity to the next level with powerful Pro features: </string>
+    <string name="paywall_pro_feature_1">🎙️ Unlimited recordings</string>
+    <string name="paywall_pro_feature_2">🚫 100% ads free</string>
+    <string name="paywall_pro_feature_3">🌍 100+ languages supported</string>
+    <string name="paywall_pro_feature_4">📤 Unlimited export and sharing</string>
+    <string name="paywall_free">%s free</string>
+    <string name="paywall_btn_text_free">Try for free</string>
+    <string name="paywall_btn_text_pay">Subscribe for %s</string>
+    <string name="paywall_btn_text_continue">Continue</string>
+    <string name="paywall_price_placeholder">%s %s per %s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%s %s/%s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">Powered by AI</string>
+    <string name="offer_subtitle">🔥 Hot Offer 🔥</string>
+    <string name="offer_title">Enjoy %s% Off\nfor a Year</string>
+    <string name="offer_description">Only for a Limited Time!</string>
+    <string name="offer_enjoy_all_features">Enjoy All Features</string>
+    <string name="offer_just_for">just for</string>
+    <string name="offer_CTA">Continue</string>
+
+</resources>
