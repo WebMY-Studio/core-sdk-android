@@ -15,6 +15,8 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.facebook.appevents.AppEventsConstants
+import com.facebook.appevents.AppEventsLogger
 import com.webmy.core_sdk.util.awaitTrue
 import com.webmy.core_sdk.util.coerceToUnit
 import com.webmy.core_sdk.util.failure
@@ -52,6 +54,7 @@ class RealBillingManager(
     application: Application,
     private val oneTimeProducts: Set<String>,
     private val subscriptionProducts: Set<String>,
+    private val metaEventsLogger: AppEventsLogger
 ) : BillingManager, PurchasesUpdatedListener, CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
@@ -343,10 +346,24 @@ class RealBillingManager(
                             val set = purchasesFlow.first().toMutableSet()
                             set.addAll(purchase.products)
                             purchasesFlow.emit(set)
+
+                            logStartTrialIfNeeded(purchase.products)
                         }
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun logStartTrialIfNeeded(purchasedProducts: Collection<String>) {
+        val products = productsFlow.first()
+        val freeTrialPurchased = products
+            .filter { purchasedProducts.contains(it.id) }
+            .mapNotNull { it as? Product.Subscription }
+            .any { it.phases.firstOrNull()?.priceMicros == 0L }
+
+        if (freeTrialPurchased) {
+            metaEventsLogger.logEvent(AppEventsConstants.EVENT_NAME_START_TRIAL)
         }
     }
 

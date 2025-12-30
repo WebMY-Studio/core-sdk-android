@@ -7,6 +7,7 @@ import com.webmy.core_sdk.presentation.adapters.subscriptions.SubscriptionsUiMod
 import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
 import com.webmy.core_sdk.presentation.paywall.base.BasePaywallViewModel
 import com.webmy.core_sdk.presentation.paywall.model.PaywallUiState
+import com.webmy.core_sdk.presentation.paywall.model.PlanListPaywallConfig
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.tools.formatters.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,23 +18,17 @@ import kotlinx.coroutines.launch
 import java.time.Period
 
 abstract class BasePlanListPaywallViewModel(
+    private val config: PlanListPaywallConfig,
     private val navigator: BaseNavigator,
     premiumInteractor: PremiumInteractor,
     analyticsManager: AnalyticsManager
 ) : BasePaywallViewModel(
     navigator, premiumInteractor, analyticsManager
 ) {
-
-    abstract val defaultSelectedPlanId: String
-
-    abstract val planList: List<String>
-
-    abstract val yearPlanId: String
-
-    private val selectedPlanFlow = MutableStateFlow(defaultSelectedPlanId)
+    private val selectedPlanFlow = MutableStateFlow(config.defaultSelectedPlanId)
 
     private val subscriptionFlow = subscriptionsFlow
-        .map { subs -> subs.filter { planList.contains(it.id) } }
+        .map { subs -> subs.filter { config.planList.contains(it.id) } }
 
     val paywallUiState =
         combine(subscriptionFlow, selectedPlanFlow) { subscriptions, selectedPlanId ->
@@ -49,7 +44,7 @@ abstract class BasePlanListPaywallViewModel(
 
                 val price = (phase.priceMicros / 10_000L) / 100f
 
-                val multiplier = if (it.id == yearPlanId) 12 else 1
+                val multiplier = if (it.id == config.yearPlanId) 12 else 1
                 val period = Period.parse(phase.billingPeriod).multipliedBy(multiplier)
                 val periodFormatted = DateTimeFormatter.formatPeriod(context, period)
 

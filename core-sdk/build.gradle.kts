@@ -90,5 +90,8 @@ afterEvaluate {
                 version = rootProject.computeVersionName()
             }
         }
+        repositories {
+            mavenLocal()
+        }
     }
 }

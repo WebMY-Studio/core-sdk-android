@@ -24,7 +24,7 @@
     <!-- Offer -->
     <string name="offer_header_title">Powered by AI</string>
     <string name="offer_subtitle">🔥 Hot Offer 🔥</string>
-    <string name="offer_title">Enjoy %s% Off\nfor a Year</string>
+    <string name="offer_title">Enjoy %s%% Off\nfor a Year</string>
     <string name="offer_description">Only for a Limited Time!</string>
     <string name="offer_enjoy_all_features">Enjoy All Features</string>
     <string name="offer_just_for">just for</string>

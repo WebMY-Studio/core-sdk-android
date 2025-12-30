@@ -2,6 +2,7 @@ package com.webmy.core_sdk
 
 import com.adapty.Adapty
 import com.adapty.models.AdaptyConfig
+import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.MobileAds
 import com.webmy.core_sdk.di.sdkModule
 import org.koin.core.context.loadKoinModules
@@ -28,6 +29,8 @@ class WebMY private constructor() {
                 AdaptyConfig.Builder(adaptyKey).build()
             )
         }
+
+        AppEventsLogger.activateApp(config.application)
     }
 
     private fun initKoin(config: Config) {

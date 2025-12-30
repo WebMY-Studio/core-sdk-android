@@ -3,6 +3,7 @@ package com.webmy.core_sdk.di
 import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
+import com.facebook.appevents.AppEventsLogger
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
@@ -78,6 +79,7 @@ internal fun Module.configureAnalytics(config: Config) {
         )
     }
 
+    single<AppEventsLogger> { AppEventsLogger.newLogger(config.application) }
 }
 
 internal fun Module.configureAppodeal(config: Config) {
@@ -112,6 +114,7 @@ internal fun Module.configureBilling(config: Config) {
     if (oneTimeProducts.isNotEmpty() || subscriptionProducts.isNotEmpty()) {
         single<BillingManager> {
             RealBillingManager(
+                metaEventsLogger = get(),
                 application = config.application,
                 oneTimeProducts = oneTimeProducts,
                 subscriptionProducts = subscriptionProducts
