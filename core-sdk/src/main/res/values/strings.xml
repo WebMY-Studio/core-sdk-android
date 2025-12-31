@@ -7,13 +7,6 @@
     <string name="year">year</string>
 
     <!-- Paywall -->
-    <string name="paywall_title">Powered by AI</string>
-    <string name="paywall_header">Go Pro &amp; Unlock Your Full Potential</string>
-    <string name="paywall_description">Take your productivity to the next level with powerful Pro features: </string>
-    <string name="paywall_pro_feature_1">🎙️ Unlimited recordings</string>
-    <string name="paywall_pro_feature_2">🚫 100% ads free</string>
-    <string name="paywall_pro_feature_3">🌍 100+ languages supported</string>
-    <string name="paywall_pro_feature_4">📤 Unlimited export and sharing</string>
     <string name="paywall_free">%s free</string>
     <string name="paywall_btn_text_free">Try for free</string>
     <string name="paywall_btn_text_pay">Subscribe for %s</string>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="day">gün</string>
+    <string name="week">hafta</string>
+    <string name="month">ay</string>
+    <string name="year">yıl</string>
+
+    <!-- Paywall -->
+    <string name="paywall_free">%s ücretsiz</string>
+    <string name="paywall_btn_text_free">Ücretsiz dene</string>
+    <string name="paywall_btn_text_pay">%s için abone ol</string>
+    <string name="paywall_btn_text_continue">Devam et</string>
+    <string name="paywall_price_placeholder">%s %s başına %s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%s %s/%s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">AI Destekli</string>
+    <string name="offer_subtitle">🔥 Özel Teklif 🔥</string>
+    <string name="offer_title">Bir Yıl Boyunca\n%s%% İndirimden Yararlanın</string>
+    <string name="offer_description">Sadece Sınırlı Süre İçin!</string>
+    <string name="offer_enjoy_all_features">Tüm Özelliklerden Yararlanın</string>
+    <string name="offer_just_for">sadece</string>
+    <string name="offer_CTA">Devam et</string>
+
+</resources>
+

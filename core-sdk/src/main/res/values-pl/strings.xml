@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="day">dzień</string>
+    <string name="week">tydzień</string>
+    <string name="month">miesiąc</string>
+    <string name="year">rok</string>
+
+    <!-- Paywall -->
+    <string name="paywall_free">%s za darmo</string>
+    <string name="paywall_btn_text_free">Wypróbuj za darmo</string>
+    <string name="paywall_btn_text_pay">Subskrybuj za %s</string>
+    <string name="paywall_btn_text_continue">Kontynuuj</string>
+    <string name="paywall_price_placeholder">%s %s za %s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%s %s/%s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">Napędzane przez AI</string>
+    <string name="offer_subtitle">🔥 Gorąca Oferta 🔥</string>
+    <string name="offer_title">Ciesz się %s%% Zniżką\nna Rok</string>
+    <string name="offer_description">Tylko przez Ograniczony Czas!</string>
+    <string name="offer_enjoy_all_features">Ciesz się Wszystkimi Funkcjami</string>
+    <string name="offer_just_for">tylko za</string>
+    <string name="offer_CTA">Kontynuuj</string>
+
+</resources>
+

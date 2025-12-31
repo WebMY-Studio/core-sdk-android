@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="day">يوم</string>
+    <string name="week">أسبوع</string>
+    <string name="month">شهر</string>
+    <string name="year">سنة</string>
+
+    <!-- Paywall -->
+    <string name="paywall_free">%s مجاناً</string>
+    <string name="paywall_btn_text_free">جرب مجاناً</string>
+    <string name="paywall_btn_text_pay">اشترك مقابل %s</string>
+    <string name="paywall_btn_text_continue">متابعة</string>
+    <string name="paywall_price_placeholder">%s %s لكل %s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%s %s/%s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">مدعوم بالذكاء الاصطناعي</string>
+    <string name="offer_subtitle">🔥 عرض ساخن 🔥</string>
+    <string name="offer_title">استمتع بخصم %s%%\nلسنة كاملة</string>
+    <string name="offer_description">فقط لفترة محدودة!</string>
+    <string name="offer_enjoy_all_features">استمتع بجميع الميزات</string>
+    <string name="offer_just_for">فقط مقابل</string>
+    <string name="offer_CTA">متابعة</string>
+
+</resources>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="day">天</string>
+    <string name="week">周</string>
+    <string name="month">月</string>
+    <string name="year">年</string>
+
+    <!-- Paywall -->
+    <string name="paywall_free">%s 免费</string>
+    <string name="paywall_btn_text_free">免费试用</string>
+    <string name="paywall_btn_text_pay">订阅 %s</string>
+    <string name="paywall_btn_text_continue">继续</string>
+    <string name="paywall_price_placeholder">每%s %s %s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%s %s/%s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">AI驱动</string>
+    <string name="offer_subtitle">🔥 热门优惠 🔥</string>
+    <string name="offer_title">享受 %s%% 折扣\n一年</string>
+    <string name="offer_description">仅限时优惠！</string>
+    <string name="offer_enjoy_all_features">享受所有功能</string>
+    <string name="offer_just_for">仅需</string>
+    <string name="offer_CTA">继续</string>
+
+</resources>
+
