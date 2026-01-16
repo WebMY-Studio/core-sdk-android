@@ -70,15 +70,9 @@ internal fun Module.configureAnalytics(config: Config) {
             null
         }
 
-        val firebase = if (config.useFirebaseAnalytics) {
-            get<FirebaseAnalytics>()
-        } else {
-            null
-        }
-
         RealAnalyticsManager(
             amplitude = amplitude,
-            firebase = firebase
+            firebase = get<FirebaseAnalytics>()
         )
     }
 

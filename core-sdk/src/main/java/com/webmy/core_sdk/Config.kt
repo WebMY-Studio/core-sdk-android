@@ -6,15 +6,14 @@ import kotlin.time.Duration
 class Config private constructor(
     val application: Application,
     val koinMode: KoinMode,
+    val adaptyKey: String?,
     val appodealKey: String?,
     val amplitudeKey: String?,
     val premiumProductIds: List<String>,
+    val oneTimeProductIds: List<String>,
     val subscriptionProductIds: List<String>,
     val remoteConfigEnabled: Boolean,
-    val oneTimeProductIds: List<String>,
-    val useFirebaseAnalytics: Boolean,
-    val remoteConfigUpdateInterval: Long,
-    val adaptyKey: String?
+    val remoteConfigUpdateInterval: Long
 ) {
     class Builder(private val application: Application) {
 
@@ -26,7 +25,6 @@ class Config private constructor(
         private var remoteConfigUpdateInterval: Long = -1
         private var oneTimeProducts: List<String> = emptyList()
         private var subscriptionProductIds: List<String> = emptyList()
-        private var useFirebaseAnalytics: Boolean = false
         private var adaptyKey: String? = null
 
         /**
@@ -65,9 +63,8 @@ class Config private constructor(
         /**
          * @param amplitudeKey Amplitude API key. By default SDK uses ServerZone.EU
          */
-        fun enableAnalytics(amplitudeKey: String, useFirebase: Boolean = false) = apply {
+        fun enableAnalytics(amplitudeKey: String) = apply {
             this.amplitudeKey = amplitudeKey
-            this.useFirebaseAnalytics = useFirebase
         }
 
         /**
@@ -114,7 +111,6 @@ class Config private constructor(
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
                 oneTimeProductIds = oneTimeProducts,
                 subscriptionProductIds = subscriptionProductIds,
-                useFirebaseAnalytics = useFirebaseAnalytics,
                 adaptyKey = adaptyKey
             )
         }

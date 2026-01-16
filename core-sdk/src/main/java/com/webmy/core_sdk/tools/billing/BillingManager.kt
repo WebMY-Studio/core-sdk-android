@@ -49,7 +49,6 @@ interface BillingManager {
     suspend fun awaitInitialized()
 }
 
-
 class RealBillingManager(
     application: Application,
     private val oneTimeProducts: Set<String>,
@@ -91,6 +90,12 @@ class RealBillingManager(
 
             isConnected.awaitTrue()
             fetchProducts()
+                .onSuccess {
+
+                }
+                .onFailure {
+
+                }
         }
     }
 
@@ -118,7 +123,6 @@ class RealBillingManager(
                         )
                     )
                 }
-
             }
             subscriptionDetails.values.forEach { detail ->
                 val productId = detail.productId
@@ -146,7 +150,6 @@ class RealBillingManager(
             }
         }
     }
-
 
     private val queryOneTimePurchasesParams = QueryPurchasesParams.newBuilder()
         .setProductType(BillingClient.ProductType.INAPP)
