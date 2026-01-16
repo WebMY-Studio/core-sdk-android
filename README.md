@@ -184,10 +184,6 @@ val remoteConfigManager by inject<RemoteConfigManager>()
 then to fetch value use
 
 ```kotlin
-remoteConfigManager.getValue() // Not recommended
-```
-or
-```kotlin
 remoteConfigManager.getSyncedValue()
 ```
 
@@ -293,9 +289,6 @@ Basic usage:
 ```kotlin
 preferences.putString("user_name", "John")
 val name = preferences.getString("user_name")
-
-preferences.putBoolean("isLoggedIn", true)
-val logged = preferences.getBoolean("isLoggedIn", false)
 ```
 
 You can also observe values as **Flows**:
@@ -335,21 +328,3 @@ SOFTWARE.
 ```
 
 ---
-
-# 💬 Contributing
-
-Contributions are welcome! 🎉  
-If you’d like to extend the SDK with additional modules (like **Firebase Push** or **Billing Subscriptions**), please:
-
-1. Fork the repository
-2. Create a feature branch (`feature/new-module`)
-3. Submit a Pull Request
-
-Be sure to follow existing code style and documentation guidelines.
-
----
-
-# 👨‍💻 Author
-
-**WebMY SDK**  
-_Accelerate your Android development with a unified, modular, and DI-friendly SDK._

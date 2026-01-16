@@ -1,23 +1,19 @@
 package com.webmy.core_sdk
 
 import android.app.Application
-import com.appodeal.ads.S
 import kotlin.time.Duration
 
 class Config private constructor(
     val application: Application,
     val koinMode: KoinMode,
     val appodealKey: String?,
-    val showDebugAds: Boolean,
     val amplitudeKey: String?,
     val premiumProductIds: List<String>,
+    val subscriptionProductIds: List<String>,
     val remoteConfigEnabled: Boolean,
-    val oneTimeProducts: List<String>,
+    val oneTimeProductIds: List<String>,
     val useFirebaseAnalytics: Boolean,
     val remoteConfigUpdateInterval: Long,
-    val fistShowAtRemoteConfigKey: String?,
-    val skipAdsAmountRemoteConfigKey: String?,
-    val subscriptionProducts: List<String>,
     val adaptyKey: String?
 ) {
     class Builder(private val application: Application) {
@@ -29,10 +25,7 @@ class Config private constructor(
         private var remoteConfigEnabled: Boolean = false
         private var remoteConfigUpdateInterval: Long = -1
         private var oneTimeProducts: List<String> = emptyList()
-        private var subscriptionProducts: List<String> = emptyList()
-        private var fistShowAtRemoteConfigKey: String? = null
-        private var skipAdsAmountRemoteConfigKey: String? = null
-        private var showDebugAds: Boolean = false
+        private var subscriptionProductIds: List<String> = emptyList()
         private var useFirebaseAnalytics: Boolean = false
         private var adaptyKey: String? = null
 
@@ -96,24 +89,14 @@ class Config private constructor(
          *    alias(libs.plugins.firebase.crashlytics) apply false
          *    ```
          */
-        fun enableRemoteConfig(
-            updateInterval: Duration = Duration.ZERO,
-            fistShowAtKey: String? = null,
-            skipAdsAmountKey: String? = null,
-        ) = apply {
+        fun enableRemoteConfig(updateInterval: Duration = Duration.ZERO) = apply {
             this.remoteConfigEnabled = true
             this.remoteConfigUpdateInterval = updateInterval.inWholeMilliseconds
-            this.fistShowAtRemoteConfigKey = fistShowAtKey
-            this.skipAdsAmountRemoteConfigKey = skipAdsAmountKey
         }
 
-        fun enableBilling(oneTimeProducts: List<String>, subscriptionProducts: List<String>) = apply {
-            this.oneTimeProducts = oneTimeProducts
-            this.subscriptionProducts = subscriptionProducts
-        }
-
-        fun enableDebugAds() = apply {
-            this.showDebugAds = true
+        fun enableBilling(oneTime: List<String>, subscription: List<String>) = apply {
+            this.oneTimeProducts = oneTime
+            this.subscriptionProductIds = subscription
         }
 
         fun enableAdapty(key: String) = apply {
@@ -129,11 +112,8 @@ class Config private constructor(
                 amplitudeKey = amplitudeKey,
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
-                oneTimeProducts = oneTimeProducts,
-                subscriptionProducts = subscriptionProducts,
-                fistShowAtRemoteConfigKey = fistShowAtRemoteConfigKey,
-                skipAdsAmountRemoteConfigKey = skipAdsAmountRemoteConfigKey,
-                showDebugAds = showDebugAds,
+                oneTimeProductIds = oneTimeProducts,
+                subscriptionProductIds = subscriptionProductIds,
                 useFirebaseAnalytics = useFirebaseAnalytics,
                 adaptyKey = adaptyKey
             )

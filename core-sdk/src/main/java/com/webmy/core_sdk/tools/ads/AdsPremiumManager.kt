@@ -4,7 +4,6 @@ import android.app.Activity
 import android.widget.FrameLayout
 import com.webmy.core_sdk.tools.billing.BillingManager
 import com.webmy.core_sdk.tools.billing.containsPurchased
-import com.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +14,14 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 interface AdsPremiumManager {
+
+    interface Factory {
+
+        fun create(
+            configCreator: suspend () -> AdsPremiumConfig
+        ): AdsPremiumManager
+    }
+
     val isPremiumFlow: Flow<Boolean>
 
     fun requestBanner(
@@ -32,30 +39,24 @@ interface AdsPremiumManager {
     fun requestInterstitial(activity: Activity)
 }
 
-class RealAdsPremiumManager(
+internal class RealAdsPremiumManager(
     premiumProductIds: List<String>,
-    private val fistShowAtRemoteConfigKey: String?,
-    private val skipAdsAmountRemoteConfigKey: String?,
     billingManager: BillingManager,
     private val adsManager: AdsManager,
-    private val remoteConfigManager: RemoteConfigManager,
+    val configCreator: suspend () -> AdsPremiumConfig
 ) : AdsPremiumManager, CoroutineScope {
-
-    companion object {
-        private const val DEFAULT_FIRST_SHOW_AT = 2L
-        private const val DEFAULT_SKIP_AMOUNT = 3L
-    }
 
     private var currentTriggerInterCount = 0L
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
-    override val isPremiumFlow = billingManager.productsFlow
-        .map { products ->
-            premiumProductIds.any { premiumProductIds ->
-                products.containsPurchased(premiumProductIds)
-            }
+    private var config: AdsPremiumConfig? = null
+
+    override val isPremiumFlow = billingManager.productsFlow.map { products ->
+        premiumProductIds.any { premiumProductIds ->
+            products.containsPurchased(premiumProductIds)
         }
+    }
 
     override fun requestBanner(activity: Activity, container: FrameLayout) {
         launch {
@@ -75,15 +76,10 @@ class RealAdsPremiumManager(
             val isPremium = isPremiumFlow.first()
 
             if (!isPremium) {
-                val firstSkipAdsAmount = fistShowAtRemoteConfigKey?.let {
-                    remoteConfigManager.getSyncedLong(it)
-                        .getOrDefault(DEFAULT_FIRST_SHOW_AT)
-                } ?: DEFAULT_FIRST_SHOW_AT
+                val config = getConfig()
 
-                val skipAdsAmount = skipAdsAmountRemoteConfigKey?.let {
-                    remoteConfigManager.getSyncedLong(it)
-                        .getOrDefault(DEFAULT_SKIP_AMOUNT)
-                } ?: DEFAULT_SKIP_AMOUNT
+                val firstSkipAdsAmount = config.firstSkipAdsAmount
+                val skipAdsAmount = config.skipAdsAmount
 
                 currentTriggerInterCount++
                 if (currentTriggerInterCount < firstSkipAdsAmount) return@launch
@@ -114,5 +110,23 @@ class RealAdsPremiumManager(
                 }
             }
         }
+    }
+
+    private suspend fun getConfig() = config ?: configCreator()
+}
+
+internal class AdsPremiumManagerFactory(
+    private val premiumProductIds: List<String>,
+    private val billingManager: BillingManager,
+    private val adsManager: AdsManager,
+) : AdsPremiumManager.Factory {
+
+    override fun create(configCreator: suspend () -> AdsPremiumConfig): AdsPremiumManager {
+        return RealAdsPremiumManager(
+            premiumProductIds,
+            billingManager,
+            adsManager,
+            configCreator
+        )
     }
 }

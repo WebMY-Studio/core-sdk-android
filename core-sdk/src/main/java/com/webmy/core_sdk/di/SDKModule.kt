@@ -8,14 +8,16 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.Config
+import com.webmy.core_sdk.data.CsvFetcher
 import com.webmy.core_sdk.data.NetworkApiCreator
+import com.webmy.core_sdk.data.RealCsvFetcher
 import com.webmy.core_sdk.data.RealNetworkApiCreator
 import com.webmy.core_sdk.domain.interactor.PremiumInteractor
 import com.webmy.core_sdk.domain.interactor.RealPremiumInteractor
 import com.webmy.core_sdk.tools.ads.AdsManager
 import com.webmy.core_sdk.tools.ads.AdsPremiumManager
+import com.webmy.core_sdk.tools.ads.AdsPremiumManagerFactory
 import com.webmy.core_sdk.tools.ads.RealAdsManager
-import com.webmy.core_sdk.tools.ads.RealAdsPremiumManager
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.tools.analytics.RealAnalyticsManager
 import com.webmy.core_sdk.tools.billing.BillingManager
@@ -40,9 +42,10 @@ internal fun sdkModule(config: Config) = module {
     configureAppodeal(config)
     configureBilling(config)
 
-    configureAdsPremium(config)
+    configureAdsPremiumFactory(config)
 
     configureNetwork()
+    configureCsv()
 }
 
 internal fun Module.configureAnalytics(config: Config) {
@@ -90,7 +93,6 @@ internal fun Module.configureAppodeal(config: Config) {
                 analyticsManager = get(),
                 application = config.application,
                 key = appodealKey,
-                showDebugAds = config.showDebugAds,
                 firebaseAnalytics = get()
             )
         }
@@ -108,8 +110,8 @@ internal fun Module.configurePreferences(config: Config) {
 }
 
 internal fun Module.configureBilling(config: Config) {
-    val oneTimeProducts = config.oneTimeProducts.toSet()
-    val subscriptionProducts = config.subscriptionProducts.toSet()
+    val oneTimeProducts = config.oneTimeProductIds.toSet()
+    val subscriptionProducts = config.subscriptionProductIds.toSet()
 
     if (oneTimeProducts.isNotEmpty() || subscriptionProducts.isNotEmpty()) {
         single<BillingManager> {
@@ -125,17 +127,14 @@ internal fun Module.configureBilling(config: Config) {
     }
 }
 
-internal fun Module.configureAdsPremium(config: Config) {
+internal fun Module.configureAdsPremiumFactory(config: Config) {
     val premiumProductIds = config.premiumProductIds
     if (premiumProductIds.isNotEmpty()) {
-        single<AdsPremiumManager> {
-            RealAdsPremiumManager(
+        single<AdsPremiumManager.Factory> {
+            AdsPremiumManagerFactory(
                 premiumProductIds = premiumProductIds,
-                fistShowAtRemoteConfigKey = config.fistShowAtRemoteConfigKey,
-                skipAdsAmountRemoteConfigKey = config.skipAdsAmountRemoteConfigKey,
                 billingManager = get(),
                 adsManager = get(),
-                remoteConfigManager = get()
             )
         }
     }
@@ -167,4 +166,10 @@ internal fun Module.configureNetwork() {
     single<NetworkApiCreator> { RealNetworkApiCreator(get()) }
 
     single<Gson> { Gson() }
+}
+
+internal fun Module.configureCsv() {
+    single<CsvFetcher> {
+        RealCsvFetcher(get())
+    }
 }

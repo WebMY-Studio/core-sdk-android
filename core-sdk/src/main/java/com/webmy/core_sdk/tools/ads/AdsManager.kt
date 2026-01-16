@@ -16,6 +16,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.logEvent
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.util.dpToPx
+import com.webmy.core_sdk.util.isHostInDebugMode
 
 /**
  * Use this entity if you want to handle ads by yourself
@@ -49,7 +50,6 @@ interface AdsManager {
 
 internal class RealAdsManager(
     private val key: String,
-    private val showDebugAds: Boolean,
     private val application: Application,
     private val analyticsManager: AnalyticsManager,
     private val firebaseAnalytics: FirebaseAnalytics
@@ -65,7 +65,7 @@ internal class RealAdsManager(
     private val adTypes = Appodeal.INTERSTITIAL or Appodeal.REWARDED_VIDEO or Appodeal.BANNER_VIEW
 
     override fun init() {
-        Appodeal.setTesting(testMode = showDebugAds)
+        Appodeal.setTesting(testMode = application.isHostInDebugMode())
         Appodeal.initialize(
             context = application,
             appKey = key,
