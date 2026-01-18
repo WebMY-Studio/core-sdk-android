@@ -1,6 +1,5 @@
-package com.webmy.core_sdk.data
+package com.webmy.core_sdk.data.csv
 
-import com.webmy.core_sdk.data.csv.CsvMapper
 import com.webmy.core_sdk.util.flatMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

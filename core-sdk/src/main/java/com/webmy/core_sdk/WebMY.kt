@@ -30,7 +30,11 @@ class WebMY private constructor() {
             )
         }
 
-        AppEventsLogger.activateApp(config.application)
+        try {
+            AppEventsLogger.activateApp(config.application)
+        } catch (e: Exception) {
+
+        }
     }
 
     private fun initKoin(config: Config) {

@@ -8,9 +8,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.Config
-import com.webmy.core_sdk.data.CsvFetcher
+import com.webmy.core_sdk.data.csv.CsvFetcher
 import com.webmy.core_sdk.data.NetworkApiCreator
-import com.webmy.core_sdk.data.RealCsvFetcher
+import com.webmy.core_sdk.data.csv.RealCsvFetcher
 import com.webmy.core_sdk.data.RealNetworkApiCreator
 import com.webmy.core_sdk.domain.interactor.PremiumInteractor
 import com.webmy.core_sdk.domain.interactor.RealPremiumInteractor

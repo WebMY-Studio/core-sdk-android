@@ -24,7 +24,7 @@ class AppButton @JvmOverloads constructor(
     private var buttonType: ButtonType = ButtonType.PRIMARY
 
     init {
-        setTextAppearance(context, R.style.SpeechToText_Text_Body1_Medium)
+        setTextAppearance(context, R.style.Webmy_Text_Body1_Medium)
         applyRippleEffect(borderless = false)
 
         gravity = Gravity.CENTER
