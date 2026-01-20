@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+    <style name="BaseTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:statusBarColor">@color/backgroundPrimary</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/backgroundPrimary</item>
@@ -15,7 +15,7 @@
     <style name="Webmy.ModalStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bg_bottom_sheet_fragment</item>
     </style>
-    
+
     <style name="BaseTextTheme" />
 
     <style name="Webmy.Text" parent="BaseTextTheme" />
