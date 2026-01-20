@@ -8,10 +8,11 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
 import com.webmy.core_sdk.Config
-import com.webmy.core_sdk.data.csv.CsvFetcher
 import com.webmy.core_sdk.data.NetworkApiCreator
-import com.webmy.core_sdk.data.csv.RealCsvFetcher
 import com.webmy.core_sdk.data.RealNetworkApiCreator
+import com.webmy.core_sdk.data.csv.CsvFetcher
+import com.webmy.core_sdk.data.csv.RealCsvFetcher
+import com.webmy.core_sdk.data.prefs.OnboardingShownPreferences
 import com.webmy.core_sdk.domain.interactor.PremiumInteractor
 import com.webmy.core_sdk.domain.interactor.RealPremiumInteractor
 import com.webmy.core_sdk.tools.ads.AdsManager
@@ -101,6 +102,8 @@ internal fun Module.configureRemoteConfig(config: Config) {
 
 internal fun Module.configurePreferences(config: Config) {
     single<Preferences> { RealPreferences(config.application) }
+
+    single { OnboardingShownPreferences(get()) }
 }
 
 internal fun Module.configureBilling(config: Config) {
