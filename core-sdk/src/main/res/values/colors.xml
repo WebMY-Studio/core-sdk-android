@@ -10,7 +10,7 @@
 
     <color name="borderPrimary">#0F0E0E0F</color>
 
-    <color name="backgroundPrimary">#FFFFFF</color>
+    <color name="backgroundPrimary">#FBFBFB</color>
     <color name="backgroundSecondary">#080E0E0F</color>
 
     <color name="textAndIconsPrimary">#0E0E0F</color>

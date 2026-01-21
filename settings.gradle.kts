@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 
         maven("https://jitpack.io")
         maven("https://artifactory.appodeal.com/appodeal")
+        maven("https://verve.jfrog.io/artifactory/verve-gradle-release/")
     }
 }
 
