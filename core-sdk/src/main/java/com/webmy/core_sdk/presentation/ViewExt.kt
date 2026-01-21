@@ -4,9 +4,13 @@ import android.R
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 
 /**
@@ -92,3 +96,87 @@ inline fun <reified T : Enum<T>> TypedArray.getEnum(
     }
 }
 
+const val DURATION_DEFAULT_GONE = 150L
+const val DURATION_DEFAULT_VISIBLE = 300L
+
+
+fun View.gone() {
+    this.visibility = View.GONE
+}
+
+fun View.visible() {
+    this.visibility = View.VISIBLE
+}
+
+fun View.invisible() {
+    this.visibility = View.INVISIBLE
+}
+
+fun View.setVisibleAlpha(flag: Boolean) {
+    if (flag) visibleWithAlpha() else goneWithAlpha()
+}
+
+
+fun View.visibleWithAlpha(duration: Long = DURATION_DEFAULT_VISIBLE) {
+    if (this.visibility != View.VISIBLE) {
+        this.alpha = 0f
+        this.visible()
+        this.animate().alpha(1f).setDuration(duration).start()
+    }
+}
+
+fun View.goneWithAlpha(duration: Long = DURATION_DEFAULT_GONE) {
+    if (this.visibility == View.VISIBLE) {
+        this.alpha = 1f
+        this.animate().alpha(0f).setDuration(duration).start()
+        Handler(Looper.getMainLooper()).postDelayed({ this.gone() }, duration)
+    }
+}
+
+fun TextView.setTextAnimation(
+    textRes: Int, duration: Long = 300, completion: (() -> Unit)? = null
+) {
+    val newText = context.getString(textRes)
+    if (this.text == newText) return
+    fadeOutAnimation(duration) {
+        this.text = newText
+        fadeInAnimation(duration) {
+            completion?.invoke()
+        }
+    }
+}
+
+fun View.fadeOutAnimation(
+    duration: Long = 150,
+    visibility: Int = View.INVISIBLE,
+    completion: (() -> Unit)? = null
+) {
+    animate()
+        .alpha(0f)
+        .setDuration(duration)
+        .withEndAction {
+            this.visibility = visibility
+            completion?.let {
+                it()
+            }
+        }
+}
+
+fun View.fadeInAnimation(duration: Long = 150, completion: (() -> Unit)? = null) {
+    alpha = 0f
+    visibility = View.VISIBLE
+    animate()
+        .alpha(1f)
+        .setDuration(duration)
+        .withEndAction {
+            completion?.let {
+                it()
+            }
+        }
+}
+
+fun View.setHeight(height: Int) {
+    val viewParams = this.layoutParams as ConstraintLayout.LayoutParams
+    viewParams.height = height
+    this.layoutParams = viewParams
+}
