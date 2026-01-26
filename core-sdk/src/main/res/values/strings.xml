@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="sec" translatable="false">sec</string>
+    <string name="min" translatable="false">min</string>
+    <string name="hour" translatable="false">h</string>
     <string name="day">day</string>
     <string name="week">week</string>
     <string name="month">month</string>

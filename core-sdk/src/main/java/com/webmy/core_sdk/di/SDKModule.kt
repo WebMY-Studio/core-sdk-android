@@ -1,5 +1,7 @@
 package com.webmy.core_sdk.di
 
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
 import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
@@ -32,6 +34,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -168,5 +171,16 @@ internal fun Module.configureNetwork() {
 internal fun Module.configureCsv() {
     single<CsvFetcher> {
         RealCsvFetcher(get())
+    }
+}
+
+inline fun <reified T> Scope.getPayload(): T {
+    val activity = get<AppCompatActivity>()
+
+    val clazz = T::class.java
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        activity.intent.getParcelableExtra(clazz.name, clazz)!!
+    } else {
+        activity.intent.getParcelableExtra(clazz.name)!!
     }
 }

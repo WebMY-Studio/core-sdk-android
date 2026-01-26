@@ -1,5 +1,7 @@
 package com.webmy.core_sdk.presentation.base.activity
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
@@ -28,8 +30,11 @@ abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivit
         throw kotlin.IllegalArgumentException("Cannot find binding class for ${javaClass.simpleName}")
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+
         setContentView(binding.root)
         observe(viewModel)
         initView()

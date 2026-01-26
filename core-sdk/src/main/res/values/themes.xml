@@ -18,7 +18,9 @@
 
     <style name="BaseTextTheme" />
 
-    <style name="Webmy.Text" parent="BaseTextTheme" />
+    <style name="Webmy.Text" parent="BaseTextTheme">
+        <item name="android:includeFontPadding">false</item>
+    </style>
 
     <style name="Webmy.Text.H1" parent="Webmy.Text">
         <item name="android:textSize">36sp</item>
