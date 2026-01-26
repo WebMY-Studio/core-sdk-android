@@ -23,4 +23,8 @@
     <string name="offer_just_for">just for</string>
     <string name="offer_CTA">Continue</string>
 
+    <string name="privacy_policy_url" translatable="false">https://docs.google.com/document/d/1oGBUbvvkG3upwwoporMwQEGue2fMLWOuBTJpP-3HIQA/edit?usp=sharing</string>
+    <string name="terms_and_conditions_url" translatable="false">https://docs.google.com/document/d/1_ZRqEVozUcT9vzQ7A0vV0ZlG8H429CJ1ZrUFp8Xqua8/edit?usp=sharing</string>
+    <string name="contact_email" translatable="false">yrshvch.studio@gmail.com</string>
+
 </resources>
