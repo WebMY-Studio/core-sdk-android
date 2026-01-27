@@ -44,8 +44,7 @@ abstract class BasePlanListPaywallViewModel(
 
                 val price = (phase.priceMicros / 10_000L) / 100f
 
-                val multiplier = if (it.id == config.yearPlanId) 12 else 1
-                val period = Period.parse(phase.billingPeriod).multipliedBy(multiplier)
+                val period = Period.parse(phase.billingPeriod)
                 val periodFormatted = DateTimeFormatter.formatPeriod(context, period)
 
                 val priceFormatted = context.getString(

@@ -44,6 +44,7 @@ class PlanViewHolder(
             root.setOnClickListener {
                 callback.onItemClick(item.productId)
             }
+            root.clipToOutline = true
         }
     }
 }

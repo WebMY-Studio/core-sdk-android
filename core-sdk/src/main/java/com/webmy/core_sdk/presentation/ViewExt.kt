@@ -180,3 +180,9 @@ fun View.setHeight(height: Int) {
     viewParams.height = height
     this.layoutParams = viewParams
 }
+
+
+fun View.setOnClickListenerOutlined(onClick: () -> Unit) {
+    setOnClickListener { onClick() }
+    clipToOutline = true
+}

@@ -9,11 +9,12 @@
     <color name="error">#D32F2F</color>
 
     <color name="borderPrimary">#0F0E0E0F</color>
+    <color name="borderSecondary">#080E0E0F</color>
 
     <color name="backgroundPrimary">#FBFBFB</color>
     <color name="backgroundSecondary">#080E0E0F</color>
 
     <color name="textAndIconsPrimary">#0E0E0F</color>
-    <color name="textAndIconsSecondary">#660E0E0F</color>
+    <color name="textAndIconsSecondary">#B20E0E0F</color>
     <color name="textAndIconsPrimaryInverse">#FFFFFF</color>
 </resources>
