@@ -1,6 +1,7 @@
 package com.webmy.core_sdk.presentation
 
 import android.R
+import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
@@ -9,9 +10,11 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+
 
 /**
  * Converts density-independent pixels (dp) to pixels (px).
@@ -185,4 +188,15 @@ fun View.setHeight(height: Int) {
 fun View.setOnClickListenerOutlined(onClick: () -> Unit) {
     setOnClickListener { onClick() }
     clipToOutline = true
+}
+
+fun View.showKeyboard() {
+    requestFocus()
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+}
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(windowToken, 0)
 }
