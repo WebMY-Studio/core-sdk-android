@@ -37,6 +37,16 @@
         <item name="fontFamily">@font/poppins_bold</item>
     </style>
 
+    <style name="Webmy.Text.H4" parent="Webmy.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H4.Medium" parent="Webmy.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
     <style name="Webmy.Text.H5" parent="Webmy.Text">
         <item name="android:textSize">18sp</item>
         <item name="fontFamily">@font/poppins_bold</item>

@@ -40,7 +40,7 @@ abstract class BaseOnboardingViewModel<T : OnboardingModel>(
         }
     }
 
-    fun onItemSelected(page: Int) {
+    open fun onItemSelected(page: Int) {
         viewModelScope.launch { currentItem.emit(onboardingModels[page]) }
     }
 }
