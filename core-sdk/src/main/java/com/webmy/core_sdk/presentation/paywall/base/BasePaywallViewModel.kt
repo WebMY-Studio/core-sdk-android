@@ -15,9 +15,11 @@ abstract class BasePaywallViewModel(
     private val analyticsManager: AnalyticsManager
 ) : BaseViewModel() {
 
+    abstract val originProperty: String
+
     init {
         startPurchaseObservation()
-        analyticsManager.logEvent("paywall_shown")
+        logEvent(eventName = "paywall_shown")
     }
 
     protected val subscriptionsFlow = premiumInteractor.subscriptionsFlow
@@ -32,10 +34,16 @@ abstract class BasePaywallViewModel(
 
     private fun startPurchaseObservation() {
         viewModelScope.launch {
-            analyticsManager.logEvent("purchase_success")
             premiumInteractor.isPremiumFlow.filter { it }.first()
+            logEvent(eventName = "purchase_success")
             navigator.finish()
         }
     }
 
+    private fun logEvent(eventName: String) {
+        analyticsManager.logEvent(
+            eventName = eventName,
+            props = mapOf("paywall_place" to originProperty)
+        )
+    }
 }
