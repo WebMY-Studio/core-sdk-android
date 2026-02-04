@@ -1,5 +1,6 @@
 package com.webmy.core_sdk.presentation.paywall.base
 
+import androidx.core.os.bundleOf
 import androidx.lifecycle.viewModelScope
 import com.webmy.core_sdk.domain.interactor.PremiumInteractor
 import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
@@ -41,9 +42,14 @@ abstract class BasePaywallViewModel(
     }
 
     private fun logEvent(eventName: String) {
+        val prop = "paywall_place" to originProperty
         analyticsManager.logEvent(
             eventName = eventName,
-            props = mapOf("paywall_place" to originProperty)
+            props = mapOf(prop)
+        )
+        analyticsManager.logFirebase(
+            eventName = eventName,
+            bundle = bundleOf(prop)
         )
     }
 }

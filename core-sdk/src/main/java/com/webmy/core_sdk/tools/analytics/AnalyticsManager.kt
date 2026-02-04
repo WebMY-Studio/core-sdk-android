@@ -1,11 +1,13 @@
 package com.webmy.core_sdk.tools.analytics
 
+import android.os.Bundle
 import com.amplitude.android.Amplitude
-import com.appodeal.ads.ext.toBundle
 import com.google.firebase.analytics.FirebaseAnalytics
 
 interface AnalyticsManager {
     fun logEvent(eventName: String, props: Map<String, Any?>? = null)
+
+    fun logFirebase(eventName: String, bundle: Bundle = Bundle())
 }
 
 internal class RealAnalyticsManager(
@@ -15,6 +17,9 @@ internal class RealAnalyticsManager(
 
     override fun logEvent(eventName: String, props: Map<String, Any?>?) {
         amplitude?.track(eventName, props)
-        firebase?.logEvent(eventName, props?.toBundle())
+    }
+
+    override fun logFirebase(eventName: String, bundle: Bundle) {
+        firebase?.logEvent(eventName, bundle)
     }
 }
