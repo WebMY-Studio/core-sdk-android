@@ -4,10 +4,10 @@ kotlin = "2.3.0"
 coreKtx = "1.17.0"
 koin-bom = "4.1.1"
 amplitude = "1.23.1"
-appodeal = "3.12.0.1"
+appodeal = "4.0.0"
 google-review = "2.0.2"
 google-play-services-ads = "24.9.0"
-firebase-bom = "34.8.0"
+firebase-bom = "34.9.0"
 coroutines = "1.10.2"
 billing-ktx = "8.3.0"
 okhttp3 = "5.3.2"
@@ -17,12 +17,108 @@ material = "1.13.0"
 adaptyBom = "3.15.2"
 facebook = "18.1.3"
 
+adjust = "5.4.6.0"
+admob = "24.7.0.0"
+admobAdapter = "5.5.0"
+adsNetworksAmazon = "3.5.0.20"
+adsNetworksMintegral = "3.5.0.16"
+adsNetworksMy_target = "3.5.0.21"
+adsNetworksPangle = "3.5.0.15"
+adsNetworksVungle = "3.5.0.11"
+amazon = "11.1.1.0"
+amazonAdapter = "11.1.1.0"
+amazonTamAdapter = "11.1.1.0"
+applovin = "13.5.1.0"
+applovinAdapter = "13.5.1.0"
+applovinAdapterVersion = "5.2.0"
+appsflyer = "6.17.3.0"
+bidmachine = "3.5.0.0"
+bidmachineAdapter = "3.5.0.0"
+bidmachineAdapterVersion = "3.5.1.0"
+bidon = "0.13.0.0"
+bigo_ads = "5.6.2.0"
+bigoAdapter = "5.3.0"
+bigoadsAdapter = "5.6.2.0"
+bigoadsAdapterVersion = "5.7.0.0"
+bytedanceAdapter = "7.8.6.0.0"
+chartboost = "9.10.2.0"
+chartboostAdapter = "9.10.2.0"
+chartboostAdapterVersion = "9.11.1.0"
+dt_exchange = "8.4.1.0"
+dtexchangeAdapter = "8.4.1.0"
+facebook_analytics = "18.0.3.0"
+facebookAdapter = "6.21.0.0"
+facebookAdapterVersion = "5.1.0"
+firebase = "23.0.0.0"
+fyberAdapter = "5.3.0"
+fyberAdapterVersion = "8.4.2.0"
+googleAdManagerAdapterVersion = "24.9.0.0"
+googleAdapter = "24.9.0.0"
+iab = "1.8.1.0"
+inmobi = "11.1.0.0"
+inmobiAdapter = "11.1.0.0"
+inmobiAdapterVersion = "11.1.1.0"
+ironsource = "9.1.0.0"
+ironsourceAdapter = "9.1.0.0"
+ironsourceAdapterVersion = "9.3.0.0.0"
+level_play = "9.1.0.0"
+meta = "6.20.0.0"
+metaAdapter = "6.20.0.0"
+mintegral = "17.0.31.0"
+mintegralAdapter = "17.0.31.0"
+mintegralAdapterVersion = "17.0.81.0"
+mobilefuse = "1.9.3.0"
+mobilefuseAdapter = "1.9.3.0"
+mobilefuseAdapterVersion = "1.10.0.0"
+moloco = "4.3.1.0"
+molocoAdapter = "4.3.1.0"
+molocoAdapterVersion = "4.5.0.0"
+my_target = "5.27.4.0"
+mytargetAdapterVersion = "5.2.0"
+ogury = "6.2.0.0"
+oguryAdapter = "5.2.0"
+oguryPresageAdapter = "6.2.1.0"
+mytargetAdapter = "5.27.4.0"
+pangle = "7.7.0.2.0"
+pangleAdapter = "5.9.0"
+pubmatic = "4.10.0.0"
+pubmaticAdapter = "4.12.0.0"
+sentry_analytics = "8.26.0.0"
+smaato = "22.7.2.0"
+smaatoAdapter = "22.7.2.3"
+smaatoAdapterVersion = "5.0.0"
+startio = "5.2.4.0"
+startioAdapter = "5.2.4.1"
+taurusx = "1.12.2.0"
+taurusxAdapter = "1.12.2.0"
+unity3dBidmachineAdapter = "5.2.0"
+unity3dInmobiAdapter = "5.4.0"
+unity3dMintegralAdapter = "5.7.0"
+unity3dMobilefuseAdapter = "5.1.0"
+unity3dMolocoAdapter = "5.6.0"
+unity3dUnityadsAdapter = "5.5.0"
+unity3dVungleAdapter = "5.5.0"
+unity_ads = "4.16.4.0"
+unityadsAdapter = "4.16.4.1"
+unityadsAdapterVersion = "4.16.6.0"
+verve = "3.7.1.0"
+verveAdapter = "3.7.1.0"
+verveAdapterVersion = "5.2.0"
+vkadsAdapter = "5.27.4.0"
+vungle = "7.6.1.0"
+vungleAdapter = "7.6.1.0"
+vungleAdapterVersion = "7.7.0.0"
+yandex = "7.17.0.0"
+yandexAdapter = "7.17.0.0"
+yandexAdapterVersion = "7.18.2.0"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 amplitude = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
-appodeal = { module = "com.appodeal.ads:sdk", version.ref = "appodeal" }
+appodeal = { module = "com.appodeal.ads.sdk:core", version.ref = "appodeal" }
 adapty-bom = { module = "io.adapty:adapty-bom", version.ref = "adaptyBom" }
 adapty = { module = "io.adapty:android-sdk" }
 facebook = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebook" }
@@ -46,6 +142,103 @@ squareup-retrofit2-converters-gson = { group = "com.squareup.retrofit2", name = 
 
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+
+adapters-level_play = { module = "com.appodeal.ads.sdk.adapters:level_play", version.ref = "level_play" }
+admob = { module = "com.appodeal.ads.sdk.adapters:admob", version.ref = "admob" }
+adjust = { module = "com.appodeal.ads.sdk.adapters:adjust", version.ref = "adjust" }
+ads-mediation-applovin-adapter = { module = "com.unity3d.ads-mediation:applovin-adapter", version.ref = "applovinAdapterVersion" }
+admob-adapter = { module = "com.unity3d.ads-mediation:admob-adapter", version.ref = "admobAdapter" }
+ads-mediation-bidmachine-adapter = { module = "com.unity3d.ads-mediation:bidmachine-adapter", version.ref = "unity3dBidmachineAdapter" }
+ads-mediation-bigo-adapter = { module = "com.unity3d.ads-mediation:bigo-adapter", version.ref = "bigoAdapter" }
+ads-mediation-facebook-adapter = { module = "com.unity3d.ads-mediation:facebook-adapter", version.ref = "facebookAdapterVersion" }
+ads-mediation-inmobi-adapter = { module = "com.unity3d.ads-mediation:inmobi-adapter", version.ref = "unity3dInmobiAdapter" }
+ads-mediation-fyber-adapter = { module = "com.unity3d.ads-mediation:fyber-adapter", version.ref = "fyberAdapter" }
+ads-mediation-moloco-adapter = { module = "com.unity3d.ads-mediation:moloco-adapter", version.ref = "unity3dMolocoAdapter" }
+ads-mediation-pangle-adapter = { module = "com.unity3d.ads-mediation:pangle-adapter", version.ref = "pangleAdapter" }
+ads-mediation-ogury-adapter = { module = "com.unity3d.ads-mediation:ogury-adapter", version.ref = "oguryAdapter" }
+ads-networks-amazon = { module = "io.bidmachine:ads.networks.amazon", version.ref = "adsNetworksAmazon" }
+ads-networks-mintegral = { module = "io.bidmachine:ads.networks.mintegral", version.ref = "adsNetworksMintegral" }
+ads-networks-my_target = { module = "io.bidmachine:ads.networks.my_target", version.ref = "adsNetworksMy_target" }
+ads-networks-pangle = { module = "io.bidmachine:ads.networks.pangle", version.ref = "adsNetworksPangle" }
+amazon = { module = "com.appodeal.ads.sdk.adapters:amazon", version.ref = "amazon" }
+amazon-adapter = { module = "org.bidon:amazon-adapter", version.ref = "amazonAdapter" }
+ads-networks-vungle = { module = "io.bidmachine:ads.networks.vungle", version.ref = "adsNetworksVungle" }
+amazon-tam-adapter = { module = "com.applovin.mediation:amazon-tam-adapter", version.ref = "amazonTamAdapter" }
+applovin = { module = "com.appodeal.ads.sdk.adapters:applovin", version.ref = "applovin" }
+applovin_max = { module = "com.appodeal.ads.sdk.adapters:applovin_max", version.ref = "applovin" }
+appsflyer = { module = "com.appodeal.ads.sdk.adapters:appsflyer", version.ref = "appsflyer" }
+bidmachine = { module = "com.appodeal.ads.sdk.adapters:bidmachine", version.ref = "bidmachine" }
+bidmachine-adapter = { module = "org.bidon:bidmachine-adapter", version.ref = "bidmachineAdapter" }
+applovin-adapter = { module = "org.bidon:applovin-adapter", version.ref = "applovinAdapter" }
+bidon = { module = "com.appodeal.ads.sdk.adapters:bidon", version.ref = "bidon" }
+bigo_ads = { module = "com.appodeal.ads.sdk.adapters:bigo_ads", version.ref = "bigo_ads" }
+bytedance-adapter = { module = "com.applovin.mediation:bytedance-adapter", version.ref = "bytedanceAdapter" }
+chartboost = { module = "com.appodeal.ads.sdk.adapters:chartboost", version.ref = "chartboost" }
+chartboost-adapter = { module = "org.bidon:chartboost-adapter", version.ref = "chartboostAdapter" }
+bigoads-adapter = { module = "org.bidon:bigoads-adapter", version.ref = "bigoadsAdapter" }
+dt_exchange = { module = "com.appodeal.ads.sdk.adapters:dt_exchange", version.ref = "dt_exchange" }
+facebook-adapter = { module = "com.applovin.mediation:facebook-adapter", version.ref = "facebookAdapter" }
+facebook_analytics = { module = "com.appodeal.ads.sdk.adapters:facebook_analytics", version.ref = "facebook_analytics" }
+firebase = { module = "com.appodeal.ads.sdk.adapters:firebase", version.ref = "firebase" }
+google-adapter = { module = "com.applovin.mediation:google-adapter", version.ref = "googleAdapter" }
+iab = { module = "com.appodeal.ads.sdk.adapters:iab", version.ref = "iab" }
+inmobi = { module = "com.appodeal.ads.sdk.adapters:inmobi", version.ref = "inmobi" }
+inmobi-adapter = { module = "org.bidon:inmobi-adapter", version.ref = "inmobiAdapter" }
+dtexchange-adapter = { module = "org.bidon:dtexchange-adapter", version.ref = "dtexchangeAdapter" }
+ironsource = { module = "com.appodeal.ads.sdk.adapters:ironsource", version.ref = "ironsource" }
+ironsource-adapter = { module = "org.bidon:ironsource-adapter", version.ref = "ironsourceAdapter" }
+mediation-bidmachine-adapter = { module = "com.applovin.mediation:bidmachine-adapter", version.ref = "bidmachineAdapterVersion" }
+mediation-bigoads-adapter = { module = "com.applovin.mediation:bigoads-adapter", version.ref = "bigoadsAdapterVersion" }
+mediation-chartboost-adapter = { module = "com.applovin.mediation:chartboost-adapter", version.ref = "chartboostAdapterVersion" }
+mediation-google-ad-manager-adapter = { module = "com.applovin.mediation:google-ad-manager-adapter", version.ref = "googleAdManagerAdapterVersion" }
+mediation-fyber-adapter = { module = "com.applovin.mediation:fyber-adapter", version.ref = "fyberAdapterVersion" }
+mediation-ironsource-adapter = { module = "com.applovin.mediation:ironsource-adapter", version.ref = "ironsourceAdapterVersion" }
+mediation-inmobi-adapter = { module = "com.applovin.mediation:inmobi-adapter", version.ref = "inmobiAdapterVersion" }
+mediation-mintegral-adapter = { module = "com.applovin.mediation:mintegral-adapter", version.ref = "mintegralAdapterVersion" }
+mediation-mobilefuse-adapter = { module = "com.applovin.mediation:mobilefuse-adapter", version.ref = "mobilefuseAdapterVersion" }
+mediation-moloco-adapter = { module = "com.applovin.mediation:moloco-adapter", version.ref = "molocoAdapterVersion" }
+mediation-unityads-adapter = { module = "com.applovin.mediation:unityads-adapter", version.ref = "unityadsAdapterVersion" }
+mediation-vungle-adapter = { module = "com.applovin.mediation:vungle-adapter", version.ref = "vungleAdapterVersion" }
+mediation-yandex-adapter = { module = "com.applovin.mediation:yandex-adapter", version.ref = "yandexAdapterVersion" }
+mintegral = { module = "com.appodeal.ads.sdk.adapters:mintegral", version.ref = "mintegral" }
+meta = { module = "com.appodeal.ads.sdk.adapters:meta", version.ref = "meta" }
+mintegral-adapter = { module = "org.bidon:mintegral-adapter", version.ref = "mintegralAdapter" }
+meta-adapter = { module = "org.bidon:meta-adapter", version.ref = "metaAdapter" }
+mobilefuse = { module = "com.appodeal.ads.sdk.adapters:mobilefuse", version.ref = "mobilefuse" }
+mobilefuse-adapter = { module = "org.bidon:mobilefuse-adapter", version.ref = "mobilefuseAdapter" }
+moloco = { module = "com.appodeal.ads.sdk.adapters:moloco", version.ref = "moloco" }
+moloco-adapter = { module = "org.bidon:moloco-adapter", version.ref = "molocoAdapter" }
+my_target = { module = "com.appodeal.ads.sdk.adapters:my_target", version.ref = "my_target" }
+mytarget-adapter = { module = "com.applovin.mediation:mytarget-adapter", version.ref = "mytargetAdapter" }
+ogury = { module = "com.appodeal.ads.sdk.adapters:ogury", version.ref = "ogury" }
+ogury-presage-adapter = { module = "com.applovin.mediation:ogury-presage-adapter", version.ref = "oguryPresageAdapter" }
+pangle = { module = "com.appodeal.ads.sdk.adapters:pangle", version.ref = "pangle" }
+pubmatic = { module = "com.appodeal.ads.sdk.adapters:pubmatic", version.ref = "pubmatic" }
+pubmatic-adapter = { module = "com.applovin.mediation:pubmatic-adapter", version.ref = "pubmaticAdapter" }
+smaato = { module = "com.appodeal.ads.sdk.adapters:smaato", version.ref = "smaato" }
+sentry_analytics = { module = "com.appodeal.ads.sdk.adapters:sentry_analytics", version.ref = "sentry_analytics" }
+smaato-adapter = { module = "com.applovin.mediation:smaato-adapter", version.ref = "smaatoAdapter" }
+startio = { module = "com.appodeal.ads.sdk.adapters:startio", version.ref = "startio" }
+startio-adapter = { module = "org.bidon:startio-adapter", version.ref = "startioAdapter" }
+taurusx = { module = "com.appodeal.ads.sdk.adapters:taurusx", version.ref = "taurusx" }
+unity3d-mintegral-adapter = { module = "com.unity3d.ads-mediation:mintegral-adapter", version.ref = "unity3dMintegralAdapter" }
+unity3d-mobilefuse-adapter = { module = "com.unity3d.ads-mediation:mobilefuse-adapter", version.ref = "unity3dMobilefuseAdapter" }
+unity3d-mytarget-adapter = { module = "com.unity3d.ads-mediation:mytarget-adapter", version.ref = "mytargetAdapterVersion" }
+unity3d-unityads-adapter = { module = "com.unity3d.ads-mediation:unityads-adapter", version.ref = "unity3dUnityadsAdapter" }
+unity3d-smaato-adapter = { module = "com.unity3d.ads-mediation:smaato-adapter", version.ref = "smaatoAdapterVersion" }
+unity3d-verve-adapter = { module = "com.unity3d.ads-mediation:verve-adapter", version.ref = "verveAdapterVersion" }
+unity3d-vungle-adapter = { module = "com.unity3d.ads-mediation:vungle-adapter", version.ref = "unity3dVungleAdapter" }
+unity_ads = { module = "com.appodeal.ads.sdk.adapters:unity_ads", version.ref = "unity_ads" }
+unityads-adapter = { module = "org.bidon:unityads-adapter", version.ref = "unityadsAdapter" }
+taurusx-adapter = { module = "org.bidon:taurusx-adapter", version.ref = "taurusxAdapter" }
+verve = { module = "com.appodeal.ads.sdk.adapters:verve", version.ref = "verve" }
+verve-adapter = { module = "com.applovin.mediation:verve-adapter", version.ref = "verveAdapter" }
+vkads-adapter = { module = "org.bidon:vkads-adapter", version.ref = "vkadsAdapter" }
+vungle = { module = "com.appodeal.ads.sdk.adapters:vungle", version.ref = "vungle" }
+yandex = { module = "com.appodeal.ads.sdk.adapters:yandex", version.ref = "yandex" }
+yandex-adapter = { module = "org.bidon:yandex-adapter", version.ref = "yandexAdapter" }
+vungle-adapter = { module = "org.bidon:vungle-adapter", version.ref = "vungleAdapter" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

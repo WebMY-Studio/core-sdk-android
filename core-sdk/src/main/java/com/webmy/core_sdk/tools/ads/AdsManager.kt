@@ -2,6 +2,7 @@ package com.webmy.core_sdk.tools.ads
 
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.appodeal.ads.Appodeal
@@ -95,8 +96,11 @@ internal class RealAdsManager(
             val map = mutableMapOf<String, Any?>()
             errors.mapIndexed { index, error ->
                 map["Error$index"] = error.message
+                Log.d("AdsManager", "Error = $error")
             }
             analyticsManager.logEvent(ANALYTICS_ERROR_EVENT, map)
+        } else {
+            Log.d("AdsManager", "Init success")
         }
     }
 
@@ -106,7 +110,7 @@ internal class RealAdsManager(
     ): Boolean {
         val adView = Appodeal.getBannerView(container.context)
         container.addView(adView)
-        container.setPadding(0, 16.dpToPx(), 0, 0)
+        container.setPadding(0, 16.dpToPx(), 0, 16.dpToPx())
 
         val isShown = Appodeal.show(activity, Appodeal.BANNER_VIEW)
         container.isVisible = isShown
