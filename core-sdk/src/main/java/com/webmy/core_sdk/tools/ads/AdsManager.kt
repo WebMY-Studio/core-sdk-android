@@ -110,7 +110,7 @@ internal class RealAdsManager(
     ): Boolean {
         val adView = Appodeal.getBannerView(container.context)
         container.addView(adView)
-        container.setPadding(0, 16.dpToPx(), 0, 16.dpToPx())
+        container.setPadding(0, 0, 0, 16.dpToPx())
 
         val isShown = Appodeal.show(activity, Appodeal.BANNER_VIEW)
         container.isVisible = isShown

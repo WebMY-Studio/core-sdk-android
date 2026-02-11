@@ -4,6 +4,7 @@
         <attr name="buttonType" format="enum">
             <enum name="primary" value="0" />
             <enum name="secondary" value="1" />
+            <enum name="premium" value="2" />
         </attr>
     </declare-styleable>
 </resources>
