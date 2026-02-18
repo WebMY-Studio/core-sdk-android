@@ -25,7 +25,10 @@ abstract class BasePaywallViewModel(
 
     protected val subscriptionsFlow = premiumInteractor.subscriptionsFlow
 
+    private var purchaseInitiated = false
+
     suspend fun purchase(productId: String) {
+        purchaseInitiated = true
         premiumInteractor.purchase(productId, navigator.activity)
     }
 
@@ -35,7 +38,9 @@ abstract class BasePaywallViewModel(
 
     private fun startPurchaseObservation() {
         viewModelScope.launch {
-            premiumInteractor.isPremiumFlow.filter { it }.first()
+            premiumInteractor.isPremiumFlow
+                .filter { purchaseInitiated && it }
+                .first()
             logEvent(eventName = "purchase_success")
             navigator.finish()
         }

@@ -1,6 +1,6 @@
 import org.gradle.api.Project
 
-private const val DefaultVersionName = "0.2.17"
+private const val DefaultVersionName = "0.2.18"
 private val DefaultVersionCode = (System.currentTimeMillis() / 1000).toInt()
 
 fun Project.computeVersionName(): String = DefaultVersionName
