@@ -26,17 +26,21 @@ interface AdsPremiumManager {
 
     fun requestBanner(
         activity: Activity,
-        container: FrameLayout,
+        container: FrameLayout
     )
 
     fun requestReward(
         activity: Activity,
         placement: String? = null,
         grantWhenPremium: Boolean = true,
+        source: String? = null,
         rewardCallback: (Boolean) -> Unit,
     )
 
-    fun requestInterstitial(activity: Activity)
+    fun requestInterstitial(
+        activity: Activity,
+        source: String? = null
+    )
 }
 
 internal class RealAdsPremiumManager(
@@ -71,7 +75,10 @@ internal class RealAdsPremiumManager(
         }
     }
 
-    override fun requestInterstitial(activity: Activity) {
+    override fun requestInterstitial(
+        activity: Activity,
+        source: String?
+    ) {
         launch {
             val isPremium = isPremiumFlow.first()
 
@@ -88,7 +95,10 @@ internal class RealAdsPremiumManager(
 
                 if (countSinceInitial % skipAdsAmount == 0L) {
                     withContext(Dispatchers.Main) {
-                        adsManager.showInter(activity)
+                        adsManager.showInter(
+                            activity = activity,
+                            source = source
+                        )
                     }
                 }
             }
@@ -99,6 +109,7 @@ internal class RealAdsPremiumManager(
         activity: Activity,
         placement: String?,
         grantWhenPremium: Boolean,
+        source: String?,
         rewardCallback: (Boolean) -> Unit,
     ) {
         launch {
@@ -106,7 +117,12 @@ internal class RealAdsPremiumManager(
                 if (grantWhenPremium) rewardCallback(true)
             } else {
                 withContext(Dispatchers.Main) {
-                    adsManager.showReward(activity, placement, rewardCallback)
+                    adsManager.showReward(
+                        activity = activity,
+                        source = source,
+                        placement = placement,
+                        rewardCallback = rewardCallback
+                    )
                 }
             }
         }

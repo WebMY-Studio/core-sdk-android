@@ -2,7 +2,6 @@ package com.webmy.core_sdk.tools.ads
 
 import android.app.Activity
 import android.app.Application
-import android.util.Log
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.appodeal.ads.Appodeal
@@ -40,11 +39,15 @@ interface AdsManager {
 
     fun showReward(
         activity: Activity,
+        source: String? = null,
         placement: String? = null,
         rewardCallback: (Boolean) -> Unit,
     )
 
-    fun showInter(activity: Activity): Boolean
+    fun showInter(
+        activity: Activity,
+        source: String? = null,
+    )
 
     fun destroy()
 }
@@ -57,7 +60,6 @@ internal class RealAdsManager(
 ) : AdsManager, AdRevenueCallbacks, ApdInitializationCallback {
 
     companion object {
-        private const val ANALYTICS_ERROR_EVENT = "appodeal_initialization_error"
         private const val DEFAULT_PLACEMENT = "default"
     }
 
@@ -95,12 +97,9 @@ internal class RealAdsManager(
         if (!errors.isNullOrEmpty()) {
             val map = mutableMapOf<String, Any?>()
             errors.mapIndexed { index, error ->
-                map["Error$index"] = error.message
-                Log.d("AdsManager", "Error = $error")
+                map["error_$index"] = error.message
             }
-            analyticsManager.logEvent(ANALYTICS_ERROR_EVENT, map)
-        } else {
-            Log.d("AdsManager", "Init success")
+            analyticsManager.logEvent("ad_initialization_error", map)
         }
     }
 
@@ -124,20 +123,47 @@ internal class RealAdsManager(
 
     override fun showReward(
         activity: Activity,
+        source: String?,
         placement: String?,
         rewardCallback: (Boolean) -> Unit,
     ) {
         val placementName = placement ?: DEFAULT_PLACEMENT
-        if (!Appodeal.canShow(Appodeal.REWARDED_VIDEO, placementName)) return
-        val isShown = Appodeal.show(activity, Appodeal.REWARDED_VIDEO, placementName)
+
+        val canShow = Appodeal.canShow(Appodeal.REWARDED_VIDEO, placementName)
+        val isShown = if (canShow) {
+            Appodeal.show(activity, Appodeal.REWARDED_VIDEO, placementName)
+        } else {
+            false
+        }
         if (isShown) {
             this.rewardCallback = rewardCallback
         }
+
+        sendAnalytics(
+            canShow = canShow,
+            isShown = isShown,
+            adType = Appodeal.REWARDED_VIDEO,
+            source = source
+        )
     }
 
-    override fun showInter(activity: Activity): Boolean {
-        if (!Appodeal.isLoaded(Appodeal.INTERSTITIAL)) return false
-        return Appodeal.show(activity, Appodeal.INTERSTITIAL)
+    override fun showInter(
+        activity: Activity,
+        source: String?
+    ) {
+        val canShow = Appodeal.canShow(Appodeal.INTERSTITIAL)
+        val isShown = if (canShow) {
+            Appodeal.show(activity, Appodeal.INTERSTITIAL)
+        } else {
+            false
+        }
+
+        sendAnalytics(
+            canShow = canShow,
+            isShown = isShown,
+            adType = Appodeal.INTERSTITIAL,
+            source = source
+        )
     }
 
     override fun destroy() {
@@ -220,5 +246,30 @@ internal class RealAdsManager(
             override fun onRewardedVideoClicked() {
             }
         })
+    }
+
+    private fun sendAnalytics(canShow: Boolean, isShown: Boolean, adType: Int, source: String?) {
+        val error = when {
+            !canShow -> "cant_show"
+            !isShown -> "not_shown"
+            else -> null
+        }
+
+        val analyticsAdType = when (adType) {
+            Appodeal.INTERSTITIAL -> "inter"
+            Appodeal.REWARDED_VIDEO -> "reward"
+            else -> null
+        }
+
+        val props = mutableMapOf(
+            "placement" to source,
+            "type" to analyticsAdType
+        )
+        if (error == null) {
+            analyticsManager.logEvent("ad_shown", props)
+        } else {
+            props["error"] = error
+            analyticsManager.logEvent("ad_error", props)
+        }
     }
 }
