@@ -26,7 +26,8 @@ class AppButton @JvmOverloads constructor(
     enum class ButtonType {
         PRIMARY,
         SECONDARY,
-        PREMIUM
+        PREMIUM,
+        DISABLED
     }
 
     private var buttonType: ButtonType = ButtonType.PRIMARY
@@ -62,6 +63,11 @@ class AppButton @JvmOverloads constructor(
             ButtonType.PREMIUM -> {
                 setBackgroundResource(R.drawable.bg_button_premium)
                 setTextColor(context.getColor(R.color.textAndIconsPrimaryInverse))
+            }
+
+            ButtonType.DISABLED -> {
+                setBackgroundResource(R.drawable.bg_button_secondary)
+                setTextColor(context.getColor(R.color.textDisabled))
             }
         }
     }
