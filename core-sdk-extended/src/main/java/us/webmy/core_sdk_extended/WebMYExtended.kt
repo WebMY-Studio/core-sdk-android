@@ -8,14 +8,6 @@ import org.koin.core.context.loadKoinModules
 import us.webmy.core_sdk_extended.di.billingModule
 import us.webmy.core_sdk_extended.di.metaModule
 
-fun WebMY.initMeta() {
-    loadKoinModules(metaModule(application))
-    try {
-        AppEventsLogger.activateApp(application)
-    } catch (_: Exception) {
-    }
-}
-
 fun WebMY.initAdapty(key: String) {
     Adapty.activate(
         application,
@@ -30,6 +22,17 @@ fun WebMY.initBilling(
     val oneTime = oneTimeProductIds.toSet()
     val subscriptions = subscriptionProductIds.toSet()
     if (oneTime.isNotEmpty() || subscriptions.isNotEmpty()) {
-        loadKoinModules(billingModule(application, oneTime, subscriptions))
+
+        try {
+            AppEventsLogger.activateApp(application)
+        } catch (_: Exception) {
+        }
+
+        loadKoinModules(
+            listOf(
+                metaModule(application),
+                billingModule(application, oneTime, subscriptions)
+            )
+        )
     }
 }
