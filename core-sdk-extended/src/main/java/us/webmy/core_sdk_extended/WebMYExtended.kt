@@ -1,35 +1,35 @@
 package us.webmy.core_sdk_extended
 
-import androidx.annotation.CallSuper
 import com.adapty.Adapty
 import com.adapty.models.AdaptyConfig
 import com.facebook.appevents.AppEventsLogger
 import com.webmy.core_sdk.WebMY
 import org.koin.core.context.loadKoinModules
-import us.webmy.core_sdk_extended.di.sdkModuleExtended
+import us.webmy.core_sdk_extended.di.billingModule
+import us.webmy.core_sdk_extended.di.metaModule
 
+fun WebMY.initMeta() {
+    loadKoinModules(metaModule(application))
+    try {
+        AppEventsLogger.activateApp(application)
+    } catch (_: Exception) {
+    }
+}
 
-open class WebMYExtended<T : ConfigExtended> : WebMY<T>() {
+fun WebMY.initAdapty(key: String) {
+    Adapty.activate(
+        application,
+        AdaptyConfig.Builder(key).build()
+    )
+}
 
-
-    @CallSuper
-    override fun init(config: T) {
-        super.init(config)
-
-        loadKoinModules(sdkModuleExtended(config))
-
-        val adaptyKey = config.adaptyKey
-        if (!adaptyKey.isNullOrEmpty()) {
-            Adapty.activate(
-                config.application,
-                AdaptyConfig.Builder(adaptyKey).build()
-            )
-        }
-
-        try {
-            AppEventsLogger.activateApp(config.application)
-        } catch (e: Exception) {
-
-        }
+fun WebMY.initBilling(
+    oneTimeProductIds: List<String> = emptyList(),
+    subscriptionProductIds: List<String> = emptyList()
+) {
+    val oneTime = oneTimeProductIds.toSet()
+    val subscriptions = subscriptionProductIds.toSet()
+    if (oneTime.isNotEmpty() || subscriptions.isNotEmpty()) {
+        loadKoinModules(billingModule(application, oneTime, subscriptions))
     }
 }

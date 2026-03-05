@@ -1,16 +1,12 @@
 package us.webmy.core_sdk_ads
 
-import androidx.annotation.CallSuper
+import com.webmy.core_sdk.WebMY
 import org.koin.core.context.loadKoinModules
-import us.webmy.core_sdk_ads.di.sdkModuleExtendedAds
-import us.webmy.core_sdk_extended.WebMYExtended
+import us.webmy.core_sdk_ads.di.adsModule
 
-open class WebMYExtendedAds : WebMYExtended<ConfigExtendedAds>() {
-
-    @CallSuper
-    override fun init(config: ConfigExtendedAds) {
-        super.init(config)
-
-        loadKoinModules(sdkModuleExtendedAds(config))
-    }
+fun WebMY.initAds(
+    appodealKey: String,
+    premiumProductIds: List<String> = emptyList()
+) {
+    loadKoinModules(adsModule(application, appodealKey, premiumProductIds))
 }

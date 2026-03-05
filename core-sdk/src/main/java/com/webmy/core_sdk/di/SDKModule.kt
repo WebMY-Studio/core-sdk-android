@@ -8,7 +8,7 @@ import com.amplitude.core.ServerZone
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
-import com.webmy.core_sdk.Config
+import com.webmy.core_sdk.WebMYConfig
 import com.webmy.core_sdk.data.NetworkApiCreator
 import com.webmy.core_sdk.data.RealNetworkApiCreator
 import com.webmy.core_sdk.data.csv.CsvFetcher
@@ -30,17 +30,16 @@ import org.koin.dsl.module
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-internal fun sdkModule(config: Config) = module {
+internal fun sdkModule(config: WebMYConfig) = module {
     configureRemoteConfig(config)
     configurePreferences(config)
     configureAnalytics(config)
-
 
     configureNetwork()
     configureCsv()
 }
 
-internal fun Module.configureAnalytics(config: Config) {
+internal fun Module.configureAnalytics(config: WebMYConfig) {
     val amplitudeKey = config.amplitudeKey
     if (!amplitudeKey.isNullOrEmpty()) {
         single<Amplitude> {
@@ -70,16 +69,14 @@ internal fun Module.configureAnalytics(config: Config) {
 
 }
 
-
-
-
-internal fun Module.configureRemoteConfig(config: Config) {
-    if (config.remoteConfigEnabled) {
-        single<RemoteConfigManager> { RealRemoteConfigManager(config.remoteConfigUpdateInterval) }
+internal fun Module.configureRemoteConfig(config: WebMYConfig) {
+    val interval = config.remoteConfigUpdateInterval
+    if (interval != null) {
+        single<RemoteConfigManager> { RealRemoteConfigManager(interval.inWholeMilliseconds) }
     }
 }
 
-internal fun Module.configurePreferences(config: Config) {
+internal fun Module.configurePreferences(config: WebMYConfig) {
     single<Preferences> { RealPreferences(config.application) }
 
     single { OnboardingShownPreferences(get()) }

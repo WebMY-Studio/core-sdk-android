@@ -1,18 +1,17 @@
 package com.webmy.core_sdk
 
-import androidx.annotation.CallSuper
+import android.app.Application
 import com.webmy.core_sdk.di.sdkModule
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 
-open class WebMY<T : Config> {
+object WebMY {
 
-    @CallSuper
-    open fun init(config: T) {
-        initKoin(config)
-    }
+    lateinit var application: Application
+        private set
 
-    private fun initKoin(config: T) {
+    fun init(config: WebMYConfig) {
+        application = config.application
         val module = sdkModule(config)
         when (config.koinMode) {
             KoinMode.START -> startKoin { modules(module) }
