@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.core_sdk"
+    namespace = "com.webmy.core_sdk_extended"
 
     compileSdkVersion(36)
 
@@ -45,28 +45,13 @@ java {
 
 
 dependencies {
-    api(libs.coroutines)
-    api(libs.androidx.core.ktx)
+    api(project(":core-sdk"))
+    api(libs.billingclient)
 
-    api(libs.appcompat)
-    api(libs.material)
+    api(libs.facebook)
 
-    api(platform(libs.koin.bom))
-    api(libs.koin.android)
-
-    implementation(libs.google.review.ktx)
-
-    implementation(platform(libs.firebase.bom))
-    api(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.config)
-
-    implementation(libs.amplitude)
-
-    api(libs.squareup.okhttp3.core)
-    api(libs.squareup.okhttp3.logging)
-    api(libs.squareup.retrofit2.core)
-    api(libs.squareup.retrofit2.converters.gson)
+    implementation(platform(libs.adapty.bom))
+    implementation(libs.adapty)
 }
 
 afterEvaluate {
@@ -76,7 +61,7 @@ afterEvaluate {
                 from(components["release"])
 
                 groupId = "com.github.WebMY-Studio"
-                artifactId = "core-sdk-android"
+                artifactId = "core-sdk-extended"
                 version = rootProject.computeVersionName()
             }
         }

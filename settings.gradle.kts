@@ -26,4 +26,5 @@ dependencyResolutionManagement {
 rootProject.name = "WebMY Core SDK"
 include(":app")
 include(":core-sdk")
-include(":core-sdk-ad-adapters")
+include(":core-sdk-extended")
+include(":core-sdk-ads")

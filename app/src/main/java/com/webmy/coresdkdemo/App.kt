@@ -1,9 +1,9 @@
 package com.webmy.coresdkdemo
 
 import android.app.Application
-import com.webmy.core_sdk.WebMY
 import com.webmy.core_sdk.Config
 import com.webmy.core_sdk.KoinMode
+import com.webmy.core_sdk.WebMY
 
 class App : Application() {
     override fun onCreate() {
@@ -13,6 +13,6 @@ class App : Application() {
             .setKoinMode(KoinMode.START)
             .build()
 
-        WebMY.INSTANCE.init(config)
+        WebMY<Config>().init(config)
     }
 }

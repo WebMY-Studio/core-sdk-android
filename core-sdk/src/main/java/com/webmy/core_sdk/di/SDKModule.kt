@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
-import com.facebook.appevents.AppEventsLogger
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.webmy.core_sdk.BuildConfig
@@ -15,16 +14,8 @@ import com.webmy.core_sdk.data.RealNetworkApiCreator
 import com.webmy.core_sdk.data.csv.CsvFetcher
 import com.webmy.core_sdk.data.csv.RealCsvFetcher
 import com.webmy.core_sdk.data.prefs.OnboardingShownPreferences
-import com.webmy.core_sdk.domain.interactor.PremiumInteractor
-import com.webmy.core_sdk.domain.interactor.RealPremiumInteractor
-import com.webmy.core_sdk.tools.ads.AdsManager
-import com.webmy.core_sdk.tools.ads.AdsPremiumManager
-import com.webmy.core_sdk.tools.ads.AdsPremiumManagerFactory
-import com.webmy.core_sdk.tools.ads.RealAdsManager
 import com.webmy.core_sdk.tools.analytics.AnalyticsManager
 import com.webmy.core_sdk.tools.analytics.RealAnalyticsManager
-import com.webmy.core_sdk.tools.billing.BillingManager
-import com.webmy.core_sdk.tools.billing.RealBillingManager
 import com.webmy.core_sdk.tools.preferences.Preferences
 import com.webmy.core_sdk.tools.preferences.RealPreferences
 import com.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
@@ -43,10 +34,7 @@ internal fun sdkModule(config: Config) = module {
     configureRemoteConfig(config)
     configurePreferences(config)
     configureAnalytics(config)
-    configureAppodeal(config)
-    configureBilling(config)
 
-    configureAdsPremiumFactory(config)
 
     configureNetwork()
     configureCsv()
@@ -80,22 +68,10 @@ internal fun Module.configureAnalytics(config: Config) {
         )
     }
 
-    single<AppEventsLogger> { AppEventsLogger.newLogger(config.application) }
 }
 
-internal fun Module.configureAppodeal(config: Config) {
-    val appodealKey = config.appodealKey
-    if (!appodealKey.isNullOrEmpty()) {
-        single<AdsManager> {
-            RealAdsManager(
-                analyticsManager = get(),
-                application = config.application,
-                key = appodealKey,
-                firebaseAnalytics = get()
-            )
-        }
-    }
-}
+
+
 
 internal fun Module.configureRemoteConfig(config: Config) {
     if (config.remoteConfigEnabled) {
@@ -107,37 +83,6 @@ internal fun Module.configurePreferences(config: Config) {
     single<Preferences> { RealPreferences(config.application) }
 
     single { OnboardingShownPreferences(get()) }
-}
-
-internal fun Module.configureBilling(config: Config) {
-    val oneTimeProducts = config.oneTimeProductIds.toSet()
-    val subscriptionProducts = config.subscriptionProductIds.toSet()
-
-    if (oneTimeProducts.isNotEmpty() || subscriptionProducts.isNotEmpty()) {
-        single<BillingManager> {
-            RealBillingManager(
-                metaEventsLogger = get(),
-                application = config.application,
-                oneTimeProducts = oneTimeProducts,
-                subscriptionProducts = subscriptionProducts
-            )
-        }
-
-        single<PremiumInteractor> { RealPremiumInteractor(get()) }
-    }
-}
-
-internal fun Module.configureAdsPremiumFactory(config: Config) {
-    val premiumProductIds = config.premiumProductIds
-    if (premiumProductIds.isNotEmpty()) {
-        single<AdsPremiumManager.Factory> {
-            AdsPremiumManagerFactory(
-                premiumProductIds = premiumProductIds,
-                billingManager = get(),
-                adsManager = get(),
-            )
-        }
-    }
 }
 
 private const val HTTP_CACHE = "http_cache"

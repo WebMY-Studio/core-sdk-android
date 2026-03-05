@@ -1,43 +1,18 @@
 package com.webmy.core_sdk
 
-import com.adapty.Adapty
-import com.adapty.models.AdaptyConfig
-import com.facebook.appevents.AppEventsLogger
-import com.google.android.gms.ads.MobileAds
+import androidx.annotation.CallSuper
 import com.webmy.core_sdk.di.sdkModule
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 
+open class WebMY<T : Config> {
 
-class WebMY private constructor() {
-
-    companion object {
-        val INSTANCE = WebMY()
-    }
-
-    fun init(config: Config) {
+    @CallSuper
+    open fun init(config: T) {
         initKoin(config)
-
-        if (!config.appodealKey.isNullOrEmpty()) {
-            MobileAds.initialize(config.application)
-        }
-
-        val adaptyKey = config.adaptyKey
-        if (!adaptyKey.isNullOrEmpty()) {
-            Adapty.activate(
-                config.application,
-                AdaptyConfig.Builder(adaptyKey).build()
-            )
-        }
-
-        try {
-            AppEventsLogger.activateApp(config.application)
-        } catch (e: Exception) {
-
-        }
     }
 
-    private fun initKoin(config: Config) {
+    private fun initKoin(config: T) {
         val module = sdkModule(config)
         when (config.koinMode) {
             KoinMode.START -> startKoin { modules(module) }

@@ -3,67 +3,32 @@ package com.webmy.core_sdk
 import android.app.Application
 import kotlin.time.Duration
 
-class Config private constructor(
+open class Config(
     val application: Application,
     val koinMode: KoinMode,
-    val adaptyKey: String?,
-    val appodealKey: String?,
     val amplitudeKey: String?,
-    val premiumProductIds: List<String>,
-    val oneTimeProductIds: List<String>,
-    val subscriptionProductIds: List<String>,
     val remoteConfigEnabled: Boolean,
-    val remoteConfigUpdateInterval: Long
+    val remoteConfigUpdateInterval: Long,
 ) {
-    class Builder(private val application: Application) {
+    open class Builder(private val application: Application) {
+        protected var koinMode: KoinMode = KoinMode.START
 
-        private var koinMode: KoinMode = KoinMode.START
-        private var appodealKey: String? = null
-        private var premiumProductIds: List<String> = emptyList()
-        private var amplitudeKey: String? = null
-        private var remoteConfigEnabled: Boolean = false
-        private var remoteConfigUpdateInterval: Long = -1
-        private var oneTimeProducts: List<String> = emptyList()
-        private var subscriptionProductIds: List<String> = emptyList()
-        private var adaptyKey: String? = null
+        protected var amplitudeKey: String? = null
+        protected var remoteConfigEnabled: Boolean = false
+        protected var remoteConfigUpdateInterval: Long = -1
 
         /**
          * @param mode See [KoinMode] to use proper value
          */
-        fun setKoinMode(mode: KoinMode) = apply {
+        fun setKoinMode(mode: KoinMode): Builder = apply {
             this.koinMode = mode
         }
 
-        /**
-         * Appodeal SDK integration guide:
-         *
-         * To use the Appodeal SDK, in addition to providing your Appodeal App Key,
-         * you must add the following configuration to your **build.gradle** or **build.gradle.kts** file:
-         *
-         * Option 1 — Kotlin DSL:
-         * ```
-         * manifestPlaceholders["ADMOB_APPLICATION_ID"] = localProperties.readSecret("ADMOB_APPLICATION_ID")
-         * ```
-         *
-         * Option 2 — Groovy DSL:
-         * ```
-         * manifestPlaceholders = [ADMOB_APPLICATION_ID: readRawSecret("ADMOB_APPLICATION_ID")]
-         * ```
-         *
-         * Then, add your `ADMOB_APPLICATION_ID` value to the **local.properties** file:
-         * ```
-         * ADMOB_APPLICATION_ID=ca-app-pub-XXXXXXXX~YYYYYYYY
-         * ```
-         */
-        fun enableAds(appodealKey: String, premiumProductIds: List<String> = emptyList()) = apply {
-            this.appodealKey = appodealKey
-            this.premiumProductIds = premiumProductIds
-        }
 
         /**
          * @param amplitudeKey Amplitude API key. By default SDK uses ServerZone.EU
          */
-        fun enableAnalytics(amplitudeKey: String) = apply {
+        fun enableAnalytics(amplitudeKey: String): Builder = apply {
             this.amplitudeKey = amplitudeKey
         }
 
@@ -86,32 +51,18 @@ class Config private constructor(
          *    alias(libs.plugins.firebase.crashlytics) apply false
          *    ```
          */
-        fun enableRemoteConfig(updateInterval: Duration = Duration.ZERO) = apply {
+        fun enableRemoteConfig(updateInterval: Duration = Duration.ZERO): Builder = apply {
             this.remoteConfigEnabled = true
             this.remoteConfigUpdateInterval = updateInterval.inWholeMilliseconds
         }
 
-        fun enableBilling(oneTime: List<String>, subscription: List<String>) = apply {
-            this.oneTimeProducts = oneTime
-            this.subscriptionProductIds = subscription
-        }
-
-        fun enableAdapty(key: String) = apply {
-            this.adaptyKey = key
-        }
-
-        fun build(): Config {
+        open fun build(): Config {
             return Config(
                 application = application,
                 koinMode = koinMode,
-                appodealKey = appodealKey,
-                premiumProductIds = premiumProductIds,
                 amplitudeKey = amplitudeKey,
                 remoteConfigEnabled = remoteConfigEnabled,
                 remoteConfigUpdateInterval = remoteConfigUpdateInterval,
-                oneTimeProductIds = oneTimeProducts,
-                subscriptionProductIds = subscriptionProductIds,
-                adaptyKey = adaptyKey
             )
         }
     }
