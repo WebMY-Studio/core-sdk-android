@@ -1,6 +1,7 @@
 package com.webmy.core_sdk.presentation
 
 import android.R
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
@@ -9,7 +10,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -199,4 +202,34 @@ fun View.showKeyboard() {
 fun View.hideKeyboard() {
     val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
+}
+
+@SuppressLint("ClickableViewAccessibility")
+fun View.addScaleFeedback() {
+    val interpolator = AccelerateDecelerateInterpolator()
+    setOnTouchListener { view, event ->
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                view.animate()
+                    .scaleX(0.96f).scaleY(0.96f)
+                    .setDuration(70)
+                    .setInterpolator(interpolator)
+                    .start()
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                view.animate()
+                    .scaleX(1f).scaleY(1f)
+                    .setDuration(100)
+                    .setInterpolator(interpolator)
+                    .start()
+            }
+        }
+        false
+    }
+}
+
+fun View.setOnClickListenerWithScaleFeedback(onClick: () -> Unit) {
+    addScaleFeedback()
+    setOnClickListener { onClick.invoke() }
 }

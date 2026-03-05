@@ -15,7 +15,7 @@
     <color name="backgroundSecondary">#080E0E0F</color>
 
     <color name="textAndIconsPrimary">#0E0E0F</color>
-    <color name="textAndIconsSecondary">#B20E0E0F</color>
+    <color name="textAndIconsSecondary">#660E0E0F</color>
     <color name="textAndIconsPrimaryInverse">#FFFFFF</color>
     <color name="textDisabled">#240E0E0F</color>
 </resources>

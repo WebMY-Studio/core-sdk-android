@@ -48,3 +48,7 @@ fun currentTimestampFlow(interval: Duration): Flow<Long> {
         }
     }
 }
+
+fun <T> flowOf(producer: suspend () -> T) = flow {
+    emit(producer())
+}
