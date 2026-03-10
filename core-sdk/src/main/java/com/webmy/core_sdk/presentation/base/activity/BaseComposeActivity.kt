@@ -17,6 +17,8 @@ abstract class BaseComposeActivity<VM : BaseViewModel> : ScopeActivity() {
         super.onCreate(savedInstanceState)
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
+        viewModel
+
         setContent {
             ScreenContent()
         }
