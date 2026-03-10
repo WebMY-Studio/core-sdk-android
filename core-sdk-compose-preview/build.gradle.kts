@@ -1,4 +1,3 @@
-import configureMavenPublishing
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
@@ -7,17 +6,12 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.core_sdk_extended"
+    namespace = "com.webmy.core_sdk_compose_preview"
 
     compileSdk = CompileSdkVersion
 
     defaultConfig {
         minSdk = MinSdkVersion
-    }
-
-    buildFeatures {
-        buildConfig = true
-        viewBinding = true
     }
 
     publishing {
@@ -31,15 +25,10 @@ kotlin {
     }
 }
 
-
 dependencies {
-    api(project(":core-sdk"))
-    api(libs.billingclient)
-
-    api(libs.facebook)
-
-    implementation(platform(libs.adapty.bom))
-    implementation(libs.adapty)
+    api(project(":core-sdk-compose"))
+    api(libs.androidx.compose.ui.tooling)
+    api(libs.androidx.compose.ui.tooling.preview)
 }
 
-configureMavenPublishing("core-sdk-extended")
+configureMavenPublishing("core-sdk-compose-preview")

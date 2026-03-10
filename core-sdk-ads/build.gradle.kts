@@ -1,23 +1,17 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     `maven-publish`
 }
 
 android {
     namespace = "com.webmy.core_sdk_ads"
 
-    compileSdkVersion(36)
+    compileSdk = CompileSdkVersion
 
     defaultConfig {
-        minSdk = 27
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        minSdk = MinSdkVersion
     }
 
     buildFeatures {
@@ -32,23 +26,18 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_21
-    }
-    jvmToolchain(21)
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = KotlinVersion.KOTLIN_2_2
     }
 }
-
 
 dependencies {
     api(project(":core-sdk-extended"))
 
     implementation(libs.google.play.services.ads)
     implementation(libs.appodeal)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
     implementation(libs.ads.networks.amazon)
     implementation(libs.ads.networks.mintegral)
@@ -147,19 +136,4 @@ dependencies {
     implementation(libs.unity3d.vungle.adapter)
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-
-                groupId = "com.github.WebMY-Studio"
-                artifactId = "core-sdk-ads"
-                version = rootProject.computeVersionName()
-            }
-        }
-        repositories {
-            mavenLocal()
-        }
-    }
-}
+configureMavenPublishing("core-sdk-ads")

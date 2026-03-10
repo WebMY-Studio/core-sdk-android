@@ -1,19 +1,18 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.webmy.coresdkdemo"
-    compileSdkVersion(36)
+    compileSdk = CompileSdkVersion
 
     defaultConfig {
-        applicationId = "com.webmy.coresdkdemo"
+        applicationId = namespace
 
-        minSdk = 27
-        targetSdk = 36
+        minSdk = MinSdkVersion
+        targetSdk = TargetSdkVersion
 
         versionCode = computeVersionCode()
         versionName = computeVersionName()
@@ -28,28 +27,14 @@ android {
             isMinifyEnabled = false
         }
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_21
-    }
-    jvmToolchain(21)
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = KotlinVersion.KOTLIN_2_2
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-
     implementation(project(":core-sdk"))
 }
