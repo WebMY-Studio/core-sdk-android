@@ -17,11 +17,11 @@ import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
-import com.webmy.core_sdk.util.awaitTrue
-import com.webmy.core_sdk.util.coerceToUnit
-import com.webmy.core_sdk.util.failure
-import com.webmy.core_sdk.util.flatMap
-import com.webmy.core_sdk.util.singleReplaySharedFlow
+import us.webmy.core_sdk.util.awaitTrue
+import us.webmy.core_sdk.util.coerceToUnit
+import us.webmy.core_sdk.util.failure
+import us.webmy.core_sdk.util.flatMap
+import us.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

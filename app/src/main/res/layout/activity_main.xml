@@ -6,7 +6,7 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <com.webmy.core_sdk.presentation.views.AppButton
+    <us.webmy.core_sdk.presentation.views.AppButton
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

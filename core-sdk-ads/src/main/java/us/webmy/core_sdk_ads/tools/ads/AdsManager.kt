@@ -14,9 +14,9 @@ import com.appodeal.ads.revenue.AdRevenueCallbacks
 import com.appodeal.ads.revenue.RevenueInfo
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.logEvent
-import com.webmy.core_sdk.tools.analytics.AnalyticsManager
-import com.webmy.core_sdk.util.dpToPx
-import com.webmy.core_sdk.util.isHostInDebugMode
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
+import us.webmy.core_sdk.util.dpToPx
+import us.webmy.core_sdk.util.isHostInDebugMode
 
 /**
  * Use this entity if you want to handle ads by yourself

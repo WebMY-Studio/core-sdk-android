@@ -60,7 +60,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvDescription" />
 
-    <com.webmy.core_sdk.presentation.views.AppButton
+    <us.webmy.core_sdk.presentation.views.AppButton
         android:id="@+id/btnConfirm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -2,9 +2,9 @@ package us.webmy.core_sdk_extended.presentation.paywall.base
 
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewModelScope
-import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
-import com.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
-import com.webmy.core_sdk.tools.analytics.AnalyticsManager
+import us.webmy.core_sdk.presentation.base.navigator.BaseNavigator
+import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

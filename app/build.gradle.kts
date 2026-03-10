@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.coresdkdemo"
+    namespace = "us.webmy.coresdkdemo"
     compileSdk = CompileSdkVersion
 
     defaultConfig {

@@ -1,4 +1,3 @@
-import configureMavenPublishing
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
@@ -7,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.core_sdk_extended"
+    namespace = "us.webmy.core_sdk_extended"
 
     compileSdk = CompileSdkVersion
 

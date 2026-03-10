@@ -2,16 +2,21 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
     `maven-publish`
 }
 
 android {
-    namespace = "com.webmy.core_sdk_compose"
+    namespace = "us.webmy.core_sdk_compose"
 
     compileSdk = CompileSdkVersion
 
     defaultConfig {
         minSdk = MinSdkVersion
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     publishing {
@@ -32,7 +37,6 @@ dependencies {
     api(libs.androidx.compose.foundation)
     api(libs.androidx.compose.material3)
     api(libs.androidx.compose.animation.graphics)
-    api(libs.androidx.compose.ui.tooling.preview)
     api(libs.androidx.compose.ui.util)
     api(libs.androidx.compose.ui.text.google.fonts)
     api(libs.androidx.activity.compose)

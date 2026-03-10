@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.core_sdk_compose_preview"
+    namespace = "us.webmy.core_sdk_compose_preview"
 
     compileSdk = CompileSdkVersion
 
@@ -26,7 +26,8 @@ kotlin {
 }
 
 dependencies {
-    api(project(":core-sdk-compose"))
+    api(platform(libs.androidx.compose.bom))
+
     api(libs.androidx.compose.ui.tooling)
     api(libs.androidx.compose.ui.tooling.preview)
 }

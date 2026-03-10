@@ -1,11 +1,11 @@
 package us.webmy.core_sdk_extended.presentation.paywall
 
 import androidx.lifecycle.viewModelScope
-import com.webmy.core_sdk.R
-import com.webmy.core_sdk.presentation.adapters.subscriptions.SubscriptionsUiModel
-import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
-import com.webmy.core_sdk.tools.analytics.AnalyticsManager
-import com.webmy.core_sdk.tools.formatters.DateTimeFormatter
+import us.webmy.core_sdk.R
+import us.webmy.core_sdk.presentation.adapters.subscriptions.SubscriptionsUiModel
+import us.webmy.core_sdk.presentation.base.navigator.BaseNavigator
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
+import us.webmy.core_sdk.tools.formatters.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first

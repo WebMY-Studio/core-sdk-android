@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.webmy.core_sdk_ads"
+    namespace = "us.webmy.core_sdk_ads"
 
     compileSdk = CompileSdkVersion
 

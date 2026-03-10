@@ -7,9 +7,9 @@ import android.text.style.StrikethroughSpan
 import androidx.core.content.ContextCompat
 import androidx.core.text.buildSpannedString
 import androidx.lifecycle.viewModelScope
-import com.webmy.core_sdk.R
-import com.webmy.core_sdk.presentation.base.navigator.BaseNavigator
-import com.webmy.core_sdk.tools.analytics.AnalyticsManager
+import us.webmy.core_sdk.R
+import us.webmy.core_sdk.presentation.base.navigator.BaseNavigator
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
