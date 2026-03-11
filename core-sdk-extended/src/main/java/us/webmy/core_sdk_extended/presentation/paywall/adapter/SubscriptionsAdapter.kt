@@ -1,4 +1,4 @@
-package us.webmy.core_sdk.presentation.adapters.subscriptions
+package us.webmy.core_sdk_extended.presentation.paywall.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -34,11 +34,13 @@ class PlanViewHolder(
 
     fun bind(item: SubscriptionsUiModel) {
         binding.apply {
+            val context = root.context
+
             tvTitle.text = item.title
-            tvPrice.text = item.formattedPrice
-            tvWeekPrice.text = item.formattedPriceWeek
-            tvTrial.isVisible = item.freeFormatted != null
-            tvTrial.text = item.freeFormatted
+            tvPrice.text = item.getFormattedPrice(context)
+            tvWeekPrice.text = item.getFormattedPriceWeek(context)
+            tvTrial.isVisible = item.getFormattedFree(context) != null
+            tvTrial.text = item.getFormattedFree(context)
 
             clNestedRoot.alpha = if (item.isSelected) 1f else 0.4f
             root.setOnClickListener {

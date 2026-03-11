@@ -1,17 +1,19 @@
 package us.webmy.core_sdk.presentation.onboarding
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import us.webmy.core_sdk.data.prefs.OnboardingShownPreferences
+import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk.util.singleReplaySharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 abstract class BaseOnboardingViewModel<T : OnboardingModel>(
     private val onboardingShownPreferences: OnboardingShownPreferences,
     private val analyticsManager: AnalyticsManager,
-) : BaseViewModel() {
+    navigationProvider: NavigationProvider
+) : BaseViewModel(navigationProvider) {
 
     init {
         analyticsManager.logEvent("onboarding_shown")

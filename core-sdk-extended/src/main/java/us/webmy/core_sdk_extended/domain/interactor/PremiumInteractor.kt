@@ -13,7 +13,7 @@ interface PremiumInteractor {
 
     val isPremiumFlow: Flow<Boolean>
 
-    suspend fun purchase(productId: String, activity: AppCompatActivity)
+    fun purchase(productId: String, activity: AppCompatActivity)
 
 }
 
@@ -33,7 +33,7 @@ internal class RealPremiumInteractor(
             products.any { it.isPurchased }
         }
 
-    override suspend fun purchase(productId: String, activity: AppCompatActivity) {
+    override fun purchase(productId: String, activity: AppCompatActivity) {
         billingManager.purchase(activity, productId)
     }
 }

@@ -89,7 +89,7 @@ dependencies {
     implementation(libs.amazon)
     implementation(libs.applovin)
     implementation(libs.applovin.max)
-    implementation(libs.appsflyer)
+//    implementation(libs.appsflyer) Some Manifest merger conflicts
     implementation(libs.bidmachine)
     implementation(libs.bidon)
     implementation(libs.bigo.ads)

@@ -17,11 +17,6 @@ import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
-import us.webmy.core_sdk.util.awaitTrue
-import us.webmy.core_sdk.util.coerceToUnit
-import us.webmy.core_sdk.util.failure
-import us.webmy.core_sdk.util.flatMap
-import us.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +29,11 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import us.webmy.core_sdk.util.awaitTrue
+import us.webmy.core_sdk.util.coerceToUnit
+import us.webmy.core_sdk.util.failure
+import us.webmy.core_sdk.util.flatMap
+import us.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlin.coroutines.CoroutineContext
 
 interface BillingManager {
@@ -42,7 +42,7 @@ interface BillingManager {
 
     suspend fun fetchProducts(): Result<Unit>
 
-    suspend fun purchase(activity: Activity, productId: String): Result<Unit>
+    fun purchase(activity: Activity, productId: String)
 
     suspend fun canBePurchased(productId: String): Boolean
 
@@ -234,33 +234,37 @@ class RealBillingManager(
             .coerceToUnit()
     }
 
-    override suspend fun purchase(activity: Activity, productId: String): Result<Unit> {
-        val tokenFlow = productsFlow
-            .mapNotNull { it.find { it.id == productId }?.offerToken }
+    override fun purchase(activity: Activity, productId: String) {
+        launch {
+            runCatching {
+                val tokenFlow = productsFlow
+                    .mapNotNull { it.find { it.id == productId }?.offerToken }
 
-        val offerDetails = combine(
-            oneTimeDetailsFlow,
-            subscriptionDetailsFlow
-        ) { oneTimeDetails, subscriptionDetails ->
-            val details = oneTimeDetails[productId] ?: subscriptionDetails[productId]
-            details
+                val offerDetails = combine(
+                    oneTimeDetailsFlow,
+                    subscriptionDetailsFlow
+                ) { oneTimeDetails, subscriptionDetails ->
+                    val details = oneTimeDetails[productId] ?: subscriptionDetails[productId]
+                    details
+                }
+                    .filterNotNull()
+                    .map { tokenFlow.first() to it }
+                    .first()
+
+
+                val params = BillingFlowParams.ProductDetailsParams.newBuilder()
+                    .setProductDetails(offerDetails.second)
+                    .setOfferToken(offerDetails.first)
+                    .build()
+
+                val flowParams = BillingFlowParams.newBuilder()
+                    .setProductDetailsParamsList(listOf(params))
+                    .build()
+
+                billingClient.launchBillingFlow(activity, flowParams)
+            }
         }
-            .filterNotNull()
-            .map { tokenFlow.first() to it }
-            .first()
 
-        return runCatching {
-            val params = BillingFlowParams.ProductDetailsParams.newBuilder()
-                .setProductDetails(offerDetails.second)
-                .setOfferToken(offerDetails.first)
-                .build()
-
-            val flowParams = BillingFlowParams.newBuilder()
-                .setProductDetailsParamsList(listOf(params))
-                .build()
-
-            billingClient.launchBillingFlow(activity, flowParams)
-        }.coerceToUnit()
     }
 
     private suspend fun queryOneTimePurchases(): Result<List<Purchase>> {

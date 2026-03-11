@@ -1,37 +1,33 @@
 package us.webmy.core_sdk.presentation.base.navigator
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Parcelable
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-abstract class BaseNavigator(
-    val activity: AppCompatActivity
-) {
+interface Navigator {
+    fun navigate(activity: AppCompatActivity, nav: Navigation)
+}
 
-    private val filePickerLauncher = activity.registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) {
-        selectFileCallback?.invoke(it)
-        selectFileCallback = null
-    }
+abstract class BaseNavigator() : Navigator {
 
-    private var selectFileCallback: ((Uri?) -> Unit)? = null
-
-    fun finish() {
+    private fun finish(activity: AppCompatActivity) {
         activity.finish()
     }
 
-    abstract fun open(target: NavigationTarget)
+    protected abstract fun open(activity: AppCompatActivity, target: NavigationTarget)
 
-    fun openBrowser(url: String) {
+    private fun openBrowser(activity: AppCompatActivity, url: String) {
         activity.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
 
-    fun openEmailApp(email: String, subject: String?, text: String?) {
+    private fun openEmailApp(
+        activity: AppCompatActivity,
+        email: String,
+        subject: String?,
+        text: String?
+    ) {
         try {
             Intent(Intent.ACTION_SENDTO).apply {
                 data = "mailto:$email".toUri()
@@ -43,7 +39,7 @@ abstract class BaseNavigator(
         }
     }
 
-    fun openGooglePlay(applicationId: String) {
+    private fun openGooglePlay(activity: AppCompatActivity, applicationId: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 data = "market://details?id=$applicationId".toUri()
@@ -53,17 +49,25 @@ abstract class BaseNavigator(
         } catch (_: Exception) {
             // Fallback to browser if Play Store app is not available
             val url = "https://play.google.com/store/apps/details?id=$applicationId"
-            openBrowser(url)
+            openBrowser(activity, url)
         }
     }
 
-    fun showBottomSheet(dialog: BottomSheetDialogFragment) {
+    private fun showBottomSheet(activity: AppCompatActivity, dialog: BottomSheetDialogFragment) {
         dialog.show(activity.supportFragmentManager, dialog.javaClass.simpleName)
     }
 
-    fun selectFile(input: String, callback: (Uri?) -> Unit) {
-        selectFileCallback = callback
-        filePickerLauncher.launch(input)
+    override fun navigate(activity: AppCompatActivity, nav: Navigation) {
+        when (nav) {
+            is Navigation.Finish -> finish(activity)
+            is Navigation.GooglePlay -> openGooglePlay(activity, nav.applicationId)
+            is Navigation.Browser -> openBrowser(activity, nav.url)
+            is Navigation.Email -> openEmailApp(activity, nav.email, nav.subject, nav.text)
+            is Navigation.BottomSheet -> showBottomSheet(activity, nav.dialog)
+            is Navigation.Screen -> open(activity, nav.target)
+            is Navigation.Purchase -> Unit
+            is Navigation.Ad -> Unit
+        }
     }
 }
 

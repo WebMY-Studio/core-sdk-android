@@ -2,19 +2,20 @@ package us.webmy.core_sdk_extended.presentation.paywall.base
 
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewModelScope
-import us.webmy.core_sdk.presentation.base.navigator.BaseNavigator
-import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
-import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import us.webmy.core_sdk.presentation.base.navigator.Navigation
+import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
+import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
 
 abstract class BasePaywallViewModel(
-    private val navigator: BaseNavigator,
+    private val navigationProvider: NavigationProvider,
     private val premiumInteractor: PremiumInteractor,
     private val analyticsManager: AnalyticsManager
-) : BaseViewModel() {
+) : BaseViewModel(navigationProvider) {
 
     abstract val originProperty: String
 
@@ -29,11 +30,13 @@ abstract class BasePaywallViewModel(
 
     suspend fun purchase(productId: String) {
         purchaseInitiated = true
-        premiumInteractor.purchase(productId, navigator.activity)
+        navigationProvider.navigateTo(Navigation.Purchase(productId))
     }
 
     fun onCloseClick() {
-        navigator.finish()
+        viewModelScope.launch {
+            navigationProvider.navigateTo(Navigation.Finish)
+        }
     }
 
     private fun startPurchaseObservation() {
@@ -42,7 +45,7 @@ abstract class BasePaywallViewModel(
                 .filter { purchaseInitiated && it }
                 .first()
             logEvent(eventName = "purchase_success")
-            navigator.finish()
+            navigationProvider.navigateTo(Navigation.Finish)
         }
     }
 

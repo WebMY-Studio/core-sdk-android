@@ -6,11 +6,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
 import androidx.viewbinding.ViewBinding
-import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import org.koin.android.ext.android.inject
 import org.koin.androidx.scope.ScopeActivity
+import us.webmy.core_sdk.presentation.base.navigator.Navigation
+import us.webmy.core_sdk.presentation.base.navigator.Navigator
+import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import us.webmy.core_sdk.util.observe
 import java.lang.reflect.ParameterizedType
 
 abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivity() {
+
+    private val navigator: Navigator by inject()
 
     protected abstract val viewModel: VM
 
@@ -37,12 +43,18 @@ abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivit
 
         setContentView(binding.root)
         observe(viewModel)
+
+        viewModel.navigation.observe(this, ::handleNavigation)
         initView()
     }
 
     abstract fun initView()
 
     abstract fun observe(viewModel: VM)
+
+    private fun handleNavigation(navigation: Navigation) {
+        navigator.navigate(this, navigation)
+    }
 
     protected fun overrideOnBackPressed(action: () -> Unit) {
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {

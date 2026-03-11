@@ -7,19 +7,6 @@ import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
-import us.webmy.core_sdk.BuildConfig
-import us.webmy.core_sdk.WebMYConfig
-import us.webmy.core_sdk.data.NetworkApiCreator
-import us.webmy.core_sdk.data.RealNetworkApiCreator
-import us.webmy.core_sdk.data.csv.CsvFetcher
-import us.webmy.core_sdk.data.csv.RealCsvFetcher
-import us.webmy.core_sdk.data.prefs.OnboardingShownPreferences
-import us.webmy.core_sdk.tools.analytics.AnalyticsManager
-import us.webmy.core_sdk.tools.analytics.RealAnalyticsManager
-import us.webmy.core_sdk.tools.preferences.Preferences
-import us.webmy.core_sdk.tools.preferences.RealPreferences
-import us.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
-import us.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -27,6 +14,20 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
+import us.webmy.core_sdk.BuildConfig
+import us.webmy.core_sdk.WebMYConfig
+import us.webmy.core_sdk.data.NetworkApiCreator
+import us.webmy.core_sdk.data.RealNetworkApiCreator
+import us.webmy.core_sdk.data.csv.CsvFetcher
+import us.webmy.core_sdk.data.csv.RealCsvFetcher
+import us.webmy.core_sdk.data.prefs.OnboardingShownPreferences
+import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
+import us.webmy.core_sdk.tools.analytics.AnalyticsManager
+import us.webmy.core_sdk.tools.analytics.RealAnalyticsManager
+import us.webmy.core_sdk.tools.preferences.Preferences
+import us.webmy.core_sdk.tools.preferences.RealPreferences
+import us.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
+import us.webmy.core_sdk.tools.remoteconfig.RemoteConfigManager
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -37,6 +38,8 @@ internal fun sdkModule(config: WebMYConfig) = module {
 
     configureNetwork()
     configureCsv()
+
+    single { NavigationProvider() }
 }
 
 internal fun Module.configureAnalytics(config: WebMYConfig) {
