@@ -18,17 +18,17 @@ import us.webmy.core_sdk_compose.configs.RealWebmyTypography
 import us.webmy.core_sdk_compose.configs.WebmySpacings
 import us.webmy.core_sdk_compose.configs.WebmyTypography
 import us.webmy.core_sdk_compose.configs.colors.LocalWebmyColors
-import us.webmy.core_sdk_compose.configs.colors.palettes.DarkColorsPalette
+import us.webmy.core_sdk_compose.configs.colors.palettes.LightColorsPalette
 import us.webmy.core_sdk_compose.configs.colors.palettes.WebmyColorsPalette
 import us.webmy.core_sdk_compose.configs.materialShapes
 
-private val DarkColorsPalette = DarkColorsPalette()
+private val LightColorsPalette = LightColorsPalette()
 
 @Composable
 fun WebmyTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = DarkColorsPalette
+    val colors = LightColorsPalette
     val typography = RealWebmyTypography()
 
     val textSelectionColors = TextSelectionColors(

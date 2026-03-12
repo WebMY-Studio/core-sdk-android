@@ -2,14 +2,16 @@ package us.webmy.core_sdk_ads.navigator
 
 import androidx.appcompat.app.AppCompatActivity
 import us.webmy.core_sdk.presentation.base.navigator.Navigation
+import us.webmy.core_sdk.tools.biometrics.domain.BiometricsServiceFactory
 import us.webmy.core_sdk_ads.tools.ads.AdsPremiumManager
 import us.webmy.core_sdk_extended.navigator.BaseNavigatorExtended
 import us.webmy.core_sdk_extended.tools.billing.BillingManager
 
 abstract class BaseNavigatorAds(
+    biometricsServiceFactory: BiometricsServiceFactory,
     billingManager: BillingManager,
     private val adsPremiumManager: AdsPremiumManager,
-) : BaseNavigatorExtended(billingManager) {
+) : BaseNavigatorExtended(biometricsServiceFactory, billingManager) {
 
     override fun navigate(activity: AppCompatActivity, nav: Navigation) {
         when (nav) {

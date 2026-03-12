@@ -5,12 +5,18 @@ import android.os.Parcelable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import us.webmy.core_sdk.tools.biometrics.domain.BiometricsServiceFactory
 
 interface Navigator {
     fun navigate(activity: AppCompatActivity, nav: Navigation)
 }
 
-abstract class BaseNavigator() : Navigator {
+abstract class BaseNavigator(
+    private val biometricsServiceFactory: BiometricsServiceFactory
+) : Navigator {
 
     private fun finish(activity: AppCompatActivity) {
         activity.finish()
@@ -57,6 +63,17 @@ abstract class BaseNavigator() : Navigator {
         dialog.show(activity.supportFragmentManager, dialog.javaClass.simpleName)
     }
 
+    private fun authenticate(activity: AppCompatActivity, isOneTime: Boolean) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val biometricService = biometricsServiceFactory.create(activity)
+            if (isOneTime) {
+                biometricService.performOneTimeAuthentication()
+            } else {
+                biometricService.performSessionAuthentication()
+            }
+        }
+    }
+
     override fun navigate(activity: AppCompatActivity, nav: Navigation) {
         when (nav) {
             is Navigation.Finish -> finish(activity)
@@ -65,6 +82,7 @@ abstract class BaseNavigator() : Navigator {
             is Navigation.Email -> openEmailApp(activity, nav.email, nav.subject, nav.text)
             is Navigation.BottomSheet -> showBottomSheet(activity, nav.dialog)
             is Navigation.Screen -> open(activity, nav.target)
+            is Navigation.Auth -> authenticate(activity, nav.isOneTime)
             is Navigation.Purchase -> Unit
             is Navigation.Ad -> Unit
         }

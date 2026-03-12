@@ -24,6 +24,10 @@ import us.webmy.core_sdk.data.prefs.OnboardingShownPreferences
 import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk.tools.analytics.RealAnalyticsManager
+import us.webmy.core_sdk.tools.biometrics.data.AuthenticationSession
+import us.webmy.core_sdk.tools.biometrics.data.InMemoryAuthenticationSession
+import us.webmy.core_sdk.tools.biometrics.domain.BiometricsServiceFactory
+import us.webmy.core_sdk.tools.biometrics.domain.RealBiometricsServiceFactory
 import us.webmy.core_sdk.tools.preferences.Preferences
 import us.webmy.core_sdk.tools.preferences.RealPreferences
 import us.webmy.core_sdk.tools.remoteconfig.RealRemoteConfigManager
@@ -32,6 +36,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 internal fun sdkModule(config: WebMYConfig) = module {
+    configureBiometrics()
     configureRemoteConfig(config)
     configurePreferences(config)
     configureAnalytics(config)
@@ -117,6 +122,12 @@ internal fun Module.configureCsv() {
     single<CsvFetcher> {
         RealCsvFetcher(get())
     }
+}
+
+internal fun Module.configureBiometrics() {
+    single<AuthenticationSession> { InMemoryAuthenticationSession() }
+    factory<BiometricsServiceFactory> { RealBiometricsServiceFactory(get()) }
+
 }
 
 inline fun <reified T> Scope.getPayload(): T {

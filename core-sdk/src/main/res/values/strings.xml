@@ -33,4 +33,9 @@
     <string name="offer_just_for">just for</string>
     <string name="offer_CTA">Continue</string>
 
+    <!-- Biometric authentication -->
+    <string name="authentication_title">Confirm your identity</string>
+    <string name="authentication_description">Use your fingerprint or device lock to continue</string>
+
+
 </resources>

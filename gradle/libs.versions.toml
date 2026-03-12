@@ -17,6 +17,7 @@ material = "1.13.0"
 adaptyBom = "3.15.2"
 facebook = "18.1.3"
 activity = "1.13.0"
+biometric = "1.1.0"
 
 adjust = "5.4.6.0"
 admob = "24.7.0.0"
@@ -122,6 +123,7 @@ appodeal = { module = "com.appodeal.ads.sdk:core", version.ref = "appodeal" }
 adapty-bom = { module = "io.adapty:adapty-bom", version.ref = "adaptyBom" }
 adapty = { module = "io.adapty:android-sdk" }
 facebook = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebook" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 
 google-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "google-review" }
 google-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "google-play-services-ads" }

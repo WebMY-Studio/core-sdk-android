@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.firebase.config)
 
     implementation(libs.amplitude)
+    implementation(libs.androidx.biometric)
 
     api(libs.squareup.okhttp3.core)
     api(libs.squareup.okhttp3.logging)

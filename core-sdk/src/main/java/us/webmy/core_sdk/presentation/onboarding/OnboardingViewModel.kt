@@ -31,10 +31,10 @@ abstract class BaseOnboardingViewModel<T : OnboardingModel>(
         navigateNext()
     }
 
-    fun onNextClick(pageCount: Int) {
+    fun onNextClick() {
         viewModelScope.launch {
             val page = currentItem.first().index
-            if (page == pageCount - 1) {
+            if (page == onboardingModels.size - 1) {
                 onCloseClick()
             } else {
                 currentItem.emit(onboardingModels[page + 1])

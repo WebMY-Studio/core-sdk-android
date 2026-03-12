@@ -32,7 +32,6 @@ sealed interface Navigation {
         val productId: String
     ) : Navigation
 
-
     sealed interface Ad : Navigation {
         data class Interstitial(
             val source: String? = null
@@ -44,6 +43,7 @@ sealed interface Navigation {
             val source: String? = null,
             val rewardCallback: (Boolean) -> Unit,
         ) : Ad
-
     }
+
+    data class Auth(val isOneTime: Boolean): Navigation
 }
