@@ -15,14 +15,11 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
-import com.facebook.appevents.AppEventsConstants
-import com.facebook.appevents.AppEventsLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -33,6 +30,7 @@ import us.webmy.core_sdk.util.awaitTrue
 import us.webmy.core_sdk.util.coerceToUnit
 import us.webmy.core_sdk.util.failure
 import us.webmy.core_sdk.util.flatMap
+import us.webmy.core_sdk.util.mapListNotNull
 import us.webmy.core_sdk.util.singleReplaySharedFlow
 import kotlin.coroutines.CoroutineContext
 
@@ -53,7 +51,6 @@ class RealBillingManager(
     application: Application,
     private val oneTimeProducts: Set<String>,
     private val subscriptionProducts: Set<String>,
-    private val metaEventsLogger: AppEventsLogger
 ) : BillingManager, PurchasesUpdatedListener, CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
@@ -90,12 +87,6 @@ class RealBillingManager(
 
             isConnected.awaitTrue()
             fetchProducts()
-                .onSuccess {
-
-                }
-                .onFailure {
-
-                }
         }
     }
 
@@ -117,7 +108,6 @@ class RealBillingManager(
                         Product.OneTime(
                             id = productId,
                             title = detail.name,
-                            offerToken = offerDetails.offerToken,
                             formattedPrice = offerDetails.formattedPrice,
                             isPurchased = purchases.contains(productId)
                         )
@@ -237,34 +227,19 @@ class RealBillingManager(
     override fun purchase(activity: Activity, productId: String) {
         launch {
             runCatching {
-                val tokenFlow = productsFlow
-                    .mapNotNull { it.find { it.id == productId }?.offerToken }
+                val paramsBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
+                    .setProductDetails(requireOfferDetails(productId))
 
-                val offerDetails = combine(
-                    oneTimeDetailsFlow,
-                    subscriptionDetailsFlow
-                ) { oneTimeDetails, subscriptionDetails ->
-                    val details = oneTimeDetails[productId] ?: subscriptionDetails[productId]
-                    details
-                }
-                    .filterNotNull()
-                    .map { tokenFlow.first() to it }
-                    .first()
-
-
-                val params = BillingFlowParams.ProductDetailsParams.newBuilder()
-                    .setProductDetails(offerDetails.second)
-                    .setOfferToken(offerDetails.first)
-                    .build()
+                val offerToken = tryFindOfferToken(productId)
+                if (offerToken != null) paramsBuilder.setOfferToken(offerToken)
 
                 val flowParams = BillingFlowParams.newBuilder()
-                    .setProductDetailsParamsList(listOf(params))
+                    .setProductDetailsParamsList(listOf(paramsBuilder.build()))
                     .build()
 
                 billingClient.launchBillingFlow(activity, flowParams)
             }
         }
-
     }
 
     private suspend fun queryOneTimePurchases(): Result<List<Purchase>> {
@@ -353,8 +328,6 @@ class RealBillingManager(
                             val set = purchasesFlow.first().toMutableSet()
                             set.addAll(purchase.products)
                             purchasesFlow.emit(set)
-
-                            logStartTrialIfNeeded(purchase.products)
                         }
                     }
                 }
@@ -362,23 +335,25 @@ class RealBillingManager(
         }
     }
 
-    private suspend fun logStartTrialIfNeeded(purchasedProducts: Collection<String>) {
-        val products = productsFlow.first()
-        val freeTrialPurchased = products
-            .filter { purchasedProducts.contains(it.id) }
-            .mapNotNull { it as? Product.Subscription }
-            .any { it.phases.firstOrNull()?.priceMicros == 0L }
+    private suspend fun tryFindPurchaseDetails(productId: String) =
+        oneTimeDetailsFlow.first()[productId] ?: subscriptionDetailsFlow.first()[productId]
 
-        if (freeTrialPurchased) {
-            metaEventsLogger.logEvent(AppEventsConstants.EVENT_NAME_START_TRIAL)
-        }
+    private suspend fun tryFindOfferToken(productId: String): String? {
+        return productsFlow
+            .mapListNotNull { it as? Product.Subscription }
+            .map { it.find { it.id == productId }?.offerToken }
+            .first()
     }
+
+    private suspend fun requireOfferDetails(productId: String) =
+        requireNotNull(tryFindPurchaseDetails(productId)) {
+            "Cannot find offer details for product with :id = $productId"
+        }
 
     override suspend fun canBePurchased(productId: String): Boolean {
         val premiumProductAvailableToPurchase = productsFlow
             .map { products ->
-                products.filter { !it.isPurchased }
-                    .find { it.id == productId }
+                products.filter { !it.isPurchased }.find { it.id == productId }
             }
             .first()
 

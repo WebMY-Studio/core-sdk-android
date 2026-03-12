@@ -4,23 +4,21 @@ sealed class Product(
     open val id: String,
     open val isPurchased: Boolean,
     open val title: String,
-    open val offerToken: String?,
 ) {
     data class OneTime(
         override val id: String,
         override val isPurchased: Boolean,
-        override val offerToken: String?,
         override val title: String,
         val formattedPrice: String?,
-    ) : Product(id, isPurchased, title, offerToken)
+    ) : Product(id, isPurchased, title)
 
     data class Subscription(
         override val id: String,
         override val isPurchased: Boolean,
-        override val offerToken: String?,
         override val title: String,
+        val offerToken: String?,
         val phases: List<Phase>
-    ) : Product(id, isPurchased, title, offerToken) {
+    ) : Product(id, isPurchased, title) {
         data class Phase(
             val formattedPrice: String,
             val billingPeriod: String,
