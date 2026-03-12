@@ -1,8 +1,6 @@
 package us.webmy.core_sdk_extended.presentation.paywall
 
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
@@ -32,8 +30,6 @@ abstract class BaseOfferPaywallViewModel(
         find { it.id == config.offerPlanId }?.phases?.firstOrNull()
 
     fun onContinueClick() {
-        viewModelScope.launch {
-            purchase(config.offerPlanId)
-        }
+        purchase(config.offerPlanId)
     }
 }

@@ -12,7 +12,7 @@ import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
 
 abstract class BasePaywallViewModel(
-    private val navigationProvider: NavigationProvider,
+    navigationProvider: NavigationProvider,
     private val premiumInteractor: PremiumInteractor,
     private val analyticsManager: AnalyticsManager
 ) : BaseViewModel(navigationProvider) {
@@ -28,15 +28,13 @@ abstract class BasePaywallViewModel(
 
     private var purchaseInitiated = false
 
-    suspend fun purchase(productId: String) {
+    protected fun purchase(productId: String) {
         purchaseInitiated = true
-        navigationProvider.navigateTo(Navigation.Purchase(productId))
+        navigateTo(Navigation.Purchase(productId))
     }
 
     fun onCloseClick() {
-        viewModelScope.launch {
-            navigationProvider.navigateTo(Navigation.Finish)
-        }
+        navigateTo(Navigation.Finish)
     }
 
     private fun startPurchaseObservation() {
@@ -45,7 +43,7 @@ abstract class BasePaywallViewModel(
                 .filter { purchaseInitiated && it }
                 .first()
             logEvent(eventName = "purchase_success")
-            navigationProvider.navigateTo(Navigation.Finish)
+            navigateTo(Navigation.Finish)
         }
     }
 
