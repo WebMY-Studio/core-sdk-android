@@ -63,13 +63,12 @@ abstract class BaseNavigator(
         dialog.show(activity.supportFragmentManager, dialog.javaClass.simpleName)
     }
 
-    private fun authenticate(activity: AppCompatActivity, isOneTime: Boolean) {
+    private fun authenticate(activity: AppCompatActivity, auth: Navigation.Auth) {
         CoroutineScope(Dispatchers.Main).launch {
             val biometricService = biometricsServiceFactory.create(activity)
-            if (isOneTime) {
-                biometricService.performOneTimeAuthentication()
-            } else {
-                biometricService.performSessionAuthentication()
+            when (auth) {
+                Navigation.Auth.OneTime -> biometricService.performOneTimeAuthentication()
+                Navigation.Auth.Session -> biometricService.performSessionAuthentication()
             }
         }
     }
@@ -82,7 +81,7 @@ abstract class BaseNavigator(
             is Navigation.Email -> openEmailApp(activity, nav.email, nav.subject, nav.text)
             is Navigation.BottomSheet -> showBottomSheet(activity, nav.dialog)
             is Navigation.Screen -> open(activity, nav.target)
-            is Navigation.Auth -> authenticate(activity, nav.isOneTime)
+            is Navigation.Auth -> authenticate(activity, nav)
             is Navigation.Purchase -> Unit
             is Navigation.Ad -> Unit
         }

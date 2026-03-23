@@ -45,5 +45,8 @@ sealed interface Navigation {
         ) : Ad
     }
 
-    data class Auth(val isOneTime: Boolean): Navigation
+    sealed interface Auth : Navigation {
+        object OneTime : Auth
+        object Session : Auth
+    }
 }

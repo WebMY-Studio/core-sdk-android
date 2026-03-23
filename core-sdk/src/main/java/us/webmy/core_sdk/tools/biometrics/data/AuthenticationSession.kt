@@ -2,6 +2,8 @@ package us.webmy.core_sdk.tools.biometrics.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 interface AuthenticationSession {
     val hasAuthenticatedInCurrentSession: Flow<Boolean>
@@ -10,6 +12,9 @@ interface AuthenticationSession {
 
     fun markAuthenticated()
 }
+
+suspend fun AuthenticationSession.awaitAuthenticated() =
+    hasAuthenticatedInCurrentSession.filter { it }.first()
 
 internal class InMemoryAuthenticationSession() : AuthenticationSession {
     override val hasAuthenticatedInCurrentSession = MutableStateFlow(false)
