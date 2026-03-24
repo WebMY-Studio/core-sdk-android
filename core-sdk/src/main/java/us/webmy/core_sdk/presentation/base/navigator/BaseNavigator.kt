@@ -1,14 +1,22 @@
 package us.webmy.core_sdk.presentation.base.navigator
 
 import android.content.Intent
+import android.os.Build
 import android.os.Parcelable
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import us.webmy.core_sdk.tools.biometrics.domain.BiometricsServiceFactory
+import us.webmy.core_sdk.util.coerceToUnit
+import us.webmy.core_sdk.util.executeSuspend
 
 interface Navigator {
     fun navigate(activity: AppCompatActivity, nav: Navigation)
@@ -73,6 +81,15 @@ abstract class BaseNavigator(
         }
     }
 
+    private fun showRateApp(activity: AppCompatActivity) {
+        CoroutineScope(Dispatchers.Main).launch {
+            ReviewManagerFactory.create(activity)
+                .requestReviewFlow()
+                .executeSuspend()
+                .coerceToUnit()
+        }
+    }
+
     override fun navigate(activity: AppCompatActivity, nav: Navigation) {
         when (nav) {
             is Navigation.Finish -> finish(activity)
@@ -82,6 +99,7 @@ abstract class BaseNavigator(
             is Navigation.BottomSheet -> showBottomSheet(activity, nav.dialog)
             is Navigation.Screen -> open(activity, nav.target)
             is Navigation.Auth -> authenticate(activity, nav)
+            is Navigation.RateApp -> showRateApp(activity)
             is Navigation.Purchase -> Unit
             is Navigation.Ad -> Unit
         }
@@ -93,3 +111,16 @@ fun <T : Parcelable> Intent.withPayload(payload: T): Intent {
         putExtra(payload::class.java.name, payload)
     }
 }
+
+inline fun <reified T : Parcelable> Intent.getPayload(): T {
+    val clazz = T::class.java
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableExtra(clazz.name, clazz)!!
+    } else {
+        @Suppress("DEPRECATION")
+        (getParcelableExtra(clazz.name) as T?)!!
+    }
+}
+
+inline fun <reified VM : ViewModel, reified T : Parcelable> ComponentActivity.viewModelWithPayload() =
+    viewModel<VM> { parametersOf(intent.getPayload<T>()) }

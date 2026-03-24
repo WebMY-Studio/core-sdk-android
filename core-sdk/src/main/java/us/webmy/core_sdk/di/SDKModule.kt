@@ -1,7 +1,5 @@
 package us.webmy.core_sdk.di
 
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
@@ -12,7 +10,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
-import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import us.webmy.core_sdk.BuildConfig
 import us.webmy.core_sdk.WebMYConfig
@@ -128,15 +125,4 @@ internal fun Module.configureBiometrics() {
     single<AuthenticationSession> { InMemoryAuthenticationSession() }
     factory<BiometricsServiceFactory> { RealBiometricsServiceFactory(get()) }
 
-}
-
-inline fun <reified T> Scope.getPayload(): T {
-    val activity = get<AppCompatActivity>()
-
-    val clazz = T::class.java
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        activity.intent.getParcelableExtra(clazz.name, clazz)!!
-    } else {
-        activity.intent.getParcelableExtra(clazz.name)!!
-    }
 }

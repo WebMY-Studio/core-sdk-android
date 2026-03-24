@@ -1,5 +1,6 @@
 package us.webmy.core_sdk.presentation.base.navigator
 
+import android.widget.FrameLayout
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 sealed interface Navigation {
@@ -24,6 +25,8 @@ sealed interface Navigation {
         val applicationId: String
     ) : Navigation
 
+    object RateApp : Navigation
+
     data class BottomSheet(
         val dialog: BottomSheetDialogFragment
     ) : Navigation
@@ -42,6 +45,10 @@ sealed interface Navigation {
             val grantWhenPremium: Boolean = true,
             val source: String? = null,
             val rewardCallback: (Boolean) -> Unit,
+        ) : Ad
+
+        data class Banner(
+            val container: FrameLayout
         ) : Ad
     }
 

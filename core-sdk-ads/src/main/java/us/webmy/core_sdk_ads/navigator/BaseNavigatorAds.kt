@@ -28,6 +28,11 @@ abstract class BaseNavigatorAds(
                 rewardCallback = nav.rewardCallback
             )
 
+            is Navigation.Ad.Banner -> adsPremiumManager.requestBanner(
+                activity = activity,
+                container = nav.container
+            )
+
             else -> super.navigate(activity, nav)
         }
     }

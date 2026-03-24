@@ -40,11 +40,11 @@ abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivit
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        viewModel.navigation.observe(this, ::handleNavigation)
 
         setContentView(binding.root)
         observe(viewModel)
 
-        viewModel.navigation.observe(this, ::handleNavigation)
         initView()
     }
 
