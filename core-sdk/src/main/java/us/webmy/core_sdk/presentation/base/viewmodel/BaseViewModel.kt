@@ -14,7 +14,7 @@ open class BaseViewModel(
     val navigation: SharedFlow<Navigation>
         get() = navigationProvider.subscribeNavigation()
 
-    protected fun navigateTo(navigation: Navigation) {
+    fun navigateTo(navigation: Navigation) {
         viewModelScope.launch {
             navigationProvider.navigateTo(navigation)
         }

@@ -41,7 +41,7 @@ internal fun sdkModule(config: WebMYConfig) = module {
     configureNetwork()
     configureCsv()
 
-    single { NavigationProvider() }
+    factory { NavigationProvider() }
 }
 
 internal fun Module.configureAnalytics(config: WebMYConfig) {

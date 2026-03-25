@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.Lifecycle
 import androidx.viewbinding.ViewBinding
 import org.koin.android.ext.android.inject
 import org.koin.androidx.scope.ScopeActivity
@@ -40,7 +41,7 @@ abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivit
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-        viewModel.navigation.observe(this, ::handleNavigation)
+        viewModel.navigation.observe(this, ::handleNavigation, Lifecycle.State.CREATED)
 
         setContentView(binding.root)
         observe(viewModel)

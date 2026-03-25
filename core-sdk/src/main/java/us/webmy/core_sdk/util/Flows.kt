@@ -21,8 +21,12 @@ suspend inline fun Flow<Boolean>.awaitTrue() {
     first { it }
 }
 
-fun <V> Flow<V>.observe(owner: LifecycleOwner, collector: suspend (V) -> Unit) {
-    observe(owner, Lifecycle.State.RESUMED, collector)
+fun <V> Flow<V>.observe(
+    owner: LifecycleOwner,
+    collector: suspend (V) -> Unit,
+    state: Lifecycle.State = Lifecycle.State.RESUMED
+) {
+    observe(owner, state, collector)
 }
 
 fun <V> Flow<V>.observe(
