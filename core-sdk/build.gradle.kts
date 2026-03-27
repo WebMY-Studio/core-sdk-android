@@ -39,6 +39,7 @@ dependencies {
 
     api(platform(libs.koin.bom))
     api(libs.koin.android)
+    api(libs.koin.compose)
 
     implementation(libs.google.review.ktx)
 

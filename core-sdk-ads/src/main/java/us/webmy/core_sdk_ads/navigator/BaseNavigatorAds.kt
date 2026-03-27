@@ -13,27 +13,29 @@ abstract class BaseNavigatorAds(
     private val adsPremiumManager: AdsPremiumManager,
 ) : BaseNavigatorExtended(biometricsServiceFactory, billingManager) {
 
-    override fun navigate(activity: AppCompatActivity, nav: Navigation) {
-        when (nav) {
-            is Navigation.Ad.Interstitial -> adsPremiumManager.requestInterstitial(
-                activity = activity,
-                source = nav.source
-            )
+    override suspend fun navigate(activity: AppCompatActivity, nav: Navigation): Result<Unit> {
+        return runCatching {
+            when (nav) {
+                is Navigation.Ad.Interstitial -> adsPremiumManager.requestInterstitial(
+                    activity = activity,
+                    source = nav.source
+                )
 
-            is Navigation.Ad.Reward -> adsPremiumManager.requestReward(
-                activity = activity,
-                source = nav.source,
-                placement = nav.placement,
-                grantWhenPremium = nav.grantWhenPremium,
-                rewardCallback = nav.rewardCallback
-            )
+                is Navigation.Ad.Reward -> adsPremiumManager.requestReward(
+                    activity = activity,
+                    source = nav.source,
+                    placement = nav.placement,
+                    grantWhenPremium = nav.grantWhenPremium,
+                    rewardCallback = nav.rewardCallback
+                )
 
-            is Navigation.Ad.Banner -> adsPremiumManager.requestBanner(
-                activity = activity,
-                container = nav.container
-            )
+                is Navigation.Ad.Banner -> adsPremiumManager.requestBanner(
+                    activity = activity,
+                    container = nav.container
+                )
 
-            else -> super.navigate(activity, nav)
+                else -> super.navigate(activity, nav)
+            }
         }
     }
 }

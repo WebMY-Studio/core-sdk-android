@@ -9,9 +9,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.play.core.review.ReviewManagerFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import us.webmy.core_sdk.tools.biometrics.domain.BiometricsServiceFactory
@@ -19,20 +16,20 @@ import us.webmy.core_sdk.util.coerceToUnit
 import us.webmy.core_sdk.util.executeSuspend
 
 interface Navigator {
-    fun navigate(activity: AppCompatActivity, nav: Navigation)
+    suspend fun navigate(activity: AppCompatActivity, nav: Navigation): Result<Unit>
 }
 
 abstract class BaseNavigator(
     private val biometricsServiceFactory: BiometricsServiceFactory
 ) : Navigator {
 
-    private fun finish(activity: AppCompatActivity) {
+    private fun finish(activity: AppCompatActivity) = runCatching {
         activity.finish()
     }
 
-    protected abstract fun open(activity: AppCompatActivity, target: NavigationTarget)
+    protected abstract fun open(activity: AppCompatActivity, target: NavigationTarget): Result<Unit>
 
-    private fun openBrowser(activity: AppCompatActivity, url: String) {
+    private fun openBrowser(activity: AppCompatActivity, url: String) = runCatching {
         activity.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
 
@@ -41,7 +38,7 @@ abstract class BaseNavigator(
         email: String,
         subject: String?,
         text: String?
-    ) {
+    ) = runCatching {
         try {
             Intent(Intent.ACTION_SENDTO).apply {
                 data = "mailto:$email".toUri()
@@ -52,8 +49,9 @@ abstract class BaseNavigator(
         } catch (_: Exception) {
         }
     }
+        .coerceToUnit()
 
-    private fun openGooglePlay(activity: AppCompatActivity, applicationId: String) {
+    private fun openGooglePlay(activity: AppCompatActivity, applicationId: String) = runCatching {
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 data = "market://details?id=$applicationId".toUri()
@@ -66,32 +64,35 @@ abstract class BaseNavigator(
             openBrowser(activity, url)
         }
     }
+        .coerceToUnit()
 
-    private fun showBottomSheet(activity: AppCompatActivity, dialog: BottomSheetDialogFragment) {
+    private fun showBottomSheet(
+        activity: AppCompatActivity,
+        dialog: BottomSheetDialogFragment
+    ) = runCatching {
         dialog.show(activity.supportFragmentManager, dialog.javaClass.simpleName)
     }
 
-    private fun authenticate(activity: AppCompatActivity, auth: Navigation.Auth) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val biometricService = biometricsServiceFactory.create(activity)
-            when (auth) {
-                Navigation.Auth.OneTime -> biometricService.performOneTimeAuthentication()
-                Navigation.Auth.Session -> biometricService.performSessionAuthentication()
-            }
+    private suspend fun authenticate(
+        activity: AppCompatActivity,
+        auth: Navigation.Auth
+    ): Result<Unit> {
+        val biometricService = biometricsServiceFactory.create(activity)
+        return when (auth) {
+            Navigation.Auth.OneTime -> biometricService.performOneTimeAuthentication()
+            Navigation.Auth.Session -> biometricService.performSessionAuthentication()
         }
+            .coerceToUnit()
     }
 
-    private fun showRateApp(activity: AppCompatActivity) {
-        CoroutineScope(Dispatchers.Main).launch {
-            ReviewManagerFactory.create(activity)
-                .requestReviewFlow()
-                .executeSuspend()
-                .coerceToUnit()
-        }
-    }
+    private suspend fun showRateApp(activity: AppCompatActivity) =
+        ReviewManagerFactory.create(activity)
+            .requestReviewFlow()
+            .executeSuspend()
+            .coerceToUnit()
 
-    override fun navigate(activity: AppCompatActivity, nav: Navigation) {
-        when (nav) {
+    override suspend fun navigate(activity: AppCompatActivity, nav: Navigation): Result<Unit> {
+        return when (nav) {
             is Navigation.Finish -> finish(activity)
             is Navigation.GooglePlay -> openGooglePlay(activity, nav.applicationId)
             is Navigation.Browser -> openBrowser(activity, nav.url)
@@ -100,8 +101,8 @@ abstract class BaseNavigator(
             is Navigation.Screen -> open(activity, nav.target)
             is Navigation.Auth -> authenticate(activity, nav)
             is Navigation.RateApp -> showRateApp(activity)
-            is Navigation.Purchase -> Unit
-            is Navigation.Ad -> Unit
+            is Navigation.Purchase -> Result.failure(Throwable("Not implemented"))
+            is Navigation.Ad -> Result.failure(Throwable("Not implemented"))
         }
     }
 }

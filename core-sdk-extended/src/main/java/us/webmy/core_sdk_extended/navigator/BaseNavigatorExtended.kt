@@ -11,8 +11,8 @@ abstract class BaseNavigatorExtended(
     private val billingManager: BillingManager
 ) : BaseNavigator(biometricsServiceFactory) {
 
-    override fun navigate(activity: AppCompatActivity, nav: Navigation) {
-        when (nav) {
+    override suspend fun navigate(activity: AppCompatActivity, nav: Navigation): Result<Unit> {
+       return when (nav) {
             is Navigation.Purchase -> billingManager.purchase(activity, nav.productId)
             else -> super.navigate(activity, nav)
         }

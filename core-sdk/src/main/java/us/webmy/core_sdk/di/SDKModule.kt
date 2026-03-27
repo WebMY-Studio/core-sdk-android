@@ -18,7 +18,6 @@ import us.webmy.core_sdk.data.RealNetworkApiCreator
 import us.webmy.core_sdk.data.csv.CsvFetcher
 import us.webmy.core_sdk.data.csv.RealCsvFetcher
 import us.webmy.core_sdk.data.prefs.OnboardingShownPreferences
-import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk.tools.analytics.RealAnalyticsManager
 import us.webmy.core_sdk.tools.biometrics.data.AuthenticationSession
@@ -40,8 +39,6 @@ internal fun sdkModule(config: WebMYConfig) = module {
 
     configureNetwork()
     configureCsv()
-
-    factory { NavigationProvider() }
 }
 
 internal fun Module.configureAnalytics(config: WebMYConfig) {

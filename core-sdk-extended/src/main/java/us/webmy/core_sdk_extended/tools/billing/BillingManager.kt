@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,7 +39,7 @@ interface BillingManager {
 
     suspend fun fetchProducts(): Result<Unit>
 
-    fun purchase(activity: Activity, productId: String)
+    suspend fun purchase(activity: Activity, productId: String): Result<Unit>
 
     suspend fun canBePurchased(productId: String): Boolean
 
@@ -224,23 +223,20 @@ class RealBillingManager(
             .coerceToUnit()
     }
 
-    override fun purchase(activity: Activity, productId: String) {
-        launch {
-            runCatching {
-                val paramsBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
-                    .setProductDetails(requireOfferDetails(productId))
+    override suspend fun purchase(activity: Activity, productId: String) = runCatching {
+        val paramsBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
+            .setProductDetails(requireOfferDetails(productId))
 
-                val offerToken = tryFindOfferToken(productId)
-                if (offerToken != null) paramsBuilder.setOfferToken(offerToken)
+        val offerToken = tryFindOfferToken(productId)
+        if (offerToken != null) paramsBuilder.setOfferToken(offerToken)
 
-                val flowParams = BillingFlowParams.newBuilder()
-                    .setProductDetailsParamsList(listOf(paramsBuilder.build()))
-                    .build()
+        val flowParams = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(listOf(paramsBuilder.build()))
+            .build()
 
-                billingClient.launchBillingFlow(activity, flowParams)
-            }
-        }
+        billingClient.launchBillingFlow(activity, flowParams)
     }
+        .coerceToUnit()
 
     private suspend fun queryOneTimePurchases(): Result<List<Purchase>> {
         if (oneTimeProducts.isEmpty()) {

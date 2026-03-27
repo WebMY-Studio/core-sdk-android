@@ -1,7 +1,6 @@
 package us.webmy.core_sdk_extended.presentation.paywall
 
 import kotlinx.coroutines.flow.mapNotNull
-import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
 import us.webmy.core_sdk_extended.presentation.paywall.base.BasePaywallViewModel
@@ -11,11 +10,10 @@ import us.webmy.core_sdk_extended.tools.billing.Product
 
 abstract class BaseOfferPaywallViewModel(
     private val config: OfferPaywallConfig,
-    navigationProvider: NavigationProvider,
     premiumInteractor: PremiumInteractor,
     analyticsManager: AnalyticsManager
 ) : BasePaywallViewModel(
-    navigationProvider, premiumInteractor, analyticsManager
+    premiumInteractor, analyticsManager
 ) {
 
     val offerUiStateFlow = subscriptionsFlow

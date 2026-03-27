@@ -39,6 +39,8 @@ dependencies {
     api(libs.androidx.compose.animation.graphics)
     api(libs.androidx.compose.ui.util)
     api(libs.androidx.compose.ui.text.google.fonts)
+    api(libs.androidx.compose.material.icons)
+    api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.activity.compose)
 
     debugImplementation(project(":core-sdk-compose-preview"))

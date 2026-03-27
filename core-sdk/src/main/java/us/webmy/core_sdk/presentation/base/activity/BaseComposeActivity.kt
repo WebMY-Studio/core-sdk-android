@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.scope.ScopeActivity
 import us.webmy.core_sdk.presentation.base.navigator.Navigation
@@ -15,7 +18,6 @@ import us.webmy.core_sdk.presentation.base.navigator.Navigator
 import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
 import us.webmy.core_sdk.util.observe
 import us.webmy.core_sdk_compose.theme.WebmyTheme
-import kotlin.getValue
 
 abstract class BaseComposeActivity<VM : BaseViewModel> : ScopeActivity() {
 
@@ -42,8 +44,10 @@ abstract class BaseComposeActivity<VM : BaseViewModel> : ScopeActivity() {
         }
     }
 
-    private fun handleNavigation(navigation: Navigation) {
-        navigator.navigate(this, navigation)
+    fun handleNavigation(navigation: Navigation) {
+        CoroutineScope(Dispatchers.Main).launch {
+            navigator.navigate(this@BaseComposeActivity, navigation)
+        }
     }
 
     @Composable

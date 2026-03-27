@@ -7,6 +7,9 @@ import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Lifecycle
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.scope.ScopeActivity
 import us.webmy.core_sdk.presentation.base.navigator.Navigation
@@ -53,8 +56,10 @@ abstract class BaseActivity<VM : BaseViewModel, VB : ViewBinding> : ScopeActivit
 
     abstract fun observe(viewModel: VM)
 
-    private fun handleNavigation(navigation: Navigation) {
-        navigator.navigate(this, navigation)
+    protected fun handleNavigation(navigation: Navigation) {
+        CoroutineScope(Dispatchers.Main).launch {
+            navigator.navigate(this@BaseActivity, navigation)
+        }
     }
 
     protected fun overrideOnBackPressed(action: () -> Unit) {

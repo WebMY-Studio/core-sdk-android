@@ -4,6 +4,11 @@ import android.graphics.drawable.Drawable
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ImageSpan
+import androidx.compose.runtime.Composable
+import org.koin.compose.viewmodel.koinViewModel
+import us.webmy.core_sdk.presentation.base.activity.BaseComposeActivity
+import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
+import us.webmy.core_sdk.util.observe
 
 fun SpannableString.addImageToEnd(drawable: Drawable) {
     drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
@@ -24,3 +29,9 @@ fun SpannableString.addImageToStart(drawable: Drawable) {
         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     )
 }
+
+@Composable
+inline fun <reified T : BaseViewModel> koinViewModelWithNavigation(activity: BaseComposeActivity<*>) =
+    koinViewModel<T>().apply {
+        navigation.observe(activity, activity::handleNavigation)
+    }

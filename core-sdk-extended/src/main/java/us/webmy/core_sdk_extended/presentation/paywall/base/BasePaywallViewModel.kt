@@ -6,16 +6,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import us.webmy.core_sdk.presentation.base.navigator.Navigation
-import us.webmy.core_sdk.presentation.base.navigator.NavigationProvider
 import us.webmy.core_sdk.presentation.base.viewmodel.BaseViewModel
 import us.webmy.core_sdk.tools.analytics.AnalyticsManager
 import us.webmy.core_sdk_extended.domain.interactor.PremiumInteractor
 
 abstract class BasePaywallViewModel(
-    navigationProvider: NavigationProvider,
     private val premiumInteractor: PremiumInteractor,
     private val analyticsManager: AnalyticsManager
-) : BaseViewModel(navigationProvider) {
+) : BaseViewModel() {
 
     abstract val originProperty: String
 
