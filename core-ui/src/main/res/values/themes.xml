@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="BaseTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="android:statusBarColor">@color/backgroundPrimary</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/backgroundPrimary</item>
+        <item name="bottomSheetDialogTheme">@style/Webmy.BottomSheetDialogTheme</item>
+    </style>
+
+    <style name="Webmy.BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Webmy.ModalStyle</item>
+    </style>
+
+    <style name="Webmy.ModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_bottom_sheet_fragment</item>
+    </style>
+
+    <style name="BaseTextTheme" />
+
+    <style name="Webmy.Text" parent="BaseTextTheme">
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Webmy.Text.H1" parent="Webmy.Text">
+        <item name="android:textSize">36sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H2" parent="Webmy.Text">
+        <item name="android:textSize">32sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H3" parent="Webmy.Text">
+        <item name="android:textSize">24sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H3.Medium" parent="Webmy.Text">
+        <item name="android:textSize">24sp</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Webmy.Text.H4" parent="Webmy.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H4.Medium" parent="Webmy.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Webmy.Text.H4.BOLD" parent="Webmy.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.H5" parent="Webmy.Text">
+        <item name="android:textSize">18sp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.Body1" parent="Webmy.Text">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="Webmy.Text.Body1.Medium" parent="Webmy.Text.Body1">
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Webmy.Text.Body1.Bold" parent="Webmy.Text.Body1">
+        <item name="fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="Webmy.Text.Body2" parent="Webmy.Text">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="Webmy.Text.Body2.Medium" parent="Webmy.Text.Body2">
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Webmy.Text.Caption" parent="Webmy.Text">
+        <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+</resources>

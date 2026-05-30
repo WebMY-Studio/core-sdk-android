@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="sec" translatable="false">sec</string>
+    <string name="min" translatable="false">min</string>
+    <string name="hour" translatable="false">h</string>
+    <string name="day">day</string>
+    <string name="week">week</string>
+    <string name="month">month</string>
+    <string name="year">year</string>
+
+    <string name="common_save" translatable="false">Save</string>
+    <string name="common_done" translatable="false">Done</string>
+    <string name="common_start" translatable="false">Start</string>
+    <string name="common_close" translatable="false">Close</string>
+    <string name="common_next" translatable="false">Next</string>
+    <string name="common_confirm" translatable="false">Confirm</string>
+
+    <!-- Paywall -->
+    <string name="paywall_free">%s free</string>
+    <string name="paywall_btn_text_free">Try for free</string>
+    <string name="paywall_btn_text_pay">Subscribe for %s</string>
+    <string name="paywall_btn_text_continue">Continue</string>
+    <string name="paywall_price_placeholder">%1$s %2$s per %3$s</string> <!--399.99 zl per year -->
+    <string name="paywall_price_placeholder_2">%1$s %2$s/%3$s</string> <!--399.99 zl/week -->
+
+    <!-- Offer -->
+    <string name="offer_header_title">Powered by AI</string>
+    <string name="offer_subtitle">🔥 Hot Offer 🔥</string>
+    <string name="offer_title">Enjoy %s%% Off\nfor a Year</string>
+    <string name="offer_description">Only for a Limited Time!</string>
+    <string name="offer_enjoy_all_features">Enjoy All Features</string>
+    <string name="offer_just_for">just for</string>
+    <string name="offer_CTA">Continue</string>
+
+    <!-- Biometric authentication -->
+    <string name="authentication_title">Confirm your identity</string>
+    <string name="authentication_description">Use your fingerprint or device lock to continue</string>
+
+
+</resources>
