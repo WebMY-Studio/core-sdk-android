@@ -3,7 +3,7 @@ package us.webmy.core.ui.presentation.onboarding
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import us.webmy.core.data.prefs.OnboardingShownPreferences
+import us.webmy.core.ui.data.prefs.OnboardingShownPreferences
 import us.webmy.core.ui.presentation.base.viewmodel.BaseViewModel
 import us.webmy.core.tools.analytics.AnalyticsManager
 import us.webmy.core.util.singleReplaySharedFlow

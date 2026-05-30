@@ -1,9 +1,13 @@
 package us.webmy.core.tools.biometrics.domain
 
+import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import us.webmy.core.error.SdkError
 import us.webmy.core.tools.biometrics.data.AuthenticationMethod
 import us.webmy.core.tools.biometrics.data.AuthenticationSession
+import us.webmy.core.tools.biometrics.data.methods.BiometricPromptAuthenticationMethod
+import us.webmy.core.util.ActivityProvider
 
 interface BiometricsService {
     /**
@@ -15,22 +19,28 @@ interface BiometricsService {
     suspend fun performOneTimeAuthentication(): Result<Unit>
 }
 
-
 internal class RealBiometricsService(
-    private val authMethod: AuthenticationMethod,
+    private val activityProvider: ActivityProvider,
     private val authenticationSession: AuthenticationSession,
 ) : BiometricsService {
+
     private val authMutex = Mutex()
 
     override suspend fun performSessionAuthentication() = authMutex.withLock {
         if (authenticationSession.isAuthenticated()) return Result.success(Unit)
 
-        authMethod.authenticateUser().onSuccess {
+        currentMethod().authenticateUser().onSuccess {
             authenticationSession.markAuthenticated()
         }
     }
 
     override suspend fun performOneTimeAuthentication() = authMutex.withLock {
-        authMethod.authenticateUser()
+        currentMethod().authenticateUser()
+    }
+
+    private fun currentMethod(): AuthenticationMethod {
+        val activity = activityProvider.requireCurrent() as? FragmentActivity
+            ?: throw SdkError.NotSupported("BiometricPrompt requires a FragmentActivity")
+        return BiometricPromptAuthenticationMethod(activity)
     }
 }

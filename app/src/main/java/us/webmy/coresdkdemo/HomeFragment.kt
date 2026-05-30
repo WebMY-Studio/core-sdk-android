@@ -13,14 +13,14 @@ import org.koin.compose.koinInject
 import us.webmy.core.ui.compose.components.button.WebmyButton
 import us.webmy.core.ui.presentation.base.fragment.BaseComposeFragment
 import us.webmy.core.ui.presentation.base.navigator.Navigation
-import us.webmy.core.ui.presentation.base.navigator.Navigator
+import us.webmy.core.ui.presentation.base.navigator.Router
 import us.webmy.core.ui.presentation.base.navigator.screen
 
 class HomeFragment : BaseComposeFragment() {
 
     @Composable
     override fun ScreenContent() {
-        val navigator: Navigator = koinInject()
+        val router: Router = koinInject()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -32,7 +32,7 @@ class HomeFragment : BaseComposeFragment() {
             WebmyButton(
                 text = "Open Settings (XML) with args",
                 onClick = {
-                    navigator.go(
+                    router.go(
                         screen<SettingsFragment>(
                             SettingsArgs(userId = "42", title = "Hello from Home"),
                         )
@@ -41,7 +41,7 @@ class HomeFragment : BaseComposeFragment() {
             )
             WebmyButton(
                 text = "Open Browser",
-                onClick = { navigator.go(Navigation.Browser("https://example.com")) },
+                onClick = { router.go(Navigation.Browser("https://example.com")) },
             )
         }
     }

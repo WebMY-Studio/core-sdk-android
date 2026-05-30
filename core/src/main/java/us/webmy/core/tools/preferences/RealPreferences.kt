@@ -16,8 +16,6 @@ class RealPreferences(application: Application) : Preferences {
             Context.MODE_PRIVATE
         )
 
-    private val listeners = mutableSetOf<SharedPreferences.OnSharedPreferenceChangeListener>()
-
     override fun contains(field: String) = sharedPreferences.contains(field)
 
     override fun putString(
@@ -149,11 +147,9 @@ class RealPreferences(application: Application) : Preferences {
                     }
                 }
 
-            listeners.add(listener)
             sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
 
             awaitClose {
-                listeners.remove(listener)
                 sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
             }
         }

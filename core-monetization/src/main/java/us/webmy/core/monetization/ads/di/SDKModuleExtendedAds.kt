@@ -2,17 +2,16 @@ package us.webmy.core.monetization.ads.di
 
 import android.app.Application
 import org.koin.dsl.module
-import us.webmy.core.monetization.ads.navigator.AdsHandler
+import us.webmy.core.monetization.ads.domain.DisplayAdUseCase
+import us.webmy.core.monetization.ads.domain.InterstitialThrottleConfig
+import us.webmy.core.monetization.ads.domain.RealDisplayAdUseCase
 import us.webmy.core.monetization.ads.tools.ads.AdsManager
-import us.webmy.core.monetization.ads.tools.ads.AdsPremiumManager
-import us.webmy.core.monetization.ads.tools.ads.AdsPremiumManagerFactory
 import us.webmy.core.monetization.ads.tools.ads.RealAdsManager
-import us.webmy.core.ui.presentation.base.navigator.AdNavigationHandler
 
 internal fun adsModule(
     application: Application,
     appodealKey: String,
-    premiumProductIds: List<String>
+    throttleConfigProvider: suspend () -> InterstitialThrottleConfig,
 ) = module {
     single<AdsManager> {
         RealAdsManager(
@@ -24,15 +23,11 @@ internal fun adsModule(
         )
     }
 
-    if (premiumProductIds.isNotEmpty()) {
-        single<AdsPremiumManager.Factory> {
-            AdsPremiumManagerFactory(
-                premiumProductIds = premiumProductIds,
-                billingManager = get(),
-                adsManager = get(),
-            )
-        }
+    single<DisplayAdUseCase> {
+        RealDisplayAdUseCase(
+            adsManager = get(),
+            premiumUseCase = get(),
+            throttleConfigProvider = throttleConfigProvider,
+        )
     }
-
-    single<AdNavigationHandler> { AdsHandler(get()) }
 }

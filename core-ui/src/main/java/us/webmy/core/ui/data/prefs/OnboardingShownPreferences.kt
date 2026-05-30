@@ -1,7 +1,8 @@
-package us.webmy.core.data.prefs
+package us.webmy.core.ui.data.prefs
 
-import us.webmy.core.tools.preferences.Preferences
 import kotlinx.coroutines.flow.Flow
+import us.webmy.core.data.prefs.SingleValuePrefs
+import us.webmy.core.tools.preferences.Preferences
 
 class OnboardingShownPreferences(override val preferences: Preferences) :
     SingleValuePrefs<Boolean> {
@@ -9,7 +10,6 @@ class OnboardingShownPreferences(override val preferences: Preferences) :
     companion object {
         private const val KEY = "Onboarding"
     }
-
 
     override fun flow(): Flow<Boolean> = preferences.booleanFlow(KEY, false)
 

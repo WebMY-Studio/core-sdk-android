@@ -4,7 +4,7 @@ import android.app.Application
 import us.webmy.core.KoinMode
 import us.webmy.core.WebMY
 import us.webmy.core.WebMYConfig
-import us.webmy.core.ui.di.coreUiModule
+import us.webmy.core.ui.di.installUi
 import us.webmy.coresdkdemo.di.appModule
 
 class App : Application() {
@@ -16,7 +16,8 @@ class App : Application() {
                 application = this,
                 koinMode = KoinMode.START,
             ),
-            extraModules = listOf(coreUiModule(), appModule),
+            extraModules = listOf(appModule),
         )
+        WebMY.installUi()
     }
 }

@@ -15,13 +15,17 @@ fun WebMY.initAdapty(key: String) {
 
 fun WebMY.initBilling(
     oneTimeProductIds: Set<String> = emptySet(),
-    subscriptionProductIds: Set<String> = emptySet()
+    subscriptionProductIds: Set<String> = emptySet(),
+    consumableProductIds: Set<String> = emptySet(),
+    premiumProductIds: Set<String> = emptySet(),
 ) {
     loadKoinModules(
         billingModule(
             application = application,
             oneTimeProducts = oneTimeProductIds,
-            subscriptionProducts = subscriptionProductIds
+            subscriptionProducts = subscriptionProductIds,
+            consumableProducts = consumableProductIds,
+            premiumProductIds = premiumProductIds,
         )
     )
 }

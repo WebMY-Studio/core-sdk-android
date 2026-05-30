@@ -10,6 +10,7 @@ sealed class Product(
         override val isPurchased: Boolean,
         override val title: String,
         val formattedPrice: String?,
+        val consumable: Boolean = false,
     ) : Product(id, isPurchased, title)
 
     data class Subscription(
@@ -31,4 +32,3 @@ sealed class Product(
 
 fun List<Product>.containsPurchased(productId: String) =
     find { it.id == productId }?.isPurchased ?: false
-

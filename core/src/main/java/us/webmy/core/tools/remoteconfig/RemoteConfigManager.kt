@@ -8,7 +8,6 @@ import us.webmy.core.util.executeSuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -23,8 +22,6 @@ interface RemoteConfigManager {
     suspend fun getLong(key: String): Result<Long>
 
     suspend fun getDouble(key: String): Result<Double>
-
-    fun dispose()
 }
 
 internal class RealRemoteConfigManager(updateInterval: Long) : RemoteConfigManager {
@@ -52,10 +49,6 @@ internal class RealRemoteConfigManager(updateInterval: Long) : RemoteConfigManag
                     }
             }
         }
-    }
-
-    override fun dispose() {
-        scope.cancel()
     }
 
     override suspend fun getString(key: String) = getSyncedValue { remoteConfig.getString(key) }

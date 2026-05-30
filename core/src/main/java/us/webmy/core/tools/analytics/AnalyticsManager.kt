@@ -12,7 +12,7 @@ interface AnalyticsManager {
 
 internal class RealAnalyticsManager(
     private val amplitude: Amplitude?,
-    private val firebase: FirebaseAnalytics?
+    private val firebase: FirebaseAnalytics,
 ) : AnalyticsManager {
 
     override fun logEvent(eventName: String, props: Map<String, Any?>?) {
@@ -20,6 +20,6 @@ internal class RealAnalyticsManager(
     }
 
     override fun logFirebase(eventName: String, bundle: Bundle) {
-        firebase?.logEvent(eventName, bundle)
+        firebase.logEvent(eventName, bundle)
     }
 }

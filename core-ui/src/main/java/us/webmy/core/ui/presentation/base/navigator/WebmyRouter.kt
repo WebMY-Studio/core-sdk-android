@@ -8,28 +8,25 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import us.webmy.core.error.SdkError
-import us.webmy.core.tools.biometrics.domain.BiometricsServiceFactory
+import us.webmy.core.tools.biometrics.domain.BiometricsService
 import us.webmy.core.ui.single.SheetController
 import us.webmy.core.util.ActivityProvider
 import us.webmy.core.util.coerceToUnit
 
 /**
- * Fragment-based [Navigator]. Holds a [FragmentActivity] reference and a container id;
+ * Fragment-based [Router]. Holds a [FragmentActivity] reference and a container id;
  * `Navigation.Screen` is dispatched via `supportFragmentManager.beginTransaction`.
  *
  * Compose bottom sheets are routed through [sheetController] (rendered by a ComposeView
  * overlay in `WebmyActivity`).
  */
-class WebmyNavigator(
+class WebmyRouter(
     private val activityProvider: ActivityProvider,
-    private val biometricsServiceFactory: BiometricsServiceFactory,
+    private val biometricsService: BiometricsService,
     val sheetController: SheetController,
-    private val purchaseHandler: PurchaseNavigationHandler? = null,
-    private val adHandler: AdNavigationHandler? = null,
-) : Navigator {
+) : Router {
 
     private var activityRef: FragmentActivity? = null
     private var containerId: Int = 0
@@ -37,18 +34,12 @@ class WebmyNavigator(
     private val asyncScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun bind(activity: FragmentActivity, containerId: Int) {
-        activityRef = activity
+        this.activityRef = activity
         this.containerId = containerId
     }
 
-    override fun unbind() {
-        activityRef = null
-        containerId = 0
-        asyncScope.coroutineContext.cancel()
-    }
-
     private fun requireActivity(): FragmentActivity =
-        activityRef ?: throw SdkError.BindingMissing("Navigator not bound to FragmentActivity")
+        activityRef ?: throw SdkError.BindingMissing("Router not bound to FragmentActivity")
 
     override fun go(nav: Navigation): Result<Unit> = when (nav) {
         is Navigation.Screen -> openScreen(nav)
@@ -61,8 +52,6 @@ class WebmyNavigator(
         is Navigation.Finish -> finish()
         is Navigation.Sheet -> sheet(nav.content)
         is Navigation.DismissSheet -> dismissSheet()
-        is Navigation.Purchase -> purchase(nav)
-        is Navigation.Ad -> ad(nav)
         is Navigation.Auth -> authenticate(nav)
     }
 
@@ -143,21 +132,12 @@ class WebmyNavigator(
 
     private fun authenticate(auth: Navigation.Auth): Result<Unit> {
         asyncScope.launch {
-            val service = biometricsServiceFactory.create()
             val result = when (auth) {
-                is Navigation.Auth.OneTime -> service.performOneTimeAuthentication()
-                is Navigation.Auth.Session -> service.performSessionAuthentication()
+                is Navigation.Auth.OneTime -> biometricsService.performOneTimeAuthentication()
+                is Navigation.Auth.Session -> biometricsService.performSessionAuthentication()
             }.coerceToUnit()
             auth.onResult?.invoke(result)
         }
         return Result.success(Unit)
     }
-
-    private fun ad(nav: Navigation.Ad) = adHandler?.handle(nav)
-        ?: Result.failure(SdkError.BindingMissing("AdNavigationHandler (add core-monetization)"))
-
-
-    private fun purchase(nav: Navigation.Purchase) = purchaseHandler?.handle(nav)
-        ?: Result.failure(SdkError.BindingMissing("PurchaseNavigationHandler (add core-monetization)"))
-
 }

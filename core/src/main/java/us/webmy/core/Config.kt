@@ -19,4 +19,5 @@ class NetworkConfig(
     val writeTimeout: Duration = 20.seconds,
     val cacheSizeBytes: Long = 50L * 1024L * 1024L,
     val interceptors: List<Interceptor> = emptyList(),
+    val enableHttpLogging: Boolean = false,
 )

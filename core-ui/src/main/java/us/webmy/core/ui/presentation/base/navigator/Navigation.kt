@@ -2,7 +2,6 @@ package us.webmy.core.ui.presentation.base.navigator
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -44,19 +43,6 @@ sealed interface Navigation {
 
     data class Sheet(val content: ComposeSheetContent) : Navigation
     object DismissSheet : Navigation
-
-    data class Purchase(val productId: String) : Navigation
-
-    sealed interface Ad : Navigation {
-        data class Interstitial(val source: String? = null) : Ad
-        data class Reward(
-            val placement: String? = null,
-            val grantWhenPremium: Boolean = true,
-            val source: String? = null,
-            val onResult: (Boolean) -> Unit,
-        ) : Ad
-        data class Banner(val container: FrameLayout) : Ad
-    }
 
     sealed interface Auth : Navigation {
         val onResult: ((Result<Unit>) -> Unit)?

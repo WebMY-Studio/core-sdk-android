@@ -1,20 +1,14 @@
 package us.webmy.core.ui.presentation.base.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import us.webmy.core.ui.presentation.base.navigator.Navigation
+import us.webmy.core.ui.presentation.base.navigator.Router
 
-open class BaseViewModel() : ViewModel() {
+open class BaseViewModel : ViewModel(), KoinComponent {
 
-    private val _navigation = MutableSharedFlow<Navigation>()
-    val navigation = _navigation.asSharedFlow()
+    private val router: Router by inject()
 
-    fun navigateTo(navigation: Navigation) {
-        viewModelScope.launch {
-            _navigation.emit(navigation)
-        }
-    }
+    fun navigateTo(navigation: Navigation): Result<Unit> = router.go(navigation)
 }

@@ -1,20 +1,20 @@
 package us.webmy.core.monetization.billing.presentation.paywall
 
 import kotlinx.coroutines.flow.mapNotNull
-import us.webmy.core.tools.analytics.AnalyticsManager
-import us.webmy.core.monetization.billing.domain.interactor.PremiumInteractor
+import us.webmy.core.monetization.billing.domain.interactor.PremiumUseCase
 import us.webmy.core.monetization.billing.presentation.paywall.base.BasePaywallViewModel
 import us.webmy.core.monetization.billing.presentation.paywall.model.OfferPaywallConfig
 import us.webmy.core.monetization.billing.presentation.paywall.model.OfferUiState
+import us.webmy.core.monetization.billing.tools.billing.BillingManager
 import us.webmy.core.monetization.billing.tools.billing.Product
+import us.webmy.core.tools.analytics.AnalyticsManager
 
 abstract class BaseOfferPaywallViewModel(
     private val config: OfferPaywallConfig,
-    premiumInteractor: PremiumInteractor,
-    analyticsManager: AnalyticsManager
-) : BasePaywallViewModel(
-    premiumInteractor, analyticsManager
-) {
+    billingManager: BillingManager,
+    premiumUseCase: PremiumUseCase,
+    analyticsManager: AnalyticsManager,
+) : BasePaywallViewModel(billingManager, premiumUseCase, analyticsManager) {
 
     val offerUiStateFlow = subscriptionsFlow
         .mapNotNull {
@@ -25,7 +25,7 @@ abstract class BaseOfferPaywallViewModel(
         }
 
     private fun List<Product.Subscription>.phaseFor(planId: String) =
-        find { it.id == config.offerPlanId }?.phases?.firstOrNull()
+        find { it.id == planId }?.phases?.firstOrNull()
 
     fun onContinueClick() {
         purchase(config.offerPlanId)

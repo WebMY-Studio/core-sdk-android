@@ -4,27 +4,24 @@ import com.amplitude.android.Amplitude
 import com.amplitude.android.Configuration
 import com.amplitude.core.ServerZone
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.gson.Gson
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import us.webmy.core.BuildConfig
 import us.webmy.core.NetworkConfig
 import us.webmy.core.WebMYConfig
 import us.webmy.core.data.NetworkApiCreator
 import us.webmy.core.data.RealNetworkApiCreator
 import us.webmy.core.data.csv.CsvFetcher
 import us.webmy.core.data.csv.RealCsvFetcher
-import us.webmy.core.data.prefs.OnboardingShownPreferences
 import us.webmy.core.tools.analytics.AnalyticsManager
 import us.webmy.core.tools.analytics.RealAnalyticsManager
 import us.webmy.core.tools.biometrics.data.AuthenticationSession
 import us.webmy.core.tools.biometrics.data.InMemoryAuthenticationSession
-import us.webmy.core.tools.biometrics.domain.BiometricsServiceFactory
-import us.webmy.core.tools.biometrics.domain.RealBiometricsServiceFactory
+import us.webmy.core.tools.biometrics.domain.BiometricsService
+import us.webmy.core.tools.biometrics.domain.RealBiometricsService
 import us.webmy.core.tools.preferences.Preferences
 import us.webmy.core.tools.preferences.RealPreferences
 import us.webmy.core.tools.remoteconfig.RealRemoteConfigManager
@@ -92,8 +89,6 @@ internal fun Module.configureRemoteConfig(config: WebMYConfig) {
 
 internal fun Module.configurePreferences(config: WebMYConfig) {
     single<Preferences> { RealPreferences(config.application) }
-
-    single { OnboardingShownPreferences(get()) }
 }
 
 internal fun Module.configureSharing() {
@@ -114,7 +109,7 @@ internal fun Module.configureNetwork(network: NetworkConfig) {
 
         network.interceptors.forEach { builder.addInterceptor(it) }
 
-        if (BuildConfig.DEBUG) {
+        if (network.enableHttpLogging) {
             builder.addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         }
 
@@ -124,8 +119,6 @@ internal fun Module.configureNetwork(network: NetworkConfig) {
     single<OkHttpClient> { get<OkHttpClient.Builder>().build() }
 
     single<NetworkApiCreator> { RealNetworkApiCreator(get()) }
-
-    single<Gson> { Gson() }
 }
 
 internal fun Module.configureCsv() {
@@ -136,5 +129,5 @@ internal fun Module.configureCsv() {
 
 internal fun Module.configureBiometrics() {
     single<AuthenticationSession> { InMemoryAuthenticationSession() }
-    factory<BiometricsServiceFactory> { RealBiometricsServiceFactory(get(), get()) }
+    single<BiometricsService> { RealBiometricsService(get(), get()) }
 }

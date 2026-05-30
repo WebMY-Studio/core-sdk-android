@@ -14,14 +14,14 @@ import androidx.fragment.app.FragmentActivity
 import org.koin.android.ext.android.inject
 import us.webmy.core.ui.R
 import us.webmy.core.ui.compose.theme.AppTheme
-import us.webmy.core.ui.presentation.base.navigator.Navigator
+import us.webmy.core.ui.presentation.base.navigator.Router
 
 /**
  * Single-activity host for SDK-based apps. Hosts a single fragment container plus a
  * Compose overlay for bottom sheets driven by [SheetController].
  *
  * Subclass and override [createStartFragment] — that fragment is shown on first launch.
- * All subsequent navigation goes through [Navigator] (XML via `BaseFragment`, Compose via
+ * All subsequent navigation goes through [Router] (XML via `BaseFragment`, Compose via
  * `BaseComposeFragment`).
  *
  * Example:
@@ -33,7 +33,7 @@ import us.webmy.core.ui.presentation.base.navigator.Navigator
  */
 abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
 
-    private val navigator: Navigator by inject()
+    private val router: Router by inject()
     private val sheetController: SheetController by inject()
 
     /** Built once on first launch (skipped on configuration change / process restore). */
@@ -43,7 +43,7 @@ abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
         setTheme(com.google.android.material.R.style.Theme_Material3_DayNight_NoActionBar)
         super.onCreate(savedInstanceState)
 
-        navigator.bind(this, R.id.webmy_container)
+        router.bind(this, R.id.webmy_container)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -58,11 +58,6 @@ abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
                 SheetOverlay(sheetController)
             }
         }
-    }
-
-    override fun onDestroy() {
-        navigator.unbind()
-        super.onDestroy()
     }
 }
 

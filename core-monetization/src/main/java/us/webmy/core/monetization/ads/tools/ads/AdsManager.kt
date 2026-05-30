@@ -24,7 +24,7 @@ import us.webmy.core.util.isHostInDebugMode
  * Wraps Appodeal SDK with analytics + logging on all callbacks.
  *
  * Activity is pulled from [ActivityProvider]; callers (composables, ViewModels,
- * [AdNavigationHandler]) do not pass it.
+ * [DisplayAdUseCase][us.webmy.core.monetization.ads.domain.DisplayAdUseCase]) do not pass it.
  */
 interface AdsManager {
 

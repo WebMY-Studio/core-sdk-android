@@ -3,7 +3,6 @@ package us.webmy.core.data
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.jvm.java
 
 interface NetworkApiCreator {
     fun <T> create(service: Class<T>, baseUrl: String): T

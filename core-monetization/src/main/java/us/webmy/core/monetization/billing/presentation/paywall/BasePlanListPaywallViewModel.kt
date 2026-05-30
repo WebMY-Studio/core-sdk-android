@@ -6,20 +6,21 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import us.webmy.core.tools.analytics.AnalyticsManager
-import us.webmy.core.monetization.billing.domain.interactor.PremiumInteractor
+import us.webmy.core.monetization.billing.domain.interactor.PremiumUseCase
 import us.webmy.core.monetization.billing.presentation.paywall.adapter.SubscriptionsUiModel
 import us.webmy.core.monetization.billing.presentation.paywall.base.BasePaywallViewModel
 import us.webmy.core.monetization.billing.presentation.paywall.model.PaywallUiState
 import us.webmy.core.monetization.billing.presentation.paywall.model.PlanListPaywallConfig
+import us.webmy.core.monetization.billing.tools.billing.BillingManager
+import us.webmy.core.tools.analytics.AnalyticsManager
 
 abstract class BasePlanListPaywallViewModel(
     private val config: PlanListPaywallConfig,
-    premiumInteractor: PremiumInteractor,
-    analyticsManager: AnalyticsManager
-) : BasePaywallViewModel(
-    premiumInteractor, analyticsManager
-) {
+    billingManager: BillingManager,
+    premiumUseCase: PremiumUseCase,
+    analyticsManager: AnalyticsManager,
+) : BasePaywallViewModel(billingManager, premiumUseCase, analyticsManager) {
+
     private val selectedPlanFlow = MutableStateFlow(config.defaultSelectedPlanId)
 
     private val subscriptionFlow = subscriptionsFlow
