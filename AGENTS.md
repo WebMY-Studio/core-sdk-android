@@ -81,7 +81,7 @@ class MyApp : Application() {
 
 Rules:
 - `WebMY.init` is idempotent — second call is a no-op with warning.
-- `KoinMode.START` calls `startKoin{}` internally. Use `LOAD` if consumer app already initialized Koin elsewhere.
+- `KoinMode.START` calls `startKoin{}` internally and registers `androidContext`. Use `LOAD` if consumer app already initialized Koin elsewhere — in that case consumer MUST have called `androidContext(this)` in their own `startKoin{}` (required by `:core` network/preferences bindings).
 - `installUi()` must be called **after** `init()` and **before** `initBilling/initAds` if the latter need anything from `:core` UI.
 - `initAds` requires `initBilling` to be called first (it injects `PremiumUseCase`).
 

@@ -3,6 +3,7 @@ package us.webmy.core
 import android.app.Application
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -25,7 +26,10 @@ object WebMY {
         _application = config.application
         val modules = listOf(sdkModule(config)) + extraModules
         when (config.koinMode) {
-            KoinMode.START -> startKoin { modules(modules) }
+            KoinMode.START -> startKoin {
+                androidContext(config.application)
+                modules(modules)
+            }
             KoinMode.LOAD -> loadKoinModules(modules)
         }
     }
