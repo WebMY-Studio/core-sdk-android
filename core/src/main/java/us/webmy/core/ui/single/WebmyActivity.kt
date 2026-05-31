@@ -9,6 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import org.koin.android.ext.android.inject
@@ -43,20 +46,37 @@ abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
         setTheme(com.google.android.material.R.style.Theme_Material3_DayNight_NoActionBar)
         super.onCreate(savedInstanceState)
 
-        router.bind(this, R.id.webmy_container)
+        applySystemBarInsets()
+
+        router.bind(this, R.id.webmyContainer)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.webmy_container, createStartFragment())
+                .replace(R.id.webmyContainer, createStartFragment())
                 .commit()
         }
 
-        val overlay = findViewById<ComposeView>(R.id.webmy_compose_overlay)
+        val overlay = findViewById<ComposeView>(R.id.webmyComposeOverlay)
         overlay.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         overlay.setContent {
             AppTheme {
                 SheetOverlay(sheetController)
             }
+        }
+    }
+
+    /**
+     * Apply status / nav bar + display cutout insets as padding on the root.
+     * Needed because compileSdk 35+ forces edge-to-edge regardless of fitsSystemWindows.
+     */
+    private fun applySystemBarInsets() {
+        val root = findViewById<android.view.View>(R.id.webmyRoot)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.updatePadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
         }
     }
 }
