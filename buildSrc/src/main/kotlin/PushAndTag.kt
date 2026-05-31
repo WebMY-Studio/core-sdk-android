@@ -15,6 +15,7 @@ abstract class PushAndTag @Inject constructor(
     @TaskAction
     fun release() {
         val versionName = project.computeVersionName()
+        val tagName = if (versionName.startsWith("v")) versionName else "v$versionName"
 
         fun runCommand(vararg command: String) {
             execOps.exec {
@@ -22,14 +23,14 @@ abstract class PushAndTag @Inject constructor(
             }
         }
 
-        println("🚀 Releasing version $versionName")
+        println("🚀 Releasing version $tagName")
 
         runCommand("git", "add", ".")
-        runCommand("git", "commit", "-m", "Release v$versionName")
+        runCommand("git", "commit", "-m", "Release $tagName")
         runCommand("git", "push")
-        runCommand("git", "tag", versionName)
-        runCommand("git", "push", "origin", versionName)
+        runCommand("git", "tag", tagName)
+        runCommand("git", "push", "origin", tagName)
 
-        println("✅ Release v$versionName pushed and tagged.")
+        println("✅ Release $tagName pushed and tagged.")
     }
 }
