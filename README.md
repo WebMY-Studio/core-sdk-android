@@ -39,12 +39,12 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.github.WebMY-Studio:core:<version>")
-    implementation("com.github.WebMY-Studio:core-monetization:<version>") // optional
+    implementation("com.github.WebMY-Studio.core-sdk-android:core:<version>")
+    implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization:<version>") // optional
 }
 ```
 
-Latest version: [JitPack](https://jitpack.io/#WebMY-Studio/core-sdk-android).
+Multi-module syntax: `com.github.<User>.<Repo>:<module>:<version>`. Latest version: [JitPack](https://jitpack.io/#WebMY-Studio/core-sdk-android).
 
 ---
 

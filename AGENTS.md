@@ -24,9 +24,9 @@ dependencyResolutionManagement {
 
 // consumer app/build.gradle.kts
 dependencies {
-    implementation("com.github.WebMY-Studio:core:<version>")
+    implementation("com.github.WebMY-Studio.core-sdk-android:core:<version>")
     // Optional — only if using billing/ads
-    implementation("com.github.WebMY-Studio:core-monetization:<version>")
+    implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization:<version>")
 }
 ```
 
