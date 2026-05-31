@@ -25,7 +25,7 @@ class OfferUiState(
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             val colorSpan = ForegroundColorSpan(
-                ContextCompat.getColor(context, us.webmy.core.ui.R.color.textAndIconsSecondary)
+                ContextCompat.getColor(context, us.webmy.core.R.color.textAndIconsSecondary)
             )
             setSpan(colorSpan, 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }

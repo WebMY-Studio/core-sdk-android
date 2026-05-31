@@ -3,7 +3,7 @@ package us.webmy.core.ui.compose.configs
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import us.webmy.core.ui.R
+import us.webmy.core.R
 
 object WebmyFontFamilies {
 

@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
     `maven-publish`
 }
 
@@ -16,6 +17,8 @@ android {
 
     buildFeatures {
         buildConfig = true
+        viewBinding = true
+        compose = true
     }
 
     publishing {
@@ -34,6 +37,7 @@ dependencies {
 
     api(platform(libs.koin.bom))
     api(libs.koin.android)
+    api(libs.koin.compose)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
@@ -47,6 +51,27 @@ dependencies {
     api(libs.squareup.okhttp3.logging)
     api(libs.squareup.retrofit2.core)
     api(libs.squareup.retrofit2.converters.gson)
+
+    api(libs.appcompat)
+    api(libs.material)
+
+    implementation(libs.google.review.ktx)
+
+    api(platform(libs.androidx.compose.bom))
+
+    api(libs.androidx.compose.ui)
+    api(libs.androidx.compose.foundation)
+    api(libs.androidx.compose.material3)
+    api(libs.androidx.compose.animation.graphics)
+    api(libs.androidx.compose.ui.util)
+    api(libs.androidx.compose.ui.text.google.fonts)
+    api(libs.androidx.compose.material.icons)
+    api(libs.androidx.compose.material.icons.extended)
+    api(libs.androidx.activity.compose)
+    api(libs.androidx.fragment.ktx)
+
+    debugApi(libs.androidx.compose.ui.tooling)
+    debugApi(libs.androidx.compose.ui.tooling.preview)
 }
 
 configureMavenPublishing("core")

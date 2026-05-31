@@ -32,7 +32,6 @@ kotlin {
 
 dependencies {
     api(project(":core"))
-    api(project(":core-ui"))
 
     api(libs.billingclient)
     api(libs.facebook)

@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import org.koin.android.ext.android.inject
-import us.webmy.core.ui.R
+import us.webmy.core.R
 import us.webmy.core.ui.compose.theme.AppTheme
 import us.webmy.core.ui.presentation.base.navigator.Router
 

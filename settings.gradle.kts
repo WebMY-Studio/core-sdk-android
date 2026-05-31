@@ -26,5 +26,4 @@ dependencyResolutionManagement {
 rootProject.name = "WebMY Core SDK"
 include(":app")
 include(":core")
-include(":core-ui")
 include(":core-monetization")

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import us.webmy.core.ui.databinding.ListItemSubscriptionBinding
+import us.webmy.core.databinding.ListItemSubscriptionBinding
 
 class PlansAdapter(
     private val callback: Callback

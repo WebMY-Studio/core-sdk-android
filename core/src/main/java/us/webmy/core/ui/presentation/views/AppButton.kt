@@ -9,7 +9,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.text.toSpannable
-import us.webmy.core.ui.R
+import us.webmy.core.R
 import us.webmy.core.ui.presentation.addImageToEnd
 import us.webmy.core.ui.presentation.addImageToStart
 import us.webmy.core.ui.presentation.applyRippleEffect
