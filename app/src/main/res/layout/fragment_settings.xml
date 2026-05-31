@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:textSize="18sp" />
 
-    <Button
+    <us.webmy.core.ui.presentation.views.AppButton
         android:id="@+id/btn_back"
+        android:paddingHorizontal="24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

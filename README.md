@@ -1,330 +1,317 @@
-# WebMY Android SDK
+# WebMY Core SDK
 
-An open-source **Android SDK** to **bootstrap app development** with a lot of pre-integrated modules — all built with **Koin** for dependency injection.
+Android SDK for shipping apps fast. One init call wires up DI, analytics, remote config, billing, ads, biometrics, navigation, theming. Compose-first, Koin-based.
 
----
-
-## ✨ Features
-
-✅ Firebase Remote Config  
-✅ Amplitude Analytics  
-✅ Appodeal Ads Integration  
-✅ One-Time In-App Purchases (Billing)  
-✅ Shared Preferences Helper
+> 🤖 **Building with an AI agent?** Point it at [`AGENTS.md`](AGENTS.md) — full API reference written for LLMs.
 
 ---
 
-## Installation
+## What's inside
 
-### Step 1 — Add Repositories
+| Concern | API |
+|---|---|
+| Single-activity host | `WebmyActivity` + `BaseFragment` / `BaseComposeFragment` |
+| Navigation | `Router` + `Navigation` sealed events |
+| DI | Koin (start it or load alongside yours) |
+| Analytics | `AnalyticsManager` — Amplitude + Firebase |
+| Remote config | `RemoteConfigManager` — Firebase RC with suspend getters |
+| Preferences | `Preferences` — SharedPreferences wrapper with Flows |
+| Biometrics | `BiometricsService` — BiometricPrompt with session caching |
+| Sharing | `SharingManager` — files, text, calendar events |
+| Network | `NetworkApiCreator` — Retrofit + OkHttp factory |
+| Billing *(opt)* | `BillingManager` + `PremiumUseCase` — Play Billing, subs + one-time + consumables |
+| Ads *(opt)* | `DisplayAdUseCase` — Appodeal with premium gating + interstitial throttling |
+| Theming | `AppTheme` + `WebmyTheme.colors/typography/spacings` + pre-built composables |
 
-Add these repositories to your **root `build.gradle.kts`** or **`settings.gradle.kts`** file:
+---
+
+## Install
 
 ```kotlin
+// settings.gradle.kts
 dependencyResolutionManagement {
     repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://artifactory.appodeal.com/appodeal") }
+        google(); mavenCentral()
+        maven("https://jitpack.io")
+        maven("https://artifactory.appodeal.com/appodeal") // only if using ads
     }
 }
-```
 
-### Step 2 — Add Dependency
-
-Add this dependency to your **app module's `build.gradle.kts`** file:
-
-```kotlin
+// app/build.gradle.kts
 dependencies {
-    implementation("com.github.WebMY-Studio:core-sdk-android:$versionName")
+    implementation("com.github.WebMY-Studio:core:<version>")
+    implementation("com.github.WebMY-Studio:core-monetization:<version>") // optional
 }
 ```
 
-> Replace `$versionName` with the latest release from [JitPack](https://jitpack.io/#WebMY-Studio/core-sdk-android).
+Latest version: [JitPack](https://jitpack.io/#WebMY-Studio/core-sdk-android).
 
+---
 
-## Initialization
-
-In your Application class, initialize the SDK as follows:
+## Quick start
 
 ```kotlin
 class MyApp : Application() {
-
     override fun onCreate() {
         super.onCreate()
 
-        val config = Config.Builder(this)
-            .setKoinMode(KoinMode.START) // or KoinMode.LOAD
-            .enableAnalytics("your_amplitude_api_key")
-            .enableAds("your_appodeal_app_key")
-            .enableBilling(listOf("product_id_1", "product_id_2"))
-            .enableRemoteConfig()
-            .build()
+        WebMY.init(
+            config = WebMYConfig(
+                application = this,
+                koinMode = KoinMode.START,
+                amplitudeKey = BuildConfig.AMPLITUDE_KEY,           // optional
+                remoteConfigUpdateInterval = 1.hours,               // optional
+                network = NetworkConfig(enableHttpLogging = BuildConfig.DEBUG),
+            ),
+            extraModules = listOf(appModule),                       // your Koin modules
+        )
+        WebMY.installUi()
 
-        WebMY.INSTANCE.init(config)
+        // Optional add-ons
+        WebMY.initBilling(
+            subscriptionProductIds = setOf("yearly_premium"),
+            premiumProductIds = setOf("yearly_premium"),
+        )
+        WebMY.initAds(BuildConfig.APPODEAL_KEY)
+    }
+}
+
+class MainActivity : WebmyActivity() {
+    override fun createStartFragment() = HomeFragment()
+}
+```
+
+That's it. Inject anything below via Koin (`by inject()` / `koinInject()`).
+
+---
+
+## Navigation
+
+ViewModel calls `Router` synchronously through `navigateTo()`. No flow, no drops, order preserved.
+
+```kotlin
+class HomeViewModel : BaseViewModel() {
+    fun onSettingsClick() = navigateTo(screen<SettingsFragment>(SettingsArgs("42")))
+    fun onUrlClick(url: String) = navigateTo(Navigation.Browser(url))
+    fun onBack() = navigateTo(Navigation.Back)
+}
+```
+
+Available events: `Screen`, `Back`, `PopUpTo`, `Browser`, `Email`, `GooglePlay`, `RateApp`, `Finish`, `Sheet`, `DismissSheet`, `Auth.OneTime/Session`.
+
+Fragment args via Parcelable:
+```kotlin
+@Parcelize
+data class SettingsArgs(val userId: String) : Parcelable
+
+// in fragment
+val args: SettingsArgs by requireArgs()
+```
+
+---
+
+## Fragments
+
+**Compose:**
+```kotlin
+class HomeFragment : BaseComposeFragment() {
+    @Composable override fun ScreenContent() {
+        val vm: HomeViewModel = koinViewModel()
+        // ...
     }
 }
 ```
 
-## Dependency Injection (Koin Integration)
-
-The SDK uses Koin for dependency injection.
-Select the proper KoinMode for your app:
-
+**XML + ViewBinding:**
 ```kotlin
-enum class KoinMode {
-    /**
-     * Use this if you use another DI or none at all.
-     */
-    START,
-
-    /**
-     * Use this if Koin is already started in your app.
-     */
-    LOAD
+class SettingsFragment : BaseFragment<SettingsVM, FragmentSettingsBinding>(
+    FragmentSettingsBinding::inflate,
+) {
+    override val viewModel: SettingsVM by viewModel()
+    override fun initView() { /* binding.* setup */ }
+    override fun observe(viewModel: SettingsVM) { /* flows */ }
 }
 ```
 
-# 📊 Analytics (Amplitude)
-
-To enable **Amplitude Analytics** integration, add your Amplitude API key during SDK configuration:
-
-```kotlin
-enableAnalytics("your_amplitude_api_key")
-```
-
-By default, the SDK uses the **EU server zone**.  
-You can use this integration to log events, track user behavior, and analyze engagement metrics across your app.
-
-```kotlin
-val analyticsManager by inject<AnalyticsManager>()
-analyticsManager.logEvent("eventName", mapOf("propertyKey" to "propertyValue"))
-```
-
 ---
 
-# 💰 Billing (One-Time Purchases)
-
-To enable **in-app one-time purchases**, add your product IDs for Google Play Console when initializing the SDK:
+## Billing
 
 ```kotlin
-enableBilling(listOf("product_id_1", "product_id_2"))
-```
+class PaywallViewModel(
+    private val billing: BillingManager,
+) : BaseViewModel() {
+    val products = billing.subscribeProducts()
 
-The SDK handles Google Play Billing integration for simple purchase flows.
-> ⚠️ Subscription billing is not yet supported — it’s **coming soon**.
-
-To access billing functionality after initialization:
-
-```kotlin
-val billingManager by inject<BillingManager>()
-billingManager.products // returns Flow of List of Product with basic info
-billingManager.fetchProducts() // method to fetch products from Google Play manually. Also called in init {} block
-billingManager.purchase(activity, "product_id") // method to start purchase flow
-```
-
----
-
-# 🔧 Firebase Integration
-
-To integrate Firebase features like **Remote Config** and **Crashlytics**, follow these steps:
-
-### 1️⃣ Add the `google-services.json` file
-Place your `google-services.json` file in the **app module** directory.
-
-### 2️⃣ Apply Firebase plugins
-
-In **libs.versions.toml**:
-
-```kotlin
-[versions]
-...
-firebase-crashlytics = "$versionNumber"
-google-services = "$versionNumber"
-
-[plugins]
-...
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
-google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
-
-```
-
-In your **app module’s** `build.gradle.kts`:
-
-```kotlin
-plugins {
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.firebase.crashlytics)
+    fun onBuy(productId: String) {
+        viewModelScope.launch {
+            when (val out = billing.purchase(productId)) {
+                PurchaseOutcome.Success -> navigateTo(Navigation.Finish)
+                PurchaseOutcome.Pending -> showSnackbar("Pending")
+                PurchaseOutcome.Cancelled -> Unit
+                is PurchaseOutcome.Failed -> showError(out.error.message)
+            }
+        }
+    }
 }
 ```
 
-In your **root** `build.gradle.kts`:
+`Product.OneTime(consumable = true)` products auto-`consume`; subscriptions + non-consumables auto-`acknowledge`. Both have exponential-backoff retry. Auto-reconnects on billing service disconnect.
+
+Pre-built paywall ViewModels: `BaseOfferPaywallViewModel`, `BasePlanListPaywallViewModel`.
+
+---
+
+## Ads
 
 ```kotlin
-plugins {
-    alias(libs.plugins.google.services) apply false
-    alias(libs.plugins.firebase.crashlytics) apply false
+class GameViewModel(
+    private val ads: DisplayAdUseCase,
+) : BaseViewModel() {
+    fun onLevelComplete() = ads.showInterstitial(source = "level_end")
+    fun onWatchAd() = ads.showReward(placement = "double_coins") { rewarded ->
+        if (rewarded) grantCoins(20)
+    }
 }
 ```
 
-### 3️⃣ Enable Remote Config in SDK
-Enable Firebase Remote Config in your configuration:
-
-```kotlin
-enableRemoteConfig()
-```
-> by default remote config update interval is set to 0 but you can define a custom interval
-
-After initialization, you can access the `RemoteConfigManager` via Koin:
-
-```kotlin
-val remoteConfigManager by inject<RemoteConfigManager>()
-```
-then to fetch value use
-
-```kotlin
-remoteConfigManager.getSyncedValue()
-```
+Premium check + interstitial throttle are built in. Skip threshold via `InterstitialThrottleConfig` passed to `WebMY.initAds(throttleConfigProvider = { ... })`.
 
 ---
 
-# Ads Integration (Appodeal)
-
-The SDK provides built-in **Appodeal Ads** integration for banner, interstitial, and rewarded ads.
-
-### Step 1 — Add Manifest Placeholders
-
-**Kotlin DSL**
-```kotlin
-manifestPlaceholders["ADMOB_APPLICATION_ID"] = localProperties.readSecret("ADMOB_APPLICATION_ID")
-```
-
-**Groovy DSL**
-```groovy
-manifestPlaceholders = [ADMOB_APPLICATION_ID: readRawSecret("ADMOB_APPLICATION_ID")]
-```
-
-### Step 2 — Add Your AdMob App ID
-
-In your `local.properties` file:
-
-```
-ADMOB_APPLICATION_ID=ca-app-pub-XXXXXXXX~YYYYYYYY
-```
-
-### Step 3 — Enable Ads in Config
+## Premium check
 
 ```kotlin
-enableAds("your_appodeal_app_key")
-```
+class GameViewModel(private val premium: PremiumUseCase) : BaseViewModel() {
+    val isPremium: Flow<Boolean> = premium.isPremiumFlow
 
-Then access the Ads Manager instance:
-
-```kotlin
-val adsManager by inject<AdsManager>()
-```
-
-## 🏳️ Banner Ad
-
-Displays a banner in the given container.
-
-```kotlin
-adsManager.showBanner(activity, bannerContainer)
-```
-
-- `activity`: current `Activity`
-- `bannerContainer`: `FrameLayout` in layout
-- Returns `true` if shown
-
----
-
-## 🎁 Rewarded Ad
-
-Shows a rewarded ad and returns a result in callback.
-
-```kotlin
-adsManager.showReward(activity, "coins_reward") { rewarded ->
-if (rewarded) {
-    // give user 1 ChocoPie or zabka hot-dog
-}
+    suspend fun unlockLevel() {
+        if (premium.isPremium()) doIt() else navigateTo(screen<PaywallFragment>())
+    }
 }
 ```
 
-- `placement`: optional tag
-- `rewarded`: `true` if user earned reward
+Checks `purchasedIds` against `premiumProductIds` from `initBilling`. Empty set ⇒ any purchase counts as premium.
 
 ---
 
-## 🚪 Interstitial Ad
-
-Displays an interstitial ad.
+## Biometrics
 
 ```kotlin
-adsManager.showInter(activity)
+class LockViewModel(private val bio: BiometricsService) : BaseViewModel() {
+    fun unlock() = viewModelScope.launch {
+        bio.performSessionAuthentication()       // skipped if authed earlier this session
+            .onSuccess { navigateTo(screen<HomeFragment>()) }
+            .onFailure { showError(it.message) }
+    }
+}
 ```
 
-Returns `true` if shown, `false` otherwise.
+Or via Router: `navigateTo(Navigation.Auth.Session(onResult = { ... }))`.
 
-
-> 💡 Ensure that you already added appodeal Maven Repo:
-> ```kotlin
-> maven { url = uri("https://artifactory.appodeal.com/appodeal") }
-> ```
+Requires `WebmyActivity` (or any `FragmentActivity`).
 
 ---
 
-# ⚙️ Preferences
-
-Use the `Preferences` interface to store and observe local data (a wrapper around `SharedPreferences`).
-
-Inject with Koin:
+## Preferences
 
 ```kotlin
-val preferences by inject<Preferences>()
-```
+val prefs: Preferences by inject()
 
-Basic usage:
+prefs.putString("user_name", "John")
+prefs.stringFlow("user_name").collect { ... }
+prefs.booleanFlow("dark_mode", defaultValue = false).collect { ... }
 
-```kotlin
-preferences.putString("user_name", "John")
-val name = preferences.getString("user_name")
-```
-
-You can also observe values as **Flows**:
-
-```kotlin
-preferences.stringFlow("user_name")
-```
-
-Supports `String`, `Boolean`, `Int`, `Long`, and `Set<String>` types — plus reactive flows for each.
-
-# 🧾 License
-
-This project is licensed under the **MIT License**.
-
-```
-MIT License
-
-Copyright (c) 2025 WebMY
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+prefs.edit {
+    putString("a", "1")
+    putInt("b", 2)
+}
 ```
 
 ---
+
+## Remote config
+
+```kotlin
+val rc: RemoteConfigManager by inject()
+val msg = rc.getString("welcome_message").getOrElse { "Hello" }
+```
+
+Suspend; first call waits for fetch+activate. Enable by passing `remoteConfigUpdateInterval` in `WebMYConfig`.
+
+---
+
+## Analytics
+
+```kotlin
+val a: AnalyticsManager by inject()
+a.logEvent("button_click", mapOf("screen" to "home"))   // Amplitude
+a.logFirebase("level_up", bundleOf("level" to 5))        // Firebase
+```
+
+Amplitude only if `amplitudeKey` passed to config. Firebase requires `google-services.json` + plugin.
+
+---
+
+## Network
+
+```kotlin
+val creator: NetworkApiCreator by inject()
+val api: MyApi = creator.create("https://api.example.com/")
+```
+
+OkHttp client is a singleton. Add interceptors via `NetworkConfig(interceptors = listOf(MyAuth()))`.
+
+---
+
+## Theming
+
+```kotlin
+AppTheme {
+    WebmyButton(text = "Buy", onClick = {})
+    WebmyText("Hello", style = WebmyTheme.typography.bodyM, color = WebmyTheme.colors.textAndIconsPrimary)
+    Spacers.Vertical(WebmyTheme.spacings.m)
+}
+```
+
+Override palette via `CompositionLocalProvider(LocalColorsPalette provides MyPalette)`.
+
+---
+
+## Modules
+
+- **`:core`** — everything above except billing/ads. Single artifact, pulls Compose + Material + Koin + OkHttp + Firebase + Amplitude.
+- **`:core-monetization`** — Billing + Ads + Adapty + Appodeal mediation adapters. Opt-in.
+
+---
+
+## Error model
+
+All thrown errors extend `SdkError`:
+```
+SdkError.NoForegroundActivity
+SdkError.NotSupported(reason)
+SdkError.BindingMissing(name)
+SdkError.Network.{ EmptyBody, HttpError(code, message), Io(cause) }
+SdkError.Billing.{ FlowFailed(message), NotAcknowledged(token), Disconnected }
+SdkError.Ads.{ LoadFailed(placement), ShowFailed(placement), NotInitialized }
+```
+
+`BillingManager.purchase()` returns `PurchaseOutcome.Failed(SdkError.Billing)` instead of throwing.
+
+---
+
+## Gotchas
+
+- `WebMY.init` is idempotent — second call is a no-op.
+- Call `installUi()` after `init()` and before `initBilling/initAds`.
+- `initAds` requires `initBilling` first (it needs `PremiumUseCase`).
+- `consumableProductIds` must be a subset of `oneTimeProductIds`.
+- `RemoteConfigManager` only registered if `remoteConfigUpdateInterval` is non-null.
+- Biometrics requires `FragmentActivity` (`WebmyActivity` qualifies).
+
+---
+
+## License
+
+MIT © WebMY
