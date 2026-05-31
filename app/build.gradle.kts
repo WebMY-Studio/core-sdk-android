@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -19,6 +21,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        compose = true
         viewBinding = true
     }
 
@@ -36,5 +39,5 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core-sdk"))
+    implementation(project(":core"))
 }
