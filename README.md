@@ -105,8 +105,22 @@ Fragment args via Parcelable:
 data class SettingsArgs(val userId: String) : Parcelable
 
 // in fragment
-val args: SettingsArgs by requireArgs()
+val args: SettingsArgs = requireArgs()
 ```
+
+Or inject the payload straight into the ViewModel via Koin `parametersOf`:
+```kotlin
+class SettingsViewModel(private val args: SettingsArgs) : BaseViewModel()
+
+// module
+viewModel { (args: SettingsArgs) -> SettingsViewModel(args) }
+
+// fragment
+override val viewModel: SettingsViewModel by viewModel {
+    parametersOf(requireArgs<SettingsArgs>())
+}
+```
+Process-death-safe — Fragment args restore, Koin rebuilds the VM with the same payload.
 
 ---
 

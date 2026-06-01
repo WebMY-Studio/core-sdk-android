@@ -175,8 +175,27 @@ There is **no `Navigation.Ad` or `Navigation.Purchase`** — use `DisplayAdUseCa
 data class SettingsArgs(val userId: String, val title: String) : Parcelable
 
 // destination fragment
-val args: SettingsArgs by requireArgs()
+val args: SettingsArgs = requireArgs()
 ```
+
+### Payload straight into ViewModel (Koin `parametersOf`)
+
+Skip reading args in the fragment — inject the payload into the ViewModel constructor:
+
+```kotlin
+// VM
+class SettingsViewModel(private val args: SettingsArgs) : BaseViewModel()
+
+// Koin module
+viewModel { (args: SettingsArgs) -> SettingsViewModel(args) }
+
+// Fragment
+override val viewModel: SettingsViewModel by viewModel {
+    parametersOf(requireArgs<SettingsArgs>())
+}
+```
+
+Process-death-safe: Fragment args (Bundle) are restored by the system, so Koin recreates the VM with the same payload. Works with `BaseFragment` and `BaseComposeFragment` (use `koinViewModel { parametersOf(...) }` in Compose).
 
 ---
 
@@ -460,7 +479,7 @@ When implementing a new screen in a consumer app:
 
 1. **Create Fragment** — `BaseFragment` (XML) or `BaseComposeFragment` (Compose).
 2. **Create ViewModel** — extend `BaseViewModel`. Inject what you need via Koin. Call `navigateTo(...)` for navigation.
-3. **Register ViewModel in Koin module:** `viewModel { MyViewModel(get(), get()) }`.
+3. **Register ViewModel in Koin module:** `viewModel { MyViewModel(get(), get()) }`. If the screen takes a payload, use `viewModel { (args: MyArgs) -> MyViewModel(args, get()) }` and resolve via `by viewModel { parametersOf(requireArgs<MyArgs>()) }`.
 4. **Add Koin module to `WebMY.init(extraModules = listOf(appModule))`**.
 5. **Open it from elsewhere:** `navigateTo(screen<MyFragment>(MyArgs(...)))`.
 
