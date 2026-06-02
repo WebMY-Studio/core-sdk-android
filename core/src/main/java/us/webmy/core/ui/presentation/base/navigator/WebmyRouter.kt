@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import us.webmy.core.error.SdkError
 import us.webmy.core.tools.biometrics.domain.BiometricsService
 import us.webmy.core.ui.single.SheetController
 import us.webmy.core.util.ActivityProvider
@@ -38,8 +37,7 @@ class WebmyRouter(
         this.containerId = containerId
     }
 
-    private fun requireActivity(): FragmentActivity =
-        activityRef ?: throw SdkError.BindingMissing("Router not bound to FragmentActivity")
+    private fun requireActivity(): FragmentActivity = activityProvider.requireHost()
 
     override fun go(nav: Navigation): Result<Unit> = when (nav) {
         is Navigation.Screen -> openScreen(nav)

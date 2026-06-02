@@ -6,6 +6,8 @@ sealed class SdkError(message: String, cause: Throwable? = null) : Throwable(mes
 
     class NoForegroundActivity : SdkError("No foreground Activity available")
 
+    class NoHostActivity : SdkError("No Host Activity available")
+
     class NotSupported(reason: String) : SdkError("Not supported: $reason")
 
     sealed class Network(message: String, cause: Throwable? = null) : SdkError(message, cause) {

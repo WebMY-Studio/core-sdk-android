@@ -240,7 +240,7 @@ class PaywallViewModel(
     fun onBuyClick(productId: String) {
         viewModelScope.launch {
             when (val outcome = billingManager.purchase(productId)) {
-                PurchaseOutcome.Success   -> navigateTo(Navigation.Finish)
+                PurchaseOutcome.Success   -> navigateTo(Navigation.Back)
                 PurchaseOutcome.Pending   -> showSnackbar("Payment pending")
                 PurchaseOutcome.Cancelled -> Unit
                 is PurchaseOutcome.Failed -> showError(outcome.error.message)

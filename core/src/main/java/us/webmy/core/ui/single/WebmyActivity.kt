@@ -1,6 +1,7 @@
 package us.webmy.core.ui.single
 
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.ActionProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -18,6 +20,7 @@ import org.koin.android.ext.android.inject
 import us.webmy.core.R
 import us.webmy.core.ui.compose.theme.AppTheme
 import us.webmy.core.ui.presentation.base.navigator.Router
+import us.webmy.core.util.ActivityProvider
 
 /**
  * Single-activity host for SDK-based apps. Hosts a single fragment container plus a
@@ -39,15 +42,16 @@ abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
     private val router: Router by inject()
     private val sheetController: SheetController by inject()
 
+    private val activityProvider: ActivityProvider by inject()
+
     /** Built once on first launch (skipped on configuration change / process restore). */
     protected abstract fun createStartFragment(): Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(com.google.android.material.R.style.Theme_Material3_DayNight_NoActionBar)
         super.onCreate(savedInstanceState)
 
-        applySystemBarInsets()
-
+        enableEdgeToEdge()
+        activityProvider.bindHost(this)
         router.bind(this, R.id.webmyContainer)
 
         if (savedInstanceState == null) {
@@ -62,21 +66,6 @@ abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
             AppTheme {
                 SheetOverlay(sheetController)
             }
-        }
-    }
-
-    /**
-     * Apply status / nav bar + display cutout insets as padding on the root.
-     * Needed because compileSdk 35+ forces edge-to-edge regardless of fitsSystemWindows.
-     */
-    private fun applySystemBarInsets() {
-        val root = findViewById<android.view.View>(R.id.webmyRoot)
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
-            val bars = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            view.updatePadding(bars.left, bars.top, bars.right, bars.bottom)
-            WindowInsetsCompat.CONSUMED
         }
     }
 }

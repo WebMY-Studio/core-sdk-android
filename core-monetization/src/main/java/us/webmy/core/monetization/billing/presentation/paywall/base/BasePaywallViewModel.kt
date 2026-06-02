@@ -30,7 +30,7 @@ abstract class BasePaywallViewModel(
             when (outcome) {
                 is PurchaseOutcome.Success -> {
                     logEvent(eventName = "purchase_success")
-                    navigateTo(Navigation.Finish)
+                    navigateTo(Navigation.Back)
                 }
                 is PurchaseOutcome.Pending -> logEvent(eventName = "purchase_pending")
                 is PurchaseOutcome.Cancelled -> logEvent(eventName = "purchase_cancelled")
@@ -40,7 +40,7 @@ abstract class BasePaywallViewModel(
     }
 
     fun onCloseClick() {
-        navigateTo(Navigation.Finish)
+        navigateTo(Navigation.Back)
     }
 
     private fun logEvent(eventName: String) {

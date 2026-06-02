@@ -43,7 +43,7 @@ private const val ACK_MAX_ATTEMPTS = 4
 private const val ACK_INITIAL_DELAY_MS = 1_000L
 private const val RECONNECT_MAX_DELAY_MS = 5 * 60_000L
 
-class RealBillingManager(
+internal class RealBillingManager(
     application: Application,
     private val activityProvider: ActivityProvider,
     private val oneTimeProducts: Set<String>,
@@ -127,9 +127,9 @@ class RealBillingManager(
             SdkError.Billing.FlowFailed("No foreground Activity")
         )
         val details = oneTimeDetails[productId] ?: subscriptionDetails[productId]
-            ?: return@withLock PurchaseOutcome.Failed(
-                SdkError.Billing.FlowFailed("Product $productId not found")
-            )
+        ?: return@withLock PurchaseOutcome.Failed(
+            SdkError.Billing.FlowFailed("Product $productId not found")
+        )
 
         val productParamsBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(details)
@@ -189,8 +189,12 @@ class RealBillingManager(
         else billing.queryPurchases(BillingClient.ProductType.INAPP).getOrThrow()
         val subscriptionPurchases = if (subscriptionProducts.isEmpty()) emptyList()
         else billing.queryPurchases(BillingClient.ProductType.SUBS).getOrThrow()
-        val oneTimeList = billing.queryProductDetails(oneTimeProducts, BillingClient.ProductType.INAPP).getOrThrow()
-        val subscriptionList = billing.queryProductDetails(subscriptionProducts, BillingClient.ProductType.SUBS).getOrThrow()
+        val oneTimeList =
+            billing.queryProductDetails(oneTimeProducts, BillingClient.ProductType.INAPP)
+                .getOrThrow()
+        val subscriptionList =
+            billing.queryProductDetails(subscriptionProducts, BillingClient.ProductType.SUBS)
+                .getOrThrow()
 
         purchasedIds = buildSet {
             (oneTimePurchases + subscriptionPurchases).forEach { p ->
@@ -266,6 +270,7 @@ class RealBillingManager(
                     )
                 }
             }
+
             BillingClient.BillingResponseCode.USER_CANCELED -> PurchaseOutcome.Cancelled
             else -> PurchaseOutcome.Failed(
                 SdkError.Billing.FlowFailed("Purchase failed: ${billingResult.responseCode} ${billingResult.debugMessage}")
