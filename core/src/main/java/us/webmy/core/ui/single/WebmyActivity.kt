@@ -2,6 +2,7 @@ package us.webmy.core.ui.single
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -37,7 +38,7 @@ import us.webmy.core.util.ActivityProvider
  * }
  * ```
  */
-abstract class WebmyActivity : FragmentActivity(R.layout.webmy_activity) {
+abstract class WebmyActivity : AppCompatActivity(R.layout.webmy_activity) {
 
     private val router: Router by inject()
     private val sheetController: SheetController by inject()
