@@ -419,16 +419,95 @@ OkHttp client is a singleton built from `NetworkConfig`. To add interceptors at 
 
 ## 15. Theming
 
-`AppTheme { content() }` wraps Material3 with WebMY palette + typography + spacings. Access tokens via:
+`AppTheme { content() }` wraps Material3 with the active WebMY palette + typography + spacings. `BaseComposeFragment` and `WebmyActivity` already wrap their content in `AppTheme`, so inside any SDK screen you just read tokens:
 ```kotlin
 WebmyTheme.colors.textAndIconsPrimary
 WebmyTheme.typography.bodyM
 WebmyTheme.spacings.m
 ```
 
-Pre-built composables under `us.webmy.core.ui.compose.components.*`: `WebmyButton`, `WebmyText`, `WebmySurface`, `WebmyCircularProgressIndicator`, plus `Spacers.Horizontal(size)` / `Spacers.Vertical(size)`.
+Pre-built composables under `us.webmy.core.ui.compose.components.*`: `WebmyButton`, `WebmyText`, `WebmySurface`, `WebmySwitch`, `WebmyCircularProgressIndicator`, plus `Spacers.Horizontal(size)` / `Spacers.Vertical(size)`.
 
-Color palette is hard-coded `LightColorsPalette` — there is currently no dark mode toggle. To override, supply your own `ColorsPalette` via `CompositionLocalProvider(LocalColorsPalette provides MyPalette)`.
+### Multi-theme model
+
+The SDK supports an arbitrary number of themes (not just light/dark). A theme is a single object:
+```kotlin
+class ThemePalette(
+    val id: ThemeId,        // typealias ThemeId = String
+    val isDark: Boolean,    // drives status-bar / nav-bar icon contrast
+    val palette: ColorsPalette,
+)
+```
+Built-in ids live in `BuildInThemeIds.LIGHT` / `BuildInThemeIds.DARK` (`DEFAULT = LIGHT`). The SDK does **not** store a display name — the consumer app owns the `id → title` mapping (see below), so adding/renaming a theme never touches the SDK.
+
+Built-in themes: **Light** (default) and **Dark**. The chosen theme is **persisted automatically** and survives process restart. Status-bar / navigation-bar icon appearance follows the active theme's `isDark` automatically — no manual window handling.
+
+### Switching / observing the theme
+
+Inject `WebmyThemeController` (singleton) — the single entry point for all theme operations:
+```kotlin
+val controller: WebmyThemeController by inject()      // or koinInject() in Compose
+
+controller.themes                // List<ThemePalette> — all registered themes (for a picker)
+controller.theme                 // StateFlow<ThemeId> — currently selected id
+controller.select(themeId)       // change + persist; every AppTheme recomposes
+controller.palette(themeId)      // ColorsPalette for an id (falls back to default)
+controller.isDark(themeId)       // Boolean for an id
+controller.get(themeId)          // the ThemePalette for an id (falls back to default)
+```
+
+Theme picker example — title is resolved consumer-side by id:
+```kotlin
+@StringRes
+fun themeTitleRes(id: ThemeId): Int = when (id) {
+    BuildInThemeIds.DARK -> CoreR.string.webmy_theme_dark   // us.webmy.core.R
+    "accent"             -> R.string.theme_accent           // your app's R
+    else                 -> CoreR.string.webmy_theme_light
+}
+
+@Composable
+fun ThemePicker(controller: WebmyThemeController = koinInject()) {
+    val current by controller.theme.collectAsState()
+    controller.themes.forEach { theme ->
+        Row(Modifier.clickable { controller.select(theme.id) }) {
+            Text(stringResource(themeTitleRes(theme.id)))
+            if (current == theme.id) Text("✓")
+        }
+    }
+}
+```
+> Built-in `webmy_theme_light` / `webmy_theme_dark` strings live in `:core`. With non-transitive R classes (AGP default), reference them via the core package R: `us.webmy.core.R` (aliased `CoreR` above), not your app's `R`.
+
+### Implementing a new theme (consumer side)
+
+1. **Define a palette** — subclass `ColorsPalette`, override every token (Compose `Color`). `ColorsPalette` is color-only; `isDark` lives on the `ThemePalette`, not here:
+```kotlin
+class AccentColorsPalette : ColorsPalette() {
+    override val backgroundPrimary = Color(0xFF1A1230)
+    override val textAndIconsPrimary = Color(0xFFEDE9FB)
+    // ... override ALL remaining tokens
+}
+```
+
+2. **Register the theme in your Koin module** with a unique `named(...)` qualifier (required — `getAll<ThemePalette>()` only sees distinct qualifiers). The controller picks it up automatically:
+```kotlin
+val appModule = module {
+    val accentId = "accent"
+    single(named(accentId)) {
+        ThemePalette(id = accentId, isDark = true, palette = AccentColorsPalette())
+    }
+}
+```
+Set `isDark` correctly — it drives status-bar icon contrast when this theme is active.
+
+3. **Map the id to a display name** wherever you render the picker (your `strings.xml` + a `when(id)` like `themeTitleRes` above). The SDK never asks for it.
+
+4. **Select it** anywhere: `controller.select("accent")`.
+
+Notes:
+- Themes must be registered in a Koin module passed to `WebMY.init(extraModules = ...)` so they are loaded before the first `AppTheme` composition.
+- Adding a new color token to `ColorsPalette` in a future SDK version is a breaking change for consumer palettes (it's an `abstract` member) — pin your SDK version and re-build palettes on upgrade.
+- For a one-off palette override without registering a theme, you can still provide directly: `CompositionLocalProvider(LocalColorsPalette provides MyPalette) { ... }`.
 
 ---
 

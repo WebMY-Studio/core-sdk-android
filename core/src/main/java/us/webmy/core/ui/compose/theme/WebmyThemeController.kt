@@ -7,29 +7,31 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import us.webmy.core.data.repo.ThemeRepository
+import us.webmy.core.domain.model.BuildInThemeIds
 import us.webmy.core.domain.model.ThemeId
-import us.webmy.core.domain.model.ThemeSpec
 import us.webmy.core.ui.compose.configs.colors.palettes.ColorsPalette
 
 class WebmyThemeController(
     private val repository: ThemeRepository,
-    themes: List<ThemePalette>,
+    palettes: List<ThemePalette>,
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
 ) {
 
-    private val byId: Map<ThemeId, ThemePalette> = themes.associateBy { it.spec.id }
+    private val byId: Map<ThemeId, ThemePalette> = palettes.associateBy { it.id }
 
-    private val fallback: ThemePalette = themes.first()
+    private val fallback: ThemePalette = byId[BuildInThemeIds.DEFAULT] ?: palettes.first()
 
-    val specs: List<ThemeSpec> = themes.map { it.spec }
+    val themes: List<ThemePalette> = palettes
 
     val theme: StateFlow<ThemeId> =
         repository.observeSelected()
-            .stateIn(scope, SharingStarted.Eagerly, fallback.spec.id)
+            .stateIn(scope, SharingStarted.Eagerly, fallback.id)
 
-    fun palette(id: ThemeId): ColorsPalette = (byId[id] ?: fallback).palette
+    fun get(id: ThemeId): ThemePalette = byId[id] ?: fallback
 
-    fun spec(id: ThemeId): ThemeSpec = (byId[id] ?: fallback).spec
+    fun palette(id: ThemeId): ColorsPalette = get(id).palette
+
+    fun isDark(id: ThemeId): Boolean = get(id).isDark
 
     fun select(id: ThemeId) = repository.select(id)
 }

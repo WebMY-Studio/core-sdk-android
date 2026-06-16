@@ -39,7 +39,7 @@ fun AppTheme(
     val themeId by controller.theme.collectAsState()
 
     val colors = remember(themeId) { controller.palette(themeId) }
-    val isDark = remember(themeId) { controller.spec(themeId).isDark }
+    val isDark = remember(themeId) { controller.isDark(themeId) }
 
     AppTheme(colors = colors, isDark = isDark, content = content)
 }

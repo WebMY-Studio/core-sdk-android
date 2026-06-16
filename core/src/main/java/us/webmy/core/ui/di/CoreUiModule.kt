@@ -23,11 +23,11 @@ internal fun uiModule(): Module = module {
     single { ThemePreferences(get()) }
     single { ThemeRepositoryImpl(get()) } bind ThemeRepository::class
 
-    single(named(ThemePalette.LIGHT.spec.id)) { ThemePalette.LIGHT }
+    single(named(ThemePalette.LIGHT.id)) { ThemePalette.LIGHT }
 
-    single(named(ThemePalette.DARK.spec.id)) { ThemePalette.DARK }
+    single(named(ThemePalette.DARK.id)) { ThemePalette.DARK }
 
-    single { WebmyThemeController(repository = get(), themes = getAll<ThemePalette>()) }
+    single { WebmyThemeController(repository = get(), palettes = getAll<ThemePalette>()) }
 
     single<Router> {
         WebmyRouter(

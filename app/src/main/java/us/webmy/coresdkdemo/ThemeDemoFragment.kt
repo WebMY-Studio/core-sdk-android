@@ -2,6 +2,7 @@ package us.webmy.coresdkdemo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,12 +59,15 @@ private fun ThemeDemoScreen() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SectionTitle("Theme")
-        controller.specs.forEach { spec ->
-            ThemeRow(
-                label = stringResource(spec.nameRes),
-                selected = themeId == spec.id,
-                onClick = { controller.select(spec.id) },
-            )
+        controller.themes.forEach { theme ->
+            val titleRes = themeTitleRes(theme.id)
+            if (titleRes != null) {
+                ThemeRow(
+                    label = stringResource(titleRes),
+                    selected = themeId == theme.id,
+                    onClick = { controller.select(theme.id) },
+                )
+            }
         }
 
         SectionTitle("Text & icons")
