@@ -1,6 +1,5 @@
 package us.webmy.core.ui.compose.configs.colors.palettes
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 
 abstract class ColorsPalette {
@@ -43,43 +42,4 @@ abstract class ColorsPalette {
     abstract val success: Color
     abstract val error: Color
     abstract val warning: Color
-
-    fun toMaterialColorScheme(): ColorScheme = ColorScheme(
-        primary = backgroundPrimary,
-        onPrimary = textAndIconsPrimary,
-        primaryContainer = backgroundTertiary,
-        onPrimaryContainer = textAndIconsPrimary,
-        inversePrimary = textAndIconsPrimary,
-        secondary = backgroundSecondary,
-        onSecondary = textAndIconsSecondary,
-        secondaryContainer = backgroundTertiary,
-        onSecondaryContainer = textAndIconsPrimary,
-        tertiary = backgroundTertiary,
-        onTertiary = textAndIconsTertiary,
-        tertiaryContainer = backgroundSecondary,
-        onTertiaryContainer = textAndIconsTertiary,
-        background = backgroundPrimary,
-        onBackground = textAndIconsPrimary,
-        surface = backgroundPrimary,
-        onSurface = textAndIconsPrimary,
-        surfaceVariant = backgroundSecondary,
-        onSurfaceVariant = textAndIconsPrimary,
-        surfaceTint = textAndIconsTertiary,
-        inverseSurface = textAndIconsSecondary,
-        inverseOnSurface = backgroundPrimary,
-        error = error,
-        onError = error,
-        errorContainer = error,
-        onErrorContainer = error,
-        outline = appliedStroke,
-        outlineVariant = appliedSeparator,
-        scrim = fill30,
-        surfaceBright = backgroundPrimary,
-        surfaceDim = backgroundPrimary,
-        surfaceContainer = textAndIconsPrimary,
-        surfaceContainerHigh = textAndIconsPrimary,
-        surfaceContainerHighest = textAndIconsPrimary,
-        surfaceContainerLow = textAndIconsPrimary,
-        surfaceContainerLowest = textAndIconsPrimary
-    )
 }

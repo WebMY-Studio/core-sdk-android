@@ -10,12 +10,12 @@ class LightColorsPalette : ColorsPalette() {
     override val backgroundTertiary = Color(0xFFF3F3F2)
     override val backgroundInverse = Color(0xFF0E0E0F)
 
-    // textAndIconsPrimary: #0E0E0F, textAndIconsSecondary: #660E0E0F, textAndIconsPrimaryInverse: #FFFFFF, textDisabled: #240E0E0F
+    // textAndIconsPrimary: #0E0E0F, textAndIconsSecondary: #9F9F9F, textAndIconsPrimaryInverse: #FFFFFF, textDisabled: #DDDDDD
     override val textAndIconsPrimary = Color(0xFF0E0E0F)
-    override val textAndIconsSecondary = Color(0x660E0E0F)
-    override val textAndIconsTertiary = Color(0x990E0E0F)
+    override val textAndIconsSecondary = Color(0xFF9F9F9F)
+    override val textAndIconsTertiary = Color(0xFF6E6E6F)
     override val textAndIconsInversePrimary = Color(0xFFFFFFFF)
-    override val textAndIconsDisabled = Color(0x240E0E0F)
+    override val textAndIconsDisabled = Color(0xFFDDDDDD)
 
     // borderPrimary: #0F0E0E0F, borderSecondary: #080E0E0F
     override val appliedOverlay = Color(0x80000000)

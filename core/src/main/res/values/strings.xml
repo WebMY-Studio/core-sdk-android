@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="webmy_theme_light">Light</string>
+    <string name="webmy_theme_dark">Dark</string>
+
     <string name="sec" translatable="false">sec</string>
     <string name="min" translatable="false">min</string>
     <string name="hour" translatable="false">h</string>

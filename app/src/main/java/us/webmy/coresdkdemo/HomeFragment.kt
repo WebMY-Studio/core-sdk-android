@@ -43,6 +43,10 @@ class HomeFragment : BaseComposeFragment() {
                 text = "Open Browser",
                 onClick = { router.go(Navigation.Browser("https://example.com")) },
             )
+            WebmyButton(
+                text = "Theme demo",
+                onClick = { router.go(screen<ThemeDemoFragment>()) },
+            )
         }
     }
 }

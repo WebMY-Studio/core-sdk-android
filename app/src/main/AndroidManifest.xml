@@ -11,6 +11,7 @@
         android:label="Demo WebMY"
         android:logo="@drawable/ic_logo"
         android:supportsRtl="true"
+        android:theme="@style/BaseTheme"
         tools:replace="android:allowBackup,android:dataExtractionRules,android:fullBackupContent">
 
         <activity

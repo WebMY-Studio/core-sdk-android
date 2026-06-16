@@ -1,7 +1,6 @@
-package us.webmy.core.ui.data.prefs
+package us.webmy.core.data.prefs
 
 import kotlinx.coroutines.flow.Flow
-import us.webmy.core.data.prefs.SingleValuePrefs
 import us.webmy.core.tools.preferences.Preferences
 
 class OnboardingShownPreferences(override val preferences: Preferences) :
