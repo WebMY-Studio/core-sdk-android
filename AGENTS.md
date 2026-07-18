@@ -1,6 +1,6 @@
 # WebMY Core SDK — Agent Guide
 
-Reference for AI coding agents (Claude Code, Cursor, Copilot, etc.) implementing features in Android apps that depend on **WebMY Core SDK** (`com.github.WebMY-Studio:core` + optional `:core-monetization`).
+Reference for AI coding agents (Claude Code, Cursor, Copilot, etc.) implementing features in Android apps that depend on **WebMY Core SDK** (`com.github.WebMY-Studio:core` + optional `:core-monetization-ads`).
 
 This file describes the *consumer-side* API surface — what is injectable, how to navigate, how to gate ads behind purchases, how to extend.
 
@@ -18,20 +18,26 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://jitpack.io")
-        maven("https://artifactory.appodeal.com/appodeal") // only if using ads
+        maven("https://artifactory.appodeal.com/appodeal") // only if using full :core-monetization-ads (ads)
+        maven("https://verve.jfrog.io/artifactory/verve-gradle-release/") // only if using full :core-monetization-ads (ads)
     }
 }
 
 // consumer app/build.gradle.kts
 dependencies {
     implementation("com.github.WebMY-Studio.core-sdk-android:core:<version>")
-    // Optional — only if using billing/ads
-    implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization:<version>")
+
+    // Optional — billing + Adapty only, no ad SDKs, no extra maven repos needed:
+    implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-billing:<version>")
+
+    // OR — Optional — billing + Adapty + Appodeal ads + mediation adapters:
+    implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-ads:<version>")
 }
 ```
 
 - `:core` — DI (Koin), Compose theme + base UI, Router, Preferences, Analytics, RemoteConfig, Sharing, Biometrics, Network (OkHttp + Retrofit), CSV, single-activity host (`WebmyActivity`).
-- `:core-monetization` — Google Play Billing (`BillingManager`), Adapty, Appodeal Ads (`AdsManager`), `PremiumUseCase`, `DisplayAdUseCase`.
+- `:core-monetization-billing` — Google Play Billing (`BillingManager`), Adapty, `PremiumUseCase`, paywalls. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos.
+- `:core-monetization-ads` — superset of `:core-monetization-billing` — adds Appodeal Ads (`AdsManager`), `DisplayAdUseCase`, and all mediation adapters.
 
 There is **no separate `:core-ui` module** — Compose + base UI live inside `:core`.
 
@@ -216,11 +222,15 @@ Process-death-safe: Fragment args (Bundle) are restored by the system, so Koin r
 | `OnboardingShownPreferences` | single-value flag, `flow() / value() / setValue()` |
 | `SheetController` | imperatively show/dismiss Compose bottom sheets (usually use `Navigation.Sheet`) |
 
-### From `:core-monetization` (only if installed)
+### From `:core-monetization-billing` (only if installed — also present in full `:core-monetization-ads`)
 | Type | Purpose |
 |------|---------|
 | `BillingManager` | `subscribeProducts(): Flow<List<Product>>`, `suspend purchase(productId): PurchaseOutcome`, `awaitInitialized()`, `canBePurchased(id)` |
-| `PremiumUseCase` | `isPremiumFlow: Flow<Boolean>`, `subscriptionsFlow`, extension `suspend isPremium()` |
+| `PremiumUseCase` | `isPremiumFlow: Flow<Boolean>`, extension `suspend isPremium()` |
+
+### From `:core-monetization-ads` only (full module, not in `:core-monetization-billing`)
+| Type | Purpose |
+|------|---------|
 | `DisplayAdUseCase` | `showBanner(container) / hideBanner(container)`, `showInterstitial(source)`, `showReward(placement, source, grantWhenPremium, onResult)` — premium gating + throttle built in |
 | `AdsManager` | low-level Appodeal wrapper — prefer `DisplayAdUseCase` |
 
@@ -582,6 +592,7 @@ When adding ad gating:
 - **`Router.go(Navigation.Screen)` before `WebmyActivity.onCreate`** → throws `SdkError.BindingMissing`. Router binds in Activity `onCreate`.
 - **`BillingManager.purchase()` before `awaitInitialized()` succeeded** → returns `PurchaseOutcome.Failed("BillingManager not initialized")`. Either await or check `subscribeProducts()` first.
 - **`DisplayAdUseCase` without `initBilling`** → Koin resolution fails (`PremiumUseCase` missing). Call `initBilling` even with empty product sets if you want ads.
+- **`initAds` unavailable with `:core-monetization-billing`** → that module has no ad SDKs. `initBilling`/`initAdapty` are available in both `:core-monetization-billing` and `:core-monetization-ads`.
 - **`RemoteConfigManager` injection fails** → `remoteConfigUpdateInterval` is `null` in `WebMYConfig`. Pass any non-null `Duration` to enable.
 - **Biometrics on non-`FragmentActivity`** → throws `SdkError.NotSupported`. Consumer must use `WebmyActivity` or another `FragmentActivity` subclass.
 - **`consumableProductIds` not subset of `oneTimeProductIds`** → throws `IllegalArgumentException` at `RealBillingManager` init.

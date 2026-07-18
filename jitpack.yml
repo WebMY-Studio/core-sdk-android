@@ -2,4 +2,4 @@ jdk:
   - openjdk17
 
 install:
-  - ./gradlew :core:publishToMavenLocal :core-monetization:publishToMavenLocal -x test --no-daemon --stacktrace
+  - ./gradlew :core:publishToMavenLocal :core-monetization-billing:publishToMavenLocal :core-monetization-ads:publishToMavenLocal -x test --no-daemon --stacktrace

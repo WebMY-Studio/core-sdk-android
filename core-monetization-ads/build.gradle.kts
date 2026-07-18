@@ -31,13 +31,9 @@ kotlin {
 }
 
 dependencies {
-    api(project(":core"))
+    api(project(":core-monetization-billing"))
 
-    api(libs.billingclient)
     api(libs.facebook)
-
-    implementation(platform(libs.adapty.bom))
-    implementation(libs.adapty)
 
     implementation(libs.google.play.services.ads)
     implementation(libs.appodeal)
@@ -141,4 +137,4 @@ dependencies {
     api(libs.unity3d.vungle.adapter)
 }
 
-configureMavenPublishing("core-monetization")
+configureMavenPublishing("core-monetization-ads")
