@@ -41,10 +41,10 @@ dependencyResolutionManagement {
 dependencies {
     implementation("com.github.WebMY-Studio.core-sdk-android:core:<version>")
 
-    // Billing + Adapty only, no ad SDKs (subscription-only apps):
+    // Billing + Apphud only, no ad SDKs (subscription-only apps):
     implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-billing:<version>") // optional
 
-    // OR: Billing + Ads + Adapty + Appodeal mediation adapters:
+    // OR: Billing + Ads + Apphud + Appodeal mediation adapters:
     implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-ads:<version>") // optional
 }
 ```
@@ -52,6 +52,26 @@ dependencies {
 Multi-module syntax: `com.github.<User>.<Repo>:<module>:<version>`. Latest version: [JitPack](https://jitpack.io/#WebMY-Studio/core-sdk-android).
 
 `maven("https://artifactory.appodeal.com/appodeal")` and the Verve repo (`https://verve.jfrog.io/artifactory/verve-gradle-release/`) are needed **only** with the full `:core-monetization-ads` module — `:core-monetization-billing` resolves from google/mavenCentral/jitpack alone.
+
+### Required manifest placeholders
+
+`:core-monetization-billing` bundles the Facebook Android SDK, whose manifest entries need two placeholders. `:core-monetization-ads` needs a third one for AdMob. Declare them in the consumer app or the merge fails with `Attribute meta-data#…@value … placeholder not substituted`:
+
+```kotlin
+// app/build.gradle.kts
+android {
+    defaultConfig {
+        manifestPlaceholders += mapOf(
+            // required by :core-monetization-billing (and by :core-monetization-ads, which depends on it)
+            "FACEBOOK_APP_ID" to "<your-facebook-app-id>",
+            "FACEBOOK_CLIENT_TOKEN" to "<your-facebook-client-token>",
+
+            // required by :core-monetization-ads only
+            "ADMOB_APPLICATION_ID" to "<your-admob-app-id>",
+        )
+    }
+}
+```
 
 ---
 
@@ -302,8 +322,8 @@ Override palette via `CompositionLocalProvider(LocalColorsPalette provides MyPal
 ## Modules
 
 - **`:core`** — everything above except billing/ads. Single artifact, pulls Compose + Material + Koin + OkHttp + Firebase + Amplitude.
-- **`:core-monetization-billing`** — Billing + Adapty + paywalls only. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos needed. Opt-in.
-- **`:core-monetization-ads`** — Billing + Ads + Adapty + Appodeal mediation adapters (superset of `:core-monetization-billing`). Opt-in.
+- **`:core-monetization-billing`** — Billing + Apphud + paywalls only. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos needed. Opt-in.
+- **`:core-monetization-ads`** — Billing + Ads + Apphud + Appodeal mediation adapters (superset of `:core-monetization-billing`). Opt-in.
 
 ---
 

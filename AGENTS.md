@@ -27,19 +27,39 @@ dependencyResolutionManagement {
 dependencies {
     implementation("com.github.WebMY-Studio.core-sdk-android:core:<version>")
 
-    // Optional — billing + Adapty only, no ad SDKs, no extra maven repos needed:
+    // Optional — billing + Apphud only, no ad SDKs, no extra maven repos needed:
     implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-billing:<version>")
 
-    // OR — Optional — billing + Adapty + Appodeal ads + mediation adapters:
+    // OR — Optional — billing + Apphud + Appodeal ads + mediation adapters:
     implementation("com.github.WebMY-Studio.core-sdk-android:core-monetization-ads:<version>")
 }
 ```
 
 - `:core` — DI (Koin), Compose theme + base UI, Router, Preferences, Analytics, RemoteConfig, Sharing, Biometrics, Network (OkHttp + Retrofit), CSV, single-activity host (`WebmyActivity`).
-- `:core-monetization-billing` — Google Play Billing (`BillingManager`), Adapty, `PremiumUseCase`, paywalls. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos.
+- `:core-monetization-billing` — Google Play Billing (`BillingManager`), Apphud, Facebook Android SDK, `PremiumUseCase`, paywalls. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos.
 - `:core-monetization-ads` — superset of `:core-monetization-billing` — adds Appodeal Ads (`AdsManager`), `DisplayAdUseCase`, and all mediation adapters.
 
 There is **no separate `:core-ui` module** — Compose + base UI live inside `:core`.
+
+### Required manifest placeholders
+
+Both monetization modules ship manifest `meta-data` with placeholders, so the consumer app must declare them or manifest merging fails:
+
+```kotlin
+// consumer app/build.gradle.kts
+android {
+    defaultConfig {
+        manifestPlaceholders += mapOf(
+            // :core-monetization-billing (Facebook SDK) — also required transitively by :core-monetization-ads
+            "FACEBOOK_APP_ID" to "<your-facebook-app-id>",
+            "FACEBOOK_CLIENT_TOKEN" to "<your-facebook-client-token>",
+
+            // :core-monetization-ads only
+            "ADMOB_APPLICATION_ID" to "<your-admob-app-id>",
+        )
+    }
+}
+```
 
 ---
 
@@ -74,7 +94,7 @@ class MyApp : Application() {
             consumableProductIds = setOf("coins_100"),     // subset of oneTimeProductIds
             premiumProductIds = setOf("yearly_premium", "monthly_premium"),
         )
-        WebMY.initAdapty(BuildConfig.ADAPTY_KEY)
+        WebMY.initApphud(BuildConfig.APPHUD_KEY)
         WebMY.initAds(
             appodealKey = BuildConfig.APPODEAL_KEY,
             throttleConfigProvider = {
@@ -592,7 +612,7 @@ When adding ad gating:
 - **`Router.go(Navigation.Screen)` before `WebmyActivity.onCreate`** → throws `SdkError.BindingMissing`. Router binds in Activity `onCreate`.
 - **`BillingManager.purchase()` before `awaitInitialized()` succeeded** → returns `PurchaseOutcome.Failed("BillingManager not initialized")`. Either await or check `subscribeProducts()` first.
 - **`DisplayAdUseCase` without `initBilling`** → Koin resolution fails (`PremiumUseCase` missing). Call `initBilling` even with empty product sets if you want ads.
-- **`initAds` unavailable with `:core-monetization-billing`** → that module has no ad SDKs. `initBilling`/`initAdapty` are available in both `:core-monetization-billing` and `:core-monetization-ads`.
+- **`initAds` unavailable with `:core-monetization-billing`** → that module has no ad SDKs. `initBilling`/`initApphud` are available in both `:core-monetization-billing` and `:core-monetization-ads`.
 - **`RemoteConfigManager` injection fails** → `remoteConfigUpdateInterval` is `null` in `WebMYConfig`. Pass any non-null `Duration` to enable.
 - **Biometrics on non-`FragmentActivity`** → throws `SdkError.NotSupported`. Consumer must use `WebmyActivity` or another `FragmentActivity` subclass.
 - **`consumableProductIds` not subset of `oneTimeProductIds`** → throws `IllegalArgumentException` at `RealBillingManager` init.

@@ -29,9 +29,9 @@ dependencies {
     api(project(":core"))
 
     api(libs.billingclient)
+    api(libs.facebook)
 
-    implementation(platform(libs.adapty.bom))
-    implementation(libs.adapty)
+    api(libs.apphud)
 }
 
 configureMavenPublishing("core-monetization-billing")

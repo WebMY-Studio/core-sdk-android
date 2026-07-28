@@ -14,7 +14,7 @@ okhttp3 = "5.4.0"
 retrofit2 = "3.0.0"
 appcompat = "1.7.1"
 material = "1.14.0"
-adaptyBom = "4.0.0"
+apphud = "3.4.2"
 facebook = "18.3.0"
 activity = "1.13.0"
 biometric = "1.1.0"
@@ -122,8 +122,7 @@ koin-compose = { module = "io.insert-koin:koin-androidx-compose" }
 
 amplitude = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
 appodeal = { module = "com.appodeal.ads.sdk:core", version.ref = "appodeal" }
-adapty-bom = { module = "io.adapty:adapty-bom", version.ref = "adaptyBom" }
-adapty = { module = "io.adapty:android-sdk" }
+apphud = { module = "com.apphud:ApphudSDK-Android", version.ref = "apphud" }
 facebook = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebook" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 

@@ -1,16 +1,12 @@
 package us.webmy.core.monetization.billing
 
-import com.adapty.Adapty
-import com.adapty.models.AdaptyConfig
+import com.apphud.sdk.Apphud
 import org.koin.core.context.loadKoinModules
 import us.webmy.core.WebMY
 import us.webmy.core.monetization.billing.di.billingModule
 
-fun WebMY.initAdapty(key: String) {
-    Adapty.activate(
-        application,
-        AdaptyConfig.Builder(key).build()
-    )
+fun WebMY.initApphud(key: String) {
+    Apphud.start(application, key)
 }
 
 fun WebMY.initBilling(

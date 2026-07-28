@@ -33,8 +33,6 @@ kotlin {
 dependencies {
     api(project(":core-monetization-billing"))
 
-    api(libs.facebook)
-
     implementation(libs.google.play.services.ads)
     implementation(libs.appodeal)
 
