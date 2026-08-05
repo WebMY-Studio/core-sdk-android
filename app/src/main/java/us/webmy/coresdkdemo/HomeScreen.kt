@@ -11,16 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import us.webmy.core.ui.compose.components.button.WebmyButton
-import us.webmy.core.ui.presentation.base.fragment.BaseComposeFragment
+import us.webmy.core.ui.compose.components.surface.WebmySurface
 import us.webmy.core.ui.presentation.base.navigator.Navigation
 import us.webmy.core.ui.presentation.base.navigator.Router
 import us.webmy.core.ui.presentation.base.navigator.screen
 
-class HomeFragment : BaseComposeFragment() {
-
-    @Composable
-    override fun ScreenContent() {
-        val router: Router = koinInject()
+@Composable
+fun HomeScreen() {
+    val router: Router = koinInject()
+    WebmySurface {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -30,22 +29,12 @@ class HomeFragment : BaseComposeFragment() {
         ) {
             Text("WebMY Demo — Home (Compose)")
             WebmyButton(
-                text = "Open Settings (XML) with args",
-                onClick = {
-                    router.go(
-                        screen<SettingsFragment>(
-                            SettingsArgs(userId = "42", title = "Hello from Home"),
-                        )
-                    )
-                },
-            )
-            WebmyButton(
                 text = "Open Browser",
                 onClick = { router.go(Navigation.Browser("https://example.com")) },
             )
             WebmyButton(
                 text = "Theme demo",
-                onClick = { router.go(screen<ThemeDemoFragment>()) },
+                onClick = { router.go(screen(ThemeDemoKey)) },
             )
         }
     }

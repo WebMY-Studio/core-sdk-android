@@ -1,70 +1,86 @@
 package us.webmy.core.ui.single
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.ActionProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import org.koin.android.ext.android.inject
-import us.webmy.core.R
 import us.webmy.core.ui.compose.theme.AppTheme
+import us.webmy.core.ui.presentation.base.navigator.Navigation
 import us.webmy.core.ui.presentation.base.navigator.Router
 import us.webmy.core.util.ActivityProvider
 
 /**
- * Single-activity host for SDK-based apps. Hosts a single fragment container plus a
- * Compose overlay for bottom sheets driven by [SheetController].
+ * Single-activity host for SDK-based apps. Pure Compose: no XML layout, no fragments.
+ * Screens are rendered by a Navigation 3 [NavDisplay] over the back stack owned by
+ * [Router]; bottom sheets are stacked on top via [SheetController].
  *
- * Subclass and override [createStartFragment] — that fragment is shown on first launch.
- * All subsequent navigation goes through [Router] (XML via `BaseFragment`, Compose via
- * `BaseComposeFragment`).
+ * It extends [FragmentActivity] (not `ComponentActivity`) purely because
+ * `androidx.biometric`'s `BiometricPrompt` requires one — no fragment is ever added.
+ *
+ * Subclass and implement [startScreen] (the root key) and [screens] (key → composable).
  *
  * Example:
  * ```
+ * data object HomeKey : NavKey
+ * data class DetailsKey(val id: String) : NavKey
+ *
  * class MainActivity : WebmyActivity() {
- *     override fun createStartFragment() = HomeFragment()
+ *     override fun startScreen(): NavKey = HomeKey
+ *
+ *     override fun EntryProviderScope<NavKey>.screens() {
+ *         entry<HomeKey> { HomeScreen() }
+ *         entry<DetailsKey> { key -> DetailsScreen(key.id) }
+ *     }
  * }
  * ```
+ *
+ * The back stack lives in the [Router] singleton, so it survives configuration changes.
+ * It is not restored after process death — the app restarts at [startScreen].
  */
-abstract class WebmyActivity : AppCompatActivity(R.layout.webmy_activity) {
+abstract class WebmyActivity : FragmentActivity() {
 
     private val router: Router by inject()
     private val sheetController: SheetController by inject()
 
     private val activityProvider: ActivityProvider by inject()
 
-    /** Built once on first launch (skipped on configuration change / process restore). */
-    protected abstract fun createStartFragment(): Fragment
+    /** Root back stack entry, used on first launch (and after process death). */
+    protected abstract fun startScreen(): NavKey
+
+    /** Declare one `entry<Key> { ... }` per screen key this app can navigate to. */
+    protected abstract fun EntryProviderScope<NavKey>.screens()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
-        activityProvider.bindHost(this)
-        router.bind(this, R.id.webmyContainer)
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.webmyContainer, createStartFragment())
-                .commit()
+        activityProvider.bindHost(this)
+
+        if (router.backStack.isEmpty()) {
+            router.backStack.add(startScreen())
         }
 
-        val overlay = findViewById<ComposeView>(R.id.webmyComposeOverlay)
-        overlay.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        overlay.setContent {
+        setContent {
             AppTheme {
+                val entries = remember { entryProvider { screens() } }
+                NavDisplay(
+                    modifier = Modifier.fillMaxSize(),
+                    backStack = router.backStack,
+                    onBack = { router.go(Navigation.Back) },
+                    entryProvider = entries,
+                )
                 SheetOverlay(sheetController)
             }
         }

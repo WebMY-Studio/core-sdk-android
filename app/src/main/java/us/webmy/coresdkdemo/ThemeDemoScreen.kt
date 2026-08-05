@@ -33,20 +33,16 @@ import us.webmy.core.ui.compose.components.surface.WebmySurface
 import us.webmy.core.ui.compose.components.switch.WebmySwitch
 import us.webmy.core.ui.compose.theme.WebmyTheme
 import us.webmy.core.ui.compose.theme.WebmyThemeController
-import us.webmy.core.ui.presentation.base.fragment.BaseComposeFragment
 
-class ThemeDemoFragment : BaseComposeFragment() {
-
-    @Composable
-    override fun ScreenContent() {
-        WebmySurface {
-            ThemeDemoScreen()
-        }
+@Composable
+fun ThemeDemoScreen() {
+    WebmySurface {
+        ThemeDemoContent()
     }
 }
 
 @Composable
-private fun ThemeDemoScreen() {
+private fun ThemeDemoContent() {
     val colors = WebmyTheme.colors
     val controller = koinInject<WebmyThemeController>()
     val themeId by controller.theme.collectAsState()

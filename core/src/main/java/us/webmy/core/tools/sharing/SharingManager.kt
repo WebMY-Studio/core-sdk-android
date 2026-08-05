@@ -1,10 +1,9 @@
 package us.webmy.core.tools.sharing
 
+import android.app.Activity
 import android.content.Intent
 import android.provider.CalendarContract
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
-import us.webmy.core.error.SdkError
 import us.webmy.core.util.ActivityProvider
 
 interface SharingManager {
@@ -17,9 +16,7 @@ internal class RealSharingManager(
     private val activityProvider: ActivityProvider,
 ) : SharingManager {
 
-    private fun requireActivity(): AppCompatActivity =
-        activityProvider.requireCurrent() as? AppCompatActivity
-            ?: throw SdkError.NotSupported("SharingManager requires AppCompatActivity foreground")
+    private fun requireActivity(): Activity = activityProvider.requireCurrent()
 
     override fun shareContent(sharing: ContentSharing) {
         val activity = requireActivity()

@@ -17,7 +17,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-        viewBinding = true
         compose = true
     }
 
@@ -52,9 +51,6 @@ dependencies {
     api(libs.squareup.retrofit2.core)
     api(libs.squareup.retrofit2.converters.gson)
 
-    api(libs.appcompat)
-    api(libs.material)
-
     implementation(libs.google.review.ktx)
 
     api(platform(libs.androidx.compose.bom))
@@ -68,6 +64,10 @@ dependencies {
     api(libs.androidx.compose.material.icons)
     api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.activity.compose)
+    api(libs.androidx.navigation3.runtime)
+    api(libs.androidx.navigation3.ui)
+
+    // FragmentActivity only: androidx.biometric's BiometricPrompt requires it. No fragments are used.
     api(libs.androidx.fragment.ktx)
 
     debugApi(libs.androidx.compose.ui.tooling)

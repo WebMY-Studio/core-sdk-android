@@ -2,8 +2,8 @@ package us.webmy.core.ui.presentation.base.navigator
 
 import android.content.Intent
 import androidx.core.net.toUri
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +15,11 @@ import us.webmy.core.util.ActivityProvider
 import us.webmy.core.util.coerceToUnit
 
 /**
- * Fragment-based [Router]. Holds a [FragmentActivity] reference and a container id;
- * `Navigation.Screen` is dispatched via `supportFragmentManager.beginTransaction`.
+ * Compose-only [Router]. `Navigation.Screen` mutates [backStack], which `WebmyActivity`
+ * renders through a Navigation 3 `NavDisplay` — no fragments, no XML.
  *
- * Compose bottom sheets are routed through [sheetController] (rendered by a ComposeView
- * overlay in `WebmyActivity`).
+ * Compose bottom sheets are routed through [sheetController] (rendered by the same
+ * `setContent` tree in `WebmyActivity`).
  */
 class WebmyRouter(
     private val activityProvider: ActivityProvider,
@@ -27,22 +27,15 @@ class WebmyRouter(
     val sheetController: SheetController,
 ) : Router {
 
-    private var activityRef: FragmentActivity? = null
-    private var containerId: Int = 0
+    override val backStack: NavBackStack<NavKey> = NavBackStack()
 
     private val asyncScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    override fun bind(activity: FragmentActivity, containerId: Int) {
-        this.activityRef = activity
-        this.containerId = containerId
-    }
-
-    private fun requireActivity(): FragmentActivity = activityProvider.requireHost()
-
     override fun go(nav: Navigation): Result<Unit> = when (nav) {
         is Navigation.Screen -> openScreen(nav)
+        is Navigation.Root -> root(nav.key)
         is Navigation.Back -> back()
-        is Navigation.PopUpTo -> popUpTo(nav.tag, nav.inclusive)
+        is Navigation.PopUpTo -> popUpTo(nav.key, nav.inclusive)
         is Navigation.Browser -> openBrowser(nav.url)
         is Navigation.Email -> openEmail(nav)
         is Navigation.GooglePlay -> openGooglePlay(nav.applicationId)
@@ -55,34 +48,41 @@ class WebmyRouter(
 
     private fun dismissSheet() = runCatching { sheetController.dismiss() }
 
+    /**
+     * No-op at the root: `NavDisplay` requires a non-empty stack, and back is left to the
+     * system there (which finishes the Activity).
+     */
     private fun back() = runCatching {
-        requireActivity().supportFragmentManager.popBackStack()
+        if (backStack.size > 1) backStack.removeLastOrNull()
+        Unit
     }
 
-    private fun popUpTo(tag: String, inclusive: Boolean) = runCatching {
-        val index = if (inclusive) {
-            FragmentManager.POP_BACK_STACK_INCLUSIVE
-        } else {
-            0
+    private fun popUpTo(key: NavKey, inclusive: Boolean) = runCatching {
+        val index = backStack.lastIndexOf(key)
+        if (index >= 0) {
+            val keepCount = (if (inclusive) index else index + 1).coerceAtLeast(1)
+            while (backStack.size > keepCount) {
+                backStack.removeLastOrNull()
+            }
         }
-        requireActivity().supportFragmentManager.popBackStack(tag, index)
     }
 
     private fun sheet(content: ComposeSheetContent) = runCatching { sheetController.show(content) }
+
     private fun finish() = runCatching {
         activityProvider.requireCurrent().finish()
     }
 
     private fun openScreen(nav: Navigation.Screen): Result<Unit> = runCatching {
-        val activity = requireActivity()
-        val fm = activity.supportFragmentManager
-        val fragment = fm.fragmentFactory.instantiate(activity.classLoader, nav.fragmentClass.name)
-        if (nav.args != null) fragment.arguments = nav.args
-        val tag = nav.fragmentClass.name
-        fm.beginTransaction()
-            .replace(containerId, fragment, tag)
-            .apply { if (nav.addToBackStack) addToBackStack(tag) }
-            .commit()
+        if (!nav.addToBackStack) backStack.removeLastOrNull()
+        backStack.add(nav.key)
+        Unit
+    }
+
+    private fun root(key: NavKey): Result<Unit> = runCatching {
+        backStack.clear()
+        backStack.add(key)
+        Unit
     }
 
     private fun openBrowser(url: String): Result<Unit> = runCatching {
@@ -119,7 +119,7 @@ class WebmyRouter(
     }
 
     private fun requestReview(): Result<Unit> = runCatching {
-        val activity = requireActivity()
+        val activity = activityProvider.requireHost()
         val manager = ReviewManagerFactory.create(activity)
         manager.requestReviewFlow().addOnCompleteListener { task ->
             if (task.isSuccessful) {

@@ -14,8 +14,6 @@ import us.webmy.core.NetworkConfig
 import us.webmy.core.WebMYConfig
 import us.webmy.core.data.NetworkApiCreator
 import us.webmy.core.data.RealNetworkApiCreator
-import us.webmy.core.data.csv.CsvFetcher
-import us.webmy.core.data.csv.RealCsvFetcher
 import us.webmy.core.tools.analytics.AnalyticsManager
 import us.webmy.core.tools.analytics.RealAnalyticsManager
 import us.webmy.core.tools.biometrics.data.AuthenticationSession
@@ -42,7 +40,6 @@ internal fun sdkModule(config: WebMYConfig) = module {
     configureSharing()
 
     configureNetwork(config.network)
-    configureCsv()
 }
 
 internal fun Module.configureActivityProvider(config: WebMYConfig) {
@@ -119,12 +116,6 @@ internal fun Module.configureNetwork(network: NetworkConfig) {
     single<OkHttpClient> { get<OkHttpClient.Builder>().build() }
 
     single<NetworkApiCreator> { RealNetworkApiCreator(get()) }
-}
-
-internal fun Module.configureCsv() {
-    single<CsvFetcher> {
-        RealCsvFetcher(get())
-    }
 }
 
 internal fun Module.configureBiometrics() {
