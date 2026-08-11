@@ -1,8 +1,8 @@
 package us.webmy.coresdkdemo
 
 import androidx.annotation.StringRes
-import us.webmy.core.domain.model.BuildInThemeIds
-import us.webmy.core.domain.model.ThemeId
+import us.webmy.core.theme.BuildInThemeIds
+import us.webmy.core.theme.ThemeId
 import us.webmy.core.R as CoreR
 
 object ThemeIds {

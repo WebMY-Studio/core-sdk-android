@@ -1,23 +1,24 @@
 package us.webmy.coresdkdemo
 
 import android.app.Application
-import us.webmy.core.KoinMode
 import us.webmy.core.WebMY
 import us.webmy.core.WebMYConfig
-import us.webmy.core.ui.di.installUi
-import us.webmy.coresdkdemo.di.appModule
+import us.webmy.core.installUi
+import us.webmy.core.theme.ThemePalette
 
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        WebMY.init(
-            config = WebMYConfig(
-                application = this,
-                koinMode = KoinMode.START,
+        WebMY.init(WebMYConfig(application = this))
+        WebMY.installUi(
+            extraPalettes = listOf(
+                ThemePalette(
+                    id = ThemeIds.ACCENT,
+                    isDark = true,
+                    palette = AccentColorsPalette(),
+                ),
             ),
-            extraModules = listOf(appModule),
         )
-        WebMY.installUi()
     }
 }

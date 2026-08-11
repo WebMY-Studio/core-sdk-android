@@ -27,12 +27,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.koin.compose.koinInject
-import us.webmy.core.ui.compose.components.button.WebmyButton
-import us.webmy.core.ui.compose.components.surface.WebmySurface
-import us.webmy.core.ui.compose.components.switch.WebmySwitch
-import us.webmy.core.ui.compose.theme.WebmyTheme
-import us.webmy.core.ui.compose.theme.WebmyThemeController
+import us.webmy.core.WebMY
+import us.webmy.core.components.WebmyButton
+import us.webmy.core.components.WebmySurface
+import us.webmy.core.components.WebmySwitch
+import us.webmy.core.theme.WebmyTheme
+import us.webmy.core.theme.WebmyThemeController
 
 @Composable
 fun ThemeDemoScreen() {
@@ -44,7 +44,7 @@ fun ThemeDemoScreen() {
 @Composable
 private fun ThemeDemoContent() {
     val colors = WebmyTheme.colors
-    val controller = koinInject<WebmyThemeController>()
+    val controller = WebMY.theme
     val themeId by controller.theme.collectAsState()
     Column(
         modifier = Modifier

@@ -1,7 +1,7 @@
 package us.webmy.coresdkdemo
 
 import androidx.compose.ui.graphics.Color
-import us.webmy.core.ui.compose.configs.colors.palettes.ColorsPalette
+import us.webmy.core.theme.ColorsPalette
 
 class AccentColorsPalette : ColorsPalette() {
     override val backgroundSystem = Color(0xFF1A1230)

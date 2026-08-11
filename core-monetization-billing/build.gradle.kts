@@ -22,16 +22,16 @@ android {
 kotlin {
     compilerOptions {
         languageVersion = KotlinVersion.KOTLIN_2_2
+        freeCompilerArgs.add("-opt-in=us.webmy.core.internal.InternalWebmyApi")
     }
 }
 
 dependencies {
     api(project(":core"))
 
-    api(libs.billingclient)
-    api(libs.facebook)
-
-    api(libs.apphud)
+    implementation(libs.billingclient)
+    implementation(libs.facebook)
+    implementation(libs.apphud)
 }
 
 configureMavenPublishing("core-monetization-billing")

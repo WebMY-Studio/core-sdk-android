@@ -9,16 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.koin.compose.koinInject
-import us.webmy.core.ui.compose.components.button.WebmyButton
-import us.webmy.core.ui.compose.components.surface.WebmySurface
-import us.webmy.core.ui.presentation.base.navigator.Navigation
-import us.webmy.core.ui.presentation.base.navigator.Router
-import us.webmy.core.ui.presentation.base.navigator.screen
+import us.webmy.core.WebMY
+import us.webmy.core.components.WebmyButton
+import us.webmy.core.components.WebmySurface
+import us.webmy.core.navigation.Navigation
+import us.webmy.core.navigation.Router
+import us.webmy.core.navigation.screen
 
 @Composable
 fun HomeScreen() {
-    val router: Router = koinInject()
+    val router: Router = WebMY.router
     WebmySurface {
         Column(
             modifier = Modifier

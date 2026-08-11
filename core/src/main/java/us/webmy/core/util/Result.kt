@@ -17,4 +17,4 @@ inline fun <T, R> Result<T>.flatMap(transform: (T) -> Result<R>): Result<R> {
 
 fun <T> failure(message: String) = Result.failure<T>(Throwable(message))
 
-fun <T> failure(error: us.webmy.core.error.SdkError) = Result.failure<T>(error)
+fun <T> failure(error: us.webmy.core.SdkError) = Result.failure<T>(error)

@@ -1,11 +1,13 @@
 # WebMY Core SDK — Agent Guide
 
-Reference for AI coding agents (Claude Code, Cursor, Copilot, etc.) implementing features in Android apps that depend on **WebMY Core SDK** (`com.github.WebMY-Studio:core` + optional `:core-monetization-ads`).
+Reference for AI coding agents (Claude Code, Cursor, Copilot, etc.) implementing features in Android apps that depend on **WebMY Core SDK** (`com.github.WebMY-Studio:core` + optional monetization modules).
 
-This file describes the *consumer-side* API surface — what is injectable, how to navigate, how to gate ads behind purchases, how to extend.
+This file describes the *consumer-side* API surface — how to obtain SDK services, how to navigate, how to gate ads behind purchases, how to extend.
 
 > **Always fetch the version matching the consumer's SDK version**, e.g.
-> `https://raw.githubusercontent.com/WebMY-Studio/core-sdk-android/v0.6.0/AGENTS.md`
+> `https://raw.githubusercontent.com/WebMY-Studio/core-sdk-android/v1.0.0/AGENTS.md`
+
+**Since v1.0.0 the SDK has no DI framework.** Koin is gone entirely. Services are resolved via typed accessors on the `WebMY` object (`WebMY.analytics`, `WebMY.router`, `WebMY.billing`, …). There is no `by inject()`, no `koinInject()`, no `koinViewModel()`, no `extraModules`, no `KoinMode`. If the consumer app uses its own DI (Koin, Hilt, manual), bridge SDK services into it: `single { WebMY.billing }`.
 
 ---
 
@@ -35,11 +37,34 @@ dependencies {
 }
 ```
 
-- `:core` — DI (Koin), Compose theme + base UI, Router, Preferences, Analytics, RemoteConfig, Sharing, Biometrics, Network (OkHttp + Retrofit), CSV, single-activity host (`WebmyActivity`).
-- `:core-monetization-billing` — Google Play Billing (`BillingManager`), Apphud, Facebook Android SDK, `PremiumUseCase`, paywalls. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos.
+- `:core` — service registry, Compose theme + base UI, Router (Navigation 3), Preferences, Analytics, RemoteConfig, Sharing, Biometrics, Network (OkHttp + Retrofit), single-activity host (`WebmyActivity`).
+- `:core-monetization-billing` — Google Play Billing (`BillingManager`), Apphud, Facebook Android SDK, `PremiumUseCase`, paywall base ViewModels. No ad SDKs, no `AD_ID` permission, no Appodeal/Verve maven repos.
 - `:core-monetization-ads` — superset of `:core-monetization-billing` — adds Appodeal Ads (`AdsManager`), `DisplayAdUseCase`, and all mediation adapters.
 
 There is **no separate `:core-ui` module** — Compose + base UI live inside `:core`.
+
+### Package layout (v1.0.0)
+
+Public API lives in shallow packages:
+
+| Area | Package |
+|---|---|
+| Entry point, config, errors | `us.webmy.core` (`WebMY`, `WebMYConfig`, `NetworkConfig`, `SdkError`, `installUi`) |
+| Analytics | `us.webmy.core.analytics` |
+| Preferences | `us.webmy.core.prefs` |
+| Biometrics | `us.webmy.core.biometrics` |
+| Remote config | `us.webmy.core.remoteconfig` |
+| Sharing | `us.webmy.core.sharing` |
+| Network | `us.webmy.core.network` |
+| Theming | `us.webmy.core.theme` |
+| Compose components | `us.webmy.core.components` |
+| Navigation | `us.webmy.core.navigation` |
+| Base VM / Activity / Onboarding | `us.webmy.core.presentation` |
+| Utils (`Legal`, `Result.flatMap`, flow helpers) | `us.webmy.core.util` |
+| Billing | `us.webmy.core.monetization.billing` + `.paywall` |
+| Ads | `us.webmy.core.monetization.ads` |
+
+Anything under `us.webmy.core.internal.*` (or `...billing.internal` / `...ads.internal`) is **not API**: classes are Kotlin-`internal` or annotated `@InternalWebmyApi` (`@RequiresOptIn`, level ERROR). Never suggest opting in from consumer code.
 
 ### Required manifest placeholders
 
@@ -73,19 +98,21 @@ class MyApp : Application() {
         super.onCreate()
 
         WebMY.init(
-            config = WebMYConfig(
+            WebMYConfig(
                 application = this,
-                koinMode = KoinMode.START, // or KoinMode.LOAD if Koin already started
                 amplitudeKey = BuildConfig.AMPLITUDE_KEY, // optional
-                remoteConfigUpdateInterval = 1.hours, // optional
+                remoteConfigUpdateInterval = 1.hours,     // optional
                 network = NetworkConfig(
                     enableHttpLogging = BuildConfig.DEBUG,
                     interceptors = listOf(MyAuthInterceptor()),
                 ),
-            ),
-            extraModules = listOf(appModule), // consumer's own Koin module(s)
+            )
         )
-        WebMY.installUi() // registers Router, SheetController, OnboardingShownPreferences
+        WebMY.installUi(
+            extraPalettes = listOf(                        // optional custom themes
+                ThemePalette(id = "accent", isDark = true, palette = AccentColorsPalette()),
+            ),
+        )
 
         // Optional extensions:
         WebMY.initBilling(
@@ -107,19 +134,28 @@ class MyApp : Application() {
 
 Rules:
 - `WebMY.init` is idempotent — second call is a no-op with warning.
-- `KoinMode.START` calls `startKoin{}` internally and registers `androidContext`. Use `LOAD` if consumer app already initialized Koin elsewhere — in that case consumer MUST have called `androidContext(this)` in their own `startKoin{}` (required by `:core` network/preferences bindings).
-- `installUi()` must be called **after** `init()` and **before** `initBilling/initAds` if the latter need anything from `:core` UI.
-- `initAds` requires `initBilling` to be called first (it injects `PremiumUseCase`).
+- Order matters: `init` → `installUi` → `initBilling` → `initAds`.
+- `installUi()` registers Router, theming, sheets, onboarding prefs. LIGHT and DARK palettes are always registered; `extraPalettes` appends custom ones.
+- `initAds` requires `initBilling` first (it resolves `PremiumUseCase`). Calling it earlier throws `IllegalStateException` with an actionable message.
+- Accessing an accessor before its init step throws `IllegalStateException` with a message naming the missing call.
 
 ---
 
 ## 3. Single-activity host
 
-Consumer's `MainActivity` extends `WebmyActivity`:
+Pure Compose, Navigation 3 — no fragments, no XML. Consumer's `MainActivity` extends `WebmyActivity` and declares its screens:
 
 ```kotlin
+data object HomeKey : NavKey
+data class DetailsKey(val id: String) : NavKey
+
 class MainActivity : WebmyActivity() {
-    override fun createStartFragment(): Fragment = HomeFragment()
+    override fun startScreen(): NavKey = HomeKey
+
+    override fun EntryProviderScope<NavKey>.screens() {
+        entry<HomeKey> { HomeScreen() }
+        entry<DetailsKey> { key -> DetailsScreen(key.id) }
+    }
 }
 ```
 
@@ -134,142 +170,107 @@ Manifest:
 ```
 
 `WebmyActivity` automatically:
-- Binds `Router` to its `supportFragmentManager` + container.
+- Wraps content in `AppTheme`.
+- Renders the back stack owned by `Router` through a Navigation 3 `NavDisplay`.
 - Hosts a Compose overlay for bottom sheets (`Navigation.Sheet`).
-- Replaces the container with `createStartFragment()` on first launch.
+- Extends `FragmentActivity` purely because `androidx.biometric` requires one — no fragment is ever added.
+
+The back stack survives configuration changes (it lives in the `Router` singleton) but **not process death** — the app restarts at `startScreen()`.
+
+**There are no `BaseFragment` / `BaseComposeFragment`** — screens are plain composables keyed by `NavKey`. Screen arguments travel inside the key (`DetailsKey(id = "42")`), not in Bundles.
 
 ---
 
-## 4. Fragments
-
-### XML + ViewBinding
-```kotlin
-class SettingsFragment : BaseFragment<SettingsViewModel, FragmentSettingsBinding>(
-    FragmentSettingsBinding::inflate,
-) {
-    override val viewModel: SettingsViewModel by viewModel()
-
-    override fun initView() { /* set up listeners using `binding` */ }
-    override fun observe(viewModel: SettingsViewModel) { /* collect flows */ }
-}
-```
-
-### Compose
-```kotlin
-class HomeFragment : BaseComposeFragment() {
-    @Composable
-    override fun ScreenContent() {
-        val vm: HomeViewModel = koinViewModel()
-        // ...
-    }
-}
-```
-
-`BaseFragment` / `BaseComposeFragment` are zero-cost wrappers. Neither subscribes to anything implicitly — navigation is fired synchronously by the ViewModel via injected `Router`.
-
----
-
-## 5. ViewModels and navigation
+## 4. ViewModels and navigation
 
 ```kotlin
 class HomeViewModel : BaseViewModel() {
-    fun onSettingsClick() {
-        navigateTo(screen<SettingsFragment>(SettingsArgs(userId = "42")))
-    }
-
+    fun onSettingsClick() = navigateTo(screen(SettingsKey(userId = "42")))
     fun onBackClick() = navigateTo(Navigation.Back)
-
     fun onLinkClick(url: String) = navigateTo(Navigation.Browser(url))
 }
 ```
 
-`BaseViewModel` is `KoinComponent`. `navigateTo(nav)` synchronously calls injected `Router.go(nav)`. Order of calls is preserved. No `MutableSharedFlow`, no drops.
+`BaseViewModel` (`us.webmy.core.presentation`) provides:
+- `navigateTo(nav): Result<Unit>` — synchronously calls `WebMY.router.go(nav)`. Order preserved, no flows, no drops.
+- `navigateWhenResumed(nav)` — defers until the host activity is RESUMED.
 
-Available `Navigation` cases (sealed):
-- `Screen(fragmentClass, args, addToBackStack)` — use helper `screen<F>(payload, addToBackStack)`
-- `Back`, `PopUpTo(tag, inclusive)`
-- `Browser(url)`, `Email(email, subject, text)`, `GooglePlay(appId)`, `RateApp`
+In composables, navigate via `WebMY.router.go(...)`.
+
+Available `Navigation` cases (sealed, `us.webmy.core.navigation`):
+- `Screen(key, addToBackStack)` — use helper `screen(key, addToBackStack = true)`
+- `Root(key)` — reset stack to a single root
+- `Back`, `PopUpTo(key, inclusive = false)`
+- `Browser(url)`, `Email(email, subject, text)`, `GooglePlay(applicationId)`, `RateApp`
 - `Finish`
-- `Sheet(@Composable content)`, `DismissSheet`
+- `Sheet(content: @Composable () -> Unit)`, `DismissSheet`
 - `Auth.OneTime(onResult)`, `Auth.Session(onResult)` — biometrics
 
-There is **no `Navigation.Ad` or `Navigation.Purchase`** — use `DisplayAdUseCase` and `BillingManager` directly.
+There is **no `Navigation.Ad` or `Navigation.Purchase`** — use `WebMY.displayAd` and `WebMY.billing` directly.
 
-### Fragment args (Parcelable payload)
-```kotlin
-@Parcelize
-data class SettingsArgs(val userId: String, val title: String) : Parcelable
-
-// destination fragment
-val args: SettingsArgs = requireArgs()
-```
-
-### Payload straight into ViewModel (Koin `parametersOf`)
-
-Skip reading args in the fragment — inject the payload into the ViewModel constructor:
+ViewModel construction is plain — no DI required. A screen payload is just a constructor parameter taken from the `NavKey`:
 
 ```kotlin
-// VM
-class SettingsViewModel(private val args: SettingsArgs) : BaseViewModel()
+class DetailsViewModel(private val id: String) : BaseViewModel()
 
-// Koin module
-viewModel { (args: SettingsArgs) -> SettingsViewModel(args) }
-
-// Fragment
-override val viewModel: SettingsViewModel by viewModel {
-    parametersOf(requireArgs<SettingsArgs>())
+// in the entry:
+entry<DetailsKey> { key ->
+    val vm: DetailsViewModel = viewModel { DetailsViewModel(key.id) }
+    DetailsScreen(vm)
 }
 ```
 
-Process-death-safe: Fragment args (Bundle) are restored by the system, so Koin recreates the VM with the same payload. Works with `BaseFragment` and `BaseComposeFragment` (use `koinViewModel { parametersOf(...) }` in Compose).
+---
+
+## 5. SDK services — typed accessors
+
+All services are lazy singletons behind `WebMY`. No injection framework involved.
+
+### From `:core` (available after `WebMY.init`)
+| Accessor | Type | Purpose |
+|------|------|---------|
+| `WebMY.analytics` | `AnalyticsManager` | `logEvent(name, props)` (Amplitude) + `logFirebase(name, bundle)` |
+| `WebMY.preferences` | `Preferences` | SharedPreferences wrapper + Flows (`stringFlow/booleanFlow/intFlow/longFlow/stringSetFlow`) |
+| `WebMY.sharing` | `SharingManager` | `shareContent / shareText / shareEvent` |
+| `WebMY.biometrics` | `BiometricsService` | `suspend performSessionAuthentication / performOneTimeAuthentication` |
+| `WebMY.network` | `NetworkApiCreator` | `create<MyApi>(baseUrl)` Retrofit factory |
+| `WebMY.httpClient` | `OkHttpClient` | the SDK's singleton OkHttp client |
+| `WebMY.activityProvider` | `ActivityProvider` | current foreground Activity (`current` nullable, `requireCurrent()` throws `SdkError.NoForegroundActivity`) |
+| `WebMY.remoteConfig` | `RemoteConfigManager` | `suspend getString/getBoolean/getLong/getDouble` — throws unless `remoteConfigUpdateInterval` was set |
+
+### After `WebMY.installUi()`
+| Accessor | Type | Purpose |
+|------|------|---------|
+| `WebMY.router` | `Router` | navigation events + `backStack` |
+| `WebMY.theme` | `WebmyThemeController` | theme switching/observing |
+| `WebMY.onboardingPreferences` | `OnboardingShownPreferences` | onboarding-shown flag, `flow() / value() / setValue()` |
+
+### From `:core-monetization-billing` (after `WebMY.initBilling`; also present in `:core-monetization-ads`)
+| Accessor | Type | Purpose |
+|------|------|---------|
+| `WebMY.billing` | `BillingManager` | `subscribeProducts(): Flow<List<Product>>`, `suspend purchase(productId): PurchaseOutcome`, `awaitInitialized()`, `canBePurchased(id)` |
+| `WebMY.premium` | `PremiumUseCase` | `isPremiumFlow: Flow<Boolean>`, extension `suspend isPremium()` |
+
+### From `:core-monetization-ads` only (after `WebMY.initAds`)
+| Accessor | Type | Purpose |
+|------|------|---------|
+| `WebMY.displayAd` | `DisplayAdUseCase` | `showBanner(container) / hideBanner(container)`, `showInterstitial(source)`, `showReward(placement, source, grantWhenPremium, onResult)` — premium gating + throttle built in |
+| `WebMY.ads` | `AdsManager` | low-level Appodeal wrapper — prefer `WebMY.displayAd` |
 
 ---
 
-## 6. Injectable singletons (via Koin `by inject()` / `koinInject()` / `get<>()`)
-
-### From `:core`
-| Type | Purpose |
-|------|---------|
-| `Router` | navigation events |
-| `ActivityProvider` | current foreground Activity (`current` nullable, `requireCurrent()` throws `SdkError.NoForegroundActivity`) |
-| `Preferences` | SharedPreferences wrapper + Flows (`stringFlow/booleanFlow/intFlow/longFlow/stringSetFlow`) |
-| `AnalyticsManager` | `logEvent(name, props)` (Amplitude) + `logFirebase(name, bundle)` |
-| `RemoteConfigManager` | `suspend getString/getBoolean/getLong/getDouble` — registered only if `remoteConfigUpdateInterval != null` |
-| `SharingManager` | `shareContent / shareText / shareEvent` |
-| `BiometricsService` | `suspend performSessionAuthentication / performOneTimeAuthentication` |
-| `NetworkApiCreator` | `create<MyApi>(baseUrl)` Retrofit factory |
-| `CsvFetcher` | `suspend byUrl(url, mapper)` |
-| `OnboardingShownPreferences` | single-value flag, `flow() / value() / setValue()` |
-| `SheetController` | imperatively show/dismiss Compose bottom sheets (usually use `Navigation.Sheet`) |
-
-### From `:core-monetization-billing` (only if installed — also present in full `:core-monetization-ads`)
-| Type | Purpose |
-|------|---------|
-| `BillingManager` | `subscribeProducts(): Flow<List<Product>>`, `suspend purchase(productId): PurchaseOutcome`, `awaitInitialized()`, `canBePurchased(id)` |
-| `PremiumUseCase` | `isPremiumFlow: Flow<Boolean>`, extension `suspend isPremium()` |
-
-### From `:core-monetization-ads` only (full module, not in `:core-monetization-billing`)
-| Type | Purpose |
-|------|---------|
-| `DisplayAdUseCase` | `showBanner(container) / hideBanner(container)`, `showInterstitial(source)`, `showReward(placement, source, grantWhenPremium, onResult)` — premium gating + throttle built in |
-| `AdsManager` | low-level Appodeal wrapper — prefer `DisplayAdUseCase` |
-
----
-
-## 7. Billing — purchase flow
+## 6. Billing — purchase flow
 
 ```kotlin
-class PaywallViewModel(
-    private val billingManager: BillingManager,
-    private val premium: PremiumUseCase,
-) : BaseViewModel() {
+class PaywallViewModel : BaseViewModel() {
+    private val billing = WebMY.billing
 
-    val products = billingManager.subscribeProducts()
+    val products = billing.subscribeProducts()
         .map { it.filterIsInstance<Product.Subscription>() }
 
     fun onBuyClick(productId: String) {
         viewModelScope.launch {
-            when (val outcome = billingManager.purchase(productId)) {
+            when (val outcome = billing.purchase(productId)) {
                 PurchaseOutcome.Success   -> navigateTo(Navigation.Back)
                 PurchaseOutcome.Pending   -> showSnackbar("Payment pending")
                 PurchaseOutcome.Cancelled -> Unit
@@ -280,43 +281,41 @@ class PaywallViewModel(
 }
 ```
 
-Or extend `BasePaywallViewModel`:
+Or extend a base paywall VM (`us.webmy.core.monetization.billing.paywall`):
 ```kotlin
-class MyPaywallViewModel(
-    config: PlanListPaywallConfig,
-    billingManager: BillingManager,
-    premium: PremiumUseCase,
-    analytics: AnalyticsManager,
-) : BasePlanListPaywallViewModel(config, billingManager, premium, analytics) {
-    override val originProperty = "main_screen"
-}
+class MyPaywallViewModel : BasePlanListPaywallViewModel(
+    config = PlanListPaywallConfig(...),
+    billingManager = WebMY.billing,
+    analyticsManager = WebMY.analytics,
+)
 ```
 
 Subclasses available:
-- `BaseOfferPaywallViewModel(OfferPaywallConfig, ...)` — single offer screen (base price + discount).
-- `BasePlanListPaywallViewModel(PlanListPaywallConfig, ...)` — selectable plan list.
+- `BaseOfferPaywallViewModel(config: OfferPaywallConfig, billingManager, analyticsManager)` — single offer screen (base price + discount). UI state: `OfferUiState`.
+- `BasePlanListPaywallViewModel(config: PlanListPaywallConfig, billingManager, analyticsManager)` — selectable plan list. UI state: `PaywallUiState` (wraps `SubscriptionsUiModel` per plan).
+
+Both extend `BasePaywallViewModel(billingManager, analyticsManager)` which pre-wires `purchase()` + `purchase_*` analytics events.
 
 ### Products
 `BillingManager.subscribeProducts()` returns `Flow<List<Product>>` with:
 - `Product.OneTime(id, isPurchased, title, formattedPrice, consumable)`
-- `Product.Subscription(id, isPurchased, title, offerToken, phases)`
+- `Product.Subscription(id, isPurchased, title, offerToken, phases: List<Phase>)` — `Phase(formattedPrice, billingPeriod, priceMicros, ...)`
 
 `isPurchased` is always `false` for `consumable` products (they re-purchase). For consumables the SDK calls `consumePurchase` automatically with exponential backoff retry; for non-consumables it acknowledges.
 
 ### Premium check
 ```kotlin
-if (premium.isPremium()) hideAds() else showInterstitial()
+if (WebMY.premium.isPremium()) hideAds() else showInterstitial()
 ```
-`isPremiumFlow` checks `purchasedIds` against the `premiumProductIds` set passed to `initBilling`. If empty, falls back to "any purchased product = premium".
+`isPremiumFlow` checks purchased ids against the `premiumProductIds` set passed to `initBilling`. If empty, falls back to "any purchased product = premium".
 
 ---
 
-## 8. Ads — `DisplayAdUseCase`
+## 7. Ads — `DisplayAdUseCase`
 
 ```kotlin
-class GameViewModel(
-    private val ads: DisplayAdUseCase,
-) : BaseViewModel() {
+class GameViewModel : BaseViewModel() {
+    private val ads = WebMY.displayAd
 
     fun onLevelComplete() {
         ads.showInterstitial(source = "level_complete") // skipped if premium, throttled by config
@@ -328,27 +327,17 @@ class GameViewModel(
         }
     }
 }
-
-// Composable
-@Composable
-fun BannerSlot() {
-    AndroidView(factory = { FrameLayout(it).also { container ->
-        // ads.showBanner(container) — call from a side-effect, not directly in factory in real code
-    }})
-}
 ```
 
-Premium gating + interstitial throttling are inside `RealDisplayAdUseCase`. Do not call `AdsManager` directly unless you're bypassing premium intentionally.
+Premium gating + interstitial throttling are inside the `DisplayAdUseCase` implementation. Do not call `WebMY.ads` (raw `AdsManager`) directly unless bypassing premium intentionally.
 
 ---
 
-## 9. Biometrics
+## 8. Biometrics
 
 ```kotlin
-val biometrics: BiometricsService by inject()
-
 viewModelScope.launch {
-    biometrics.performSessionAuthentication() // returns Result<Unit>; ignores if already authed this session
+    WebMY.biometrics.performSessionAuthentication() // Result<Unit>; no-op if already authed this session
         .onSuccess { unlockScreen() }
         .onFailure { showError(it.message) }
 }
@@ -361,14 +350,14 @@ navigateTo(Navigation.Auth.Session(onResult = { result ->
 }))
 ```
 
-Requires consumer's Activity to be a `FragmentActivity` (`WebmyActivity` is). Throws `SdkError.NotSupported` otherwise.
+Requires the foreground Activity to be a `FragmentActivity` (`WebmyActivity` is). Throws `SdkError.NotSupported` otherwise.
 
 ---
 
-## 10. Preferences
+## 9. Preferences
 
 ```kotlin
-val prefs: Preferences by inject()
+val prefs = WebMY.preferences
 
 prefs.putString("user_name", "John")
 val name = prefs.getString("user_name") // nullable, no default
@@ -385,19 +374,17 @@ prefs.edit {
 }
 ```
 
-For one-off boolean flags, create your own `SingleValuePrefs<T>` impl (mirror `OnboardingShownPreferences`).
+For one-off boolean flags, create your own `SingleValuePrefs<T>` impl (mirror `OnboardingShownPreferences`, both in `us.webmy.core.prefs`).
 
 ---
 
-## 11. Remote Config
+## 10. Remote Config
 
-Only registered if `WebMYConfig(remoteConfigUpdateInterval = ...)` is non-null AND `google-services.json` is set up.
+Only registered if `WebMYConfig(remoteConfigUpdateInterval = ...)` is non-null AND `google-services.json` is set up. `WebMY.remoteConfig` throws otherwise.
 
 ```kotlin
-val rc: RemoteConfigManager by inject()
-
 viewModelScope.launch {
-    rc.getString("welcome_message")
+    WebMY.remoteConfig.getString("welcome_message")
         .onSuccess { showWelcome(it) }
 }
 ```
@@ -406,57 +393,52 @@ viewModelScope.launch {
 
 ---
 
-## 12. Analytics
+## 11. Analytics
 
 ```kotlin
-val a: AnalyticsManager by inject()
-a.logEvent("button_click", mapOf("screen" to "home"))    // Amplitude
-a.logFirebase("level_up", bundleOf("level" to 5))         // Firebase
+WebMY.analytics.logEvent("button_click", mapOf("screen" to "home"))  // Amplitude
+WebMY.analytics.logFirebase("level_up", bundleOf("level" to 5))       // Firebase
 ```
 
 Amplitude is enabled only if `WebMYConfig(amplitudeKey = ...)` is non-null. Firebase Analytics is always available (requires `google-services.json` + Firebase plugin in consumer app).
 
 ---
 
-## 13. Sharing
+## 12. Sharing
 
 ```kotlin
-val sharing: SharingManager by inject()
-
-sharing.shareText("Check this out: https://example.com")
-sharing.shareContent(ContentSharing.file(
+WebMY.sharing.shareText("Check this out: https://example.com")
+WebMY.sharing.shareContent(ContentSharing(
     text = "screenshot",
-    uri = fileUri,
-    mimeType = "image/png",
+    file = FileSharing(uri = fileUri, mimeType = "image/png"),
 ))
-sharing.shareEvent(EventSharing(title = "Meeting", startTime = ..., endTime = ...))
+WebMY.sharing.shareEvent(EventSharing(title = "Meeting", startTime = ..., endTime = ...))
 ```
 
-Requires foreground Activity — usually fine from a Fragment / Composable triggered by user.
+Requires foreground Activity — usually fine when triggered by user interaction.
 
 ---
 
-## 14. Network
+## 13. Network
 
 ```kotlin
-val creator: NetworkApiCreator by inject()
-val api: MyApi = creator.create("https://api.example.com/")
+val api: MyApi = WebMY.network.create("https://api.example.com/")
 ```
 
-OkHttp client is a singleton built from `NetworkConfig`. To add interceptors at init time, pass them in `WebMYConfig.network.interceptors`. To enable HTTP body logging, pass `enableHttpLogging = true`.
+OkHttp client is a singleton (`WebMY.httpClient`) built from `NetworkConfig`. To add interceptors at init time, pass them in `WebMYConfig.network.interceptors`. To enable HTTP body logging, pass `enableHttpLogging = true`.
 
 ---
 
-## 15. Theming
+## 14. Theming
 
-`AppTheme { content() }` wraps Material3 with the active WebMY palette + typography + spacings. `BaseComposeFragment` and `WebmyActivity` already wrap their content in `AppTheme`, so inside any SDK screen you just read tokens:
+`AppTheme { content() }` (in `us.webmy.core.theme`) wraps Material3 with the active WebMY palette + typography + spacings. `WebmyActivity` already wraps its content, so inside any SDK-hosted screen just read tokens:
 ```kotlin
 WebmyTheme.colors.textAndIconsPrimary
 WebmyTheme.typography.bodyM
-WebmyTheme.spacings.m
+WebmyTheme.spacings.spacing16
 ```
 
-Pre-built composables under `us.webmy.core.ui.compose.components.*`: `WebmyButton`, `WebmyText`, `WebmySurface`, `WebmySwitch`, `WebmyCircularProgressIndicator`, plus `Spacers.Horizontal(size)` / `Spacers.Vertical(size)`.
+Pre-built composables in `us.webmy.core.components`: `WebmyButton`, `WebmyText`, `WebmySurface`, `WebmySwitch`, `WebmyCircularProgressIndicator`, plus `VerticalSpacer { spacing16 }` / `HorizontalSpacer { spacing8 }` (lambda receives `WebmySpacings`).
 
 ### Multi-theme model
 
@@ -468,15 +450,15 @@ class ThemePalette(
     val palette: ColorsPalette,
 )
 ```
-Built-in ids live in `BuildInThemeIds.LIGHT` / `BuildInThemeIds.DARK` (`DEFAULT = LIGHT`). The SDK does **not** store a display name — the consumer app owns the `id → title` mapping (see below), so adding/renaming a theme never touches the SDK.
+Built-in ids live in `BuildInThemeIds.LIGHT` / `BuildInThemeIds.DARK` (`DEFAULT = LIGHT`). The SDK does **not** store a display name — the consumer app owns the `id → title` mapping, so adding/renaming a theme never touches the SDK.
 
-Built-in themes: **Light** (default) and **Dark**. The chosen theme is **persisted automatically** and survives process restart. Status-bar / navigation-bar icon appearance follows the active theme's `isDark` automatically — no manual window handling.
+Built-in themes: **Light** (default) and **Dark**. The chosen theme is **persisted automatically** and survives process restart. Status-bar / navigation-bar icon appearance follows the active theme's `isDark` automatically.
 
 ### Switching / observing the theme
 
-Inject `WebmyThemeController` (singleton) — the single entry point for all theme operations:
+`WebMY.theme` (a `WebmyThemeController`) is the single entry point:
 ```kotlin
-val controller: WebmyThemeController by inject()      // or koinInject() in Compose
+val controller = WebMY.theme
 
 controller.themes                // List<ThemePalette> — all registered themes (for a picker)
 controller.theme                 // StateFlow<ThemeId> — currently selected id
@@ -496,7 +478,8 @@ fun themeTitleRes(id: ThemeId): Int = when (id) {
 }
 
 @Composable
-fun ThemePicker(controller: WebmyThemeController = koinInject()) {
+fun ThemePicker() {
+    val controller = WebMY.theme
     val current by controller.theme.collectAsState()
     controller.themes.forEach { theme ->
         Row(Modifier.clickable { controller.select(theme.id) }) {
@@ -510,7 +493,7 @@ fun ThemePicker(controller: WebmyThemeController = koinInject()) {
 
 ### Implementing a new theme (consumer side)
 
-1. **Define a palette** — subclass `ColorsPalette`, override every token (Compose `Color`). `ColorsPalette` is color-only; `isDark` lives on the `ThemePalette`, not here:
+1. **Define a palette** — subclass `ColorsPalette` (in `us.webmy.core.theme`), override every token (Compose `Color`). `ColorsPalette` is color-only; `isDark` lives on the `ThemePalette`:
 ```kotlin
 class AccentColorsPalette : ColorsPalette() {
     override val backgroundPrimary = Color(0xFF1A1230)
@@ -519,31 +502,29 @@ class AccentColorsPalette : ColorsPalette() {
 }
 ```
 
-2. **Register the theme in your Koin module** with a unique `named(...)` qualifier (required — `getAll<ThemePalette>()` only sees distinct qualifiers). The controller picks it up automatically:
+2. **Register it via `installUi`** — no DI, no qualifiers:
 ```kotlin
-val appModule = module {
-    val accentId = "accent"
-    single(named(accentId)) {
-        ThemePalette(id = accentId, isDark = true, palette = AccentColorsPalette())
-    }
-}
+WebMY.installUi(
+    extraPalettes = listOf(
+        ThemePalette(id = "accent", isDark = true, palette = AccentColorsPalette()),
+    ),
+)
 ```
-Set `isDark` correctly — it drives status-bar icon contrast when this theme is active.
+Set `isDark` correctly — it drives status-bar icon contrast when this theme is active. Duplicate ids resolve last-wins.
 
 3. **Map the id to a display name** wherever you render the picker (your `strings.xml` + a `when(id)` like `themeTitleRes` above). The SDK never asks for it.
 
-4. **Select it** anywhere: `controller.select("accent")`.
+4. **Select it** anywhere: `WebMY.theme.select("accent")`.
 
 Notes:
-- Themes must be registered in a Koin module passed to `WebMY.init(extraModules = ...)` so they are loaded before the first `AppTheme` composition.
 - Adding a new color token to `ColorsPalette` in a future SDK version is a breaking change for consumer palettes (it's an `abstract` member) — pin your SDK version and re-build palettes on upgrade.
-- For a one-off palette override without registering a theme, you can still provide directly: `CompositionLocalProvider(LocalColorsPalette provides MyPalette) { ... }`.
+- One-off palette override for a subtree: `AppTheme(colors = MyPalette(), isDark = true) { ... }` — the `AppTheme` overload with explicit colors needs no registered theme.
 
 ---
 
-## 16. Errors
+## 15. Errors
 
-All SDK-thrown errors are subclasses of `SdkError: Throwable`:
+All SDK-thrown errors are subclasses of `SdkError: Throwable` (`us.webmy.core.SdkError`):
 - `SdkError.NoForegroundActivity`
 - `SdkError.NotSupported(reason)`
 - `SdkError.NotImplemented(feature)`
@@ -552,83 +533,83 @@ All SDK-thrown errors are subclasses of `SdkError: Throwable`:
 - `SdkError.Billing.{ NotAcknowledged(token), FlowFailed(message), Disconnected }`
 - `SdkError.Ads.{ LoadFailed(placement), ShowFailed(placement), NotInitialized }`
 
-`BillingManager` returns `PurchaseOutcome.Failed(SdkError.Billing)` instead of throwing.
+`BillingManager` returns `PurchaseOutcome.Failed(SdkError.Billing)` instead of throwing. Missing-service accessors (`WebMY.billing` before `initBilling`, etc.) throw `IllegalStateException` with a message naming the required init call.
 
 ---
 
-## 17. Onboarding
+## 16. Onboarding
 
-Extend `BaseOnboardingViewModel`:
+Extend `BaseOnboardingViewModel` (`us.webmy.core.presentation`):
 ```kotlin
-class MyOnboardingViewModel(
-    onboardingPrefs: OnboardingShownPreferences,
-    analytics: AnalyticsManager,
-) : BaseOnboardingViewModel<MyPageModel>(onboardingPrefs, analytics) {
-
+class MyOnboardingViewModel : BaseOnboardingViewModel<MyPageModel>(
+    onboardingShownPreferences = WebMY.onboardingPreferences,
+    analyticsManager = WebMY.analytics,
+) {
     override val onboardingModels: List<MyPageModel> = listOf(
-        MyPageModel(index = 0, ...),
-        MyPageModel(index = 1, ...),
+        MyPageModel(index = 0, title = "Welcome"),
+        MyPageModel(index = 1, title = "Features"),
     )
 
     override fun navigateNext() {
-        navigateTo(screen<MainScreenFragment>(addToBackStack = false))
+        navigateTo(Navigation.Root(HomeKey))
     }
 }
 
 data class MyPageModel(override val index: Int, val title: String) : OnboardingModel
 ```
 
-`onCloseClick()` and `onNextClick()` are pre-wired. `currentItem: SharedFlow<T>` exposes the active page.
+`onCloseClick()` and `onNextClick()` are pre-wired (analytics + shown-flag). `currentItem: SharedFlow<T>` exposes the active page.
 
 ---
 
-## 18. Building a new feature — quick checklist
+## 17. Building a new feature — quick checklist
 
 When implementing a new screen in a consumer app:
 
-1. **Create Fragment** — `BaseFragment` (XML) or `BaseComposeFragment` (Compose).
-2. **Create ViewModel** — extend `BaseViewModel`. Inject what you need via Koin. Call `navigateTo(...)` for navigation.
-3. **Register ViewModel in Koin module:** `viewModel { MyViewModel(get(), get()) }`. If the screen takes a payload, use `viewModel { (args: MyArgs) -> MyViewModel(args, get()) }` and resolve via `by viewModel { parametersOf(requireArgs<MyArgs>()) }`.
-4. **Add Koin module to `WebMY.init(extraModules = listOf(appModule))`**.
-5. **Open it from elsewhere:** `navigateTo(screen<MyFragment>(MyArgs(...)))`.
+1. **Declare a `NavKey`** — a data class/object carrying the screen's arguments.
+2. **Create a composable screen** and a ViewModel extending `BaseViewModel`. Pull SDK services via `WebMY.<accessor>`; navigation via `navigateTo(...)`.
+3. **Register the entry** in `MainActivity.screens()`: `entry<MyKey> { key -> MyScreen(key) }`.
+4. **Open it from elsewhere:** `navigateTo(screen(MyKey(...)))`.
 
 When implementing a paywall:
 1. Decide layout: single offer (`BaseOfferPaywallViewModel`) or plan list (`BasePlanListPaywallViewModel`).
 2. Build config (`OfferPaywallConfig` / `PlanListPaywallConfig`).
-3. Subclass the base, override `originProperty` for analytics.
-4. Bind UI to `offerUiStateFlow` / `paywallUiState`.
+3. Subclass the base, passing `WebMY.billing` + `WebMY.analytics` to the super constructor.
+4. Bind UI to `offerUiState` / `paywallUiState`.
 5. Call `onContinueClick()` from the CTA.
 
 When adding ad gating:
-1. Inject `DisplayAdUseCase`.
+1. Use `WebMY.displayAd`.
 2. Call `showInterstitial / showReward / showBanner` from the ViewModel.
 3. Premium check + throttle are handled internally.
 
 ---
 
-## 19. Common gotchas
+## 18. Common gotchas
 
-- **`WebMY.application` accessed before `init()`** → throws `IllegalStateException("WebMY.init(...) not called")`. Always init in `Application.onCreate`.
-- **`Router.go(Navigation.Screen)` before `WebmyActivity.onCreate`** → throws `SdkError.BindingMissing`. Router binds in Activity `onCreate`.
+- **`WebMY.application` or any accessor before `init()`** → `IllegalStateException`. Always init in `Application.onCreate`.
+- **`WebMY.theme` / `WebMY.router` before `installUi()`** → `IllegalStateException("UI services not installed...")`.
+- **`WebMY.billing` / `WebMY.premium` before `initBilling()`** → `IllegalStateException("Billing is not initialized...")`.
+- **`initAds` before `initBilling`** → `IllegalStateException("initAds requires billing...")`. Call `initBilling` even with empty product sets if you want ads.
+- **`initAds` unavailable with `:core-monetization-billing`** → that module has no ad SDKs. `initBilling`/`initApphud` are available in both monetization modules.
 - **`BillingManager.purchase()` before `awaitInitialized()` succeeded** → returns `PurchaseOutcome.Failed("BillingManager not initialized")`. Either await or check `subscribeProducts()` first.
-- **`DisplayAdUseCase` without `initBilling`** → Koin resolution fails (`PremiumUseCase` missing). Call `initBilling` even with empty product sets if you want ads.
-- **`initAds` unavailable with `:core-monetization-billing`** → that module has no ad SDKs. `initBilling`/`initApphud` are available in both `:core-monetization-billing` and `:core-monetization-ads`.
-- **`RemoteConfigManager` injection fails** → `remoteConfigUpdateInterval` is `null` in `WebMYConfig`. Pass any non-null `Duration` to enable.
-- **Biometrics on non-`FragmentActivity`** → throws `SdkError.NotSupported`. Consumer must use `WebmyActivity` or another `FragmentActivity` subclass.
-- **`consumableProductIds` not subset of `oneTimeProductIds`** → throws `IllegalArgumentException` at `RealBillingManager` init.
+- **`WebMY.remoteConfig` throws** → `remoteConfigUpdateInterval` is `null` in `WebMYConfig`. Pass any non-null `Duration` to enable.
+- **Biometrics on non-`FragmentActivity`** → throws `SdkError.NotSupported`. Use `WebmyActivity` or another `FragmentActivity` subclass.
+- **`consumableProductIds` not subset of `oneTimeProductIds`** → throws `IllegalArgumentException` at billing init.
 - **Calling `WebMY.init` twice** → second call is a silent no-op with `Log.w("WebMY", ...)`.
+- **Imports fail after upgrading from 0.x** → packages were flattened in 1.0.0; see the migration table in `README.md`.
 
 ---
 
-## 20. Versioning
+## 19. Versioning
 
 This document is **versioned with the SDK**. To pin docs to a specific SDK version:
 ```
-https://raw.githubusercontent.com/WebMY-Studio/core-sdk-android/v0.6.0/AGENTS.md
+https://raw.githubusercontent.com/WebMY-Studio/core-sdk-android/v1.0.0/AGENTS.md
 ```
 Or `main` for the latest:
 ```
 https://raw.githubusercontent.com/WebMY-Studio/core-sdk-android/main/AGENTS.md
 ```
 
-If you (the AI agent) detect that the consumer's `implementation("com.github.WebMY-Studio:core:X.Y.Z")` version doesn't match this doc's API, fetch the matching version explicitly.
+If you (the AI agent) detect that the consumer's `implementation("com.github.WebMY-Studio.core-sdk-android:core:X.Y.Z")` version doesn't match this doc's API (e.g. the app still passes `koinMode` or `extraModules` — that's 0.x), fetch the matching version explicitly.

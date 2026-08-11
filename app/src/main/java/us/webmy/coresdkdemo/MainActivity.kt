@@ -2,7 +2,7 @@ package us.webmy.coresdkdemo
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import us.webmy.core.ui.single.WebmyActivity
+import us.webmy.core.presentation.WebmyActivity
 
 class MainActivity : WebmyActivity() {
 

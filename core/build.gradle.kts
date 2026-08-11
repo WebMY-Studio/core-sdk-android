@@ -28,50 +28,39 @@ android {
 kotlin {
     compilerOptions {
         languageVersion = KotlinVersion.KOTLIN_2_2
+        freeCompilerArgs.add("-opt-in=us.webmy.core.internal.InternalWebmyApi")
     }
 }
 
 dependencies {
-    api(libs.coroutines)
+    // api: types below leak into public SDK signatures
+    api(libs.coroutines)                       // Flow/StateFlow in Preferences, BillingManager, etc.
+    api(platform(libs.androidx.compose.bom))
+    api(libs.androidx.compose.ui)
+    api(libs.androidx.compose.foundation)
+    api(libs.androidx.compose.material3)
+    api(libs.androidx.navigation3.runtime)     // NavKey in Router/WebmyActivity
+    api(libs.androidx.lifecycle.viewmodel.ktx) // BaseViewModel : ViewModel
+    api(libs.squareup.okhttp3.core)            // NetworkConfig.interceptors, WebMY.httpClient
+    api(libs.squareup.retrofit2.core)          // NetworkApiCreator.createRetrofit
+    // FragmentActivity only: androidx.biometric's BiometricPrompt requires it. No fragments are used.
+    api(libs.androidx.fragment.ktx)
 
-    api(platform(libs.koin.bom))
-    api(libs.koin.android)
-    api(libs.koin.compose)
-
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation3.ui)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
-
     implementation(libs.amplitude)
     implementation(libs.androidx.biometric)
-
-    api(libs.squareup.okhttp3.core)
-    api(libs.squareup.okhttp3.logging)
-    api(libs.squareup.retrofit2.core)
-    api(libs.squareup.retrofit2.converters.gson)
-
     implementation(libs.google.review.ktx)
+    implementation(libs.squareup.okhttp3.logging)
+    implementation(libs.squareup.retrofit2.converters.gson)
 
-    api(platform(libs.androidx.compose.bom))
-
-    api(libs.androidx.compose.ui)
-    api(libs.androidx.compose.foundation)
-    api(libs.androidx.compose.material3)
-    api(libs.androidx.compose.animation.graphics)
-    api(libs.androidx.compose.ui.util)
-    api(libs.androidx.compose.ui.text.google.fonts)
-    api(libs.androidx.compose.material.icons)
-    api(libs.androidx.compose.material.icons.extended)
-    api(libs.androidx.activity.compose)
-    api(libs.androidx.navigation3.runtime)
-    api(libs.androidx.navigation3.ui)
-
-    // FragmentActivity only: androidx.biometric's BiometricPrompt requires it. No fragments are used.
-    api(libs.androidx.fragment.ktx)
-
-    debugApi(libs.androidx.compose.ui.tooling)
-    debugApi(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling.preview)
 }
 
 configureMavenPublishing("core")

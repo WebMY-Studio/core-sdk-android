@@ -1,0 +1,26 @@
+package us.webmy.core.internal.navigation
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import us.webmy.core.navigation.ComposeSheetContent
+
+/**
+ * Holds the current Compose bottom-sheet content. Observed by [WebmyAppHost]
+ * to render a ModalBottomSheet on top of the NavHost.
+ */
+internal class SheetController {
+
+    var content: ComposeSheetContent? by mutableStateOf(null)
+        private set
+
+    fun show(sheet: ComposeSheetContent) {
+        content = sheet
+    }
+
+    fun dismiss() {
+        content = null
+    }
+
+    val isShowing: Boolean get() = content != null
+}

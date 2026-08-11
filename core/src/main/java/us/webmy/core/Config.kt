@@ -7,7 +7,6 @@ import kotlin.time.Duration.Companion.seconds
 
 class WebMYConfig(
     val application: Application,
-    val koinMode: KoinMode = KoinMode.START,
     val amplitudeKey: String? = null,
     val remoteConfigUpdateInterval: Duration? = null,
     val network: NetworkConfig = NetworkConfig(),
