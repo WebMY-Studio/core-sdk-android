@@ -40,6 +40,7 @@ dependencies {
     api(libs.androidx.compose.foundation)
     api(libs.androidx.compose.material3)
     api(libs.androidx.navigation3.runtime)     // NavKey in Router/WebmyActivity
+    api(libs.androidx.navigation3.ui)          // NavDisplay.transitionSpec in consumer screens() overrides
     api(libs.androidx.lifecycle.viewmodel.ktx) // BaseViewModel : ViewModel
     api(libs.squareup.okhttp3.core)            // NetworkConfig.interceptors, WebMY.httpClient
     api(libs.squareup.retrofit2.core)          // NetworkApiCreator.createRetrofit
@@ -48,7 +49,6 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.navigation3.ui)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)

@@ -79,13 +79,11 @@ internal class WebmyRouter(
     private fun openScreen(nav: Navigation.Screen): Result<Unit> = runCatching {
         if (!nav.addToBackStack) backStack.removeLastOrNull()
         backStack.add(nav.key)
-        Unit
     }
 
     private fun root(key: NavKey): Result<Unit> = runCatching {
         backStack.clear()
         backStack.add(key)
-        Unit
     }
 
     private fun openBrowser(url: String): Result<Unit> = runCatching {
