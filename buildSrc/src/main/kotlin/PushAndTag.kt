@@ -14,8 +14,7 @@ abstract class PushAndTag @Inject constructor(
 
     @TaskAction
     fun release() {
-        val versionName = project.computeVersionName()
-        val tagName = if (versionName.startsWith("v")) versionName else "v$versionName"
+        val tagName = project.computeVersionName()
 
         fun runCommand(vararg command: String) {
             execOps.exec {

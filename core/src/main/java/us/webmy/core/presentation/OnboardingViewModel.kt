@@ -4,18 +4,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import us.webmy.core.prefs.OnboardingShownPreferences
-import us.webmy.core.presentation.BaseViewModel
-import us.webmy.core.analytics.AnalyticsManager
 import us.webmy.core.util.singleReplaySharedFlow
 
 abstract class BaseOnboardingViewModel<T : OnboardingModel>(
-    private val onboardingShownPreferences: OnboardingShownPreferences,
-    private val analyticsManager: AnalyticsManager,
+    private val onboardingShownPreferences: OnboardingShownPreferences
 ) : BaseViewModel() {
-
-    init {
-        analyticsManager.logEvent("onboarding_shown")
-    }
 
     abstract val onboardingModels: List<T>
 
@@ -24,7 +17,6 @@ abstract class BaseOnboardingViewModel<T : OnboardingModel>(
     val currentItem = singleReplaySharedFlow<T>()
 
     fun onCloseClick() {
-        analyticsManager.logEvent("onboarding_closed")
         onboardingShownPreferences.setValue(true)
         navigateNext()
     }
