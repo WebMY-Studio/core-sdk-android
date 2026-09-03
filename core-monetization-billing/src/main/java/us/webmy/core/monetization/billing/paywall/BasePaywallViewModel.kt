@@ -44,10 +44,13 @@ abstract class BasePaywallViewModel(
         navigateTo(Navigation.Back)
     }
 
-    private fun logPaywallEvent(eventName: String) {
+    private fun logPaywallEvent(eventName: String, productId: String? = null) {
         analyticsManager.logEvent(
             eventName = eventName,
-            props = mapOf("paywall_place" to originProperty)
+            props = mutableMapOf(
+                "paywall_place" to originProperty,
+                "product_id" to productId
+            )
         )
     }
 }
